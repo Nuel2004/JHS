@@ -1,1 +1,0 @@
-//para rutas protegidas por administrador
