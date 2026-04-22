@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { procesionRepository } from '@/database/repositories';
 import { useProcesionStore } from '@/stores/procesionStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -6,7 +6,7 @@ import { SectionLabel } from '@/components/landing/Helpers';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'react-hot-toast';
-import { MapPin, Play, Square, Navigation, Loader2, Radio } from 'lucide-react';
+import { Play, Square, Navigation, Loader2, Radio } from 'lucide-react';
 
 export default function AdminGPSPage() {
   const { sessionHermano } = useAuthStore();

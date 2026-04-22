@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 .claude
+.env
+.env.*
 jhs.txt
 supabase.txt
 supabase-email-confirmation.html

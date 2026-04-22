@@ -18,8 +18,6 @@ export const PUESTOS = [
   { id: 'Sin asignar',   label: 'Sin preferencia',desc: 'Pendiente de asignación',          color: 'text-primary/40 border-secondary/15  bg-muted/40'  },
 ];
 
-const SIN_PREFERENCIA_ID = null;
-
 // ── Sub-componente: selector de puesto inline ─────────────────────────────────
 
 interface SelectorPuestoProps {

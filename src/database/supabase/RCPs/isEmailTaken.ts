@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-import { supabase } from "../Client";
+import { supabaseClient as supabase } from "../Client";
 import { t } from "i18next";
 
 export async function isEmailTaken(email: string): Promise<boolean> {

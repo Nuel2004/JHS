@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabaseClient } from '@/database/supabase/Client';
 import { SectionLabel } from '@/components/landing/Helpers';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Users, CheckCircle2, Clock, Euro, MapPin, Loader2 } from 'lucide-react';
 
 interface StatsAdmin {

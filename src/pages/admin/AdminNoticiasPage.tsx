@@ -7,8 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Star, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Plus, Pencil, Trash2, EyeOff, Star, Loader2 } from 'lucide-react';
 
 const VACIA: NoticiaCreate = { titulo: '', cuerpo: '', imagen_url: '', destacada: false, publicada: true };
 

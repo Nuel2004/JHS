@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { noticiaRepository } from '@/database/repositories';
 import type { Noticia } from '@/interfaces/Noticia';
 import { SectionLabel, GoldenDivider } from '@/components/landing/Helpers';
-import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
 
 function NoticiaCard({ noticia }: { noticia: Noticia }) {

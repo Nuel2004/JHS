@@ -1,6 +1,5 @@
 import { useAuthStore } from '@/stores/authStore';
 import { SectionLabel, GoldenDivider } from '@/components/landing/Helpers';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CheckCircle2, Clock, CreditCard, Home } from 'lucide-react';
 

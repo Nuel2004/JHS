@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MapPin, Mail, Phone, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from 'react-hot-toast';
 
 const WHATSAPP_NUMBER = '34600000000'; // TODO: cambiar al número real
 
