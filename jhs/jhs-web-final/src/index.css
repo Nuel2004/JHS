@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  /* --- PALETA BASADA EN TU IMAGEN --- */
+  
+  /* Verde Oscuro (Primary de la imagen) */
+  --color-primary: #1B3022;
+  --color-primary-foreground: #F5F2E9;
+
+  /* Dorado (Secondary de la imagen) */
+  --color-secondary: #B8860B;
+  --color-secondary-foreground: #F5F2E9;
+
+  /* Amarillo Mostaza (Tertiary de la imagen) */
+  --color-accent: #E5C100;
+  --color-accent-foreground: #1B3022;
+
+  /* Neutro/Pergamino (Neutral de la imagen) */
+  --color-background: #F5F2E9;
+  --color-foreground: #1B3022;
+
+  /* Estados de componentes (Basados en la imagen) */
+  --color-muted: #E2E0D7;
+  --color-muted-foreground: #1B3022;
+  --color-border: rgba(27, 48, 34, 0.1);
+  --color-destructive: #B01212; /* El rojo de la papelera en la imagen */
+  --color-destructive-foreground: #F5F2E9;
+
+  /* --- TIPOGRAFÍAS DE LA IMAGEN --- */
+  --font-display: "Noto Serif", serif; /* Headline */
+  --font-body: "Manrope", sans-serif;   /* Body y Label */
+}
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, .font-display {
+    @apply font-display;
+  }
+}
