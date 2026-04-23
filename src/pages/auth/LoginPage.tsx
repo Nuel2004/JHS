@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { hermanoRepository } from '@/database/repositories';
-import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore, REMEMBER_KEY } from '@/stores/authStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,10 +16,20 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ email: '', password: '' });
+  const [rememberMe, setRememberMe] = useState(
+    () => localStorage.getItem(REMEMBER_KEY) === 'true'
+  );
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+
+    // Guardar el flag antes de setSession para que adaptiveStorage lo lea
+    if (rememberMe) {
+      localStorage.setItem(REMEMBER_KEY, 'true');
+    } else {
+      localStorage.removeItem(REMEMBER_KEY);
+    }
 
     const { data, error } = await hermanoRepository.login(form.email, form.password);
 
@@ -70,7 +80,20 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex items-center justify-between">
+              <label htmlFor="remember-me" className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  id="remember-me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-3.5 h-3.5 accent-secondary cursor-pointer"
+                />
+                <span className="font-body text-[10px] uppercase tracking-widest text-primary/60">
+                  Recordar sesión
+                </span>
+              </label>
+
               <Link to="/recuperar-password"
                 className="font-serif text-[10px] tracking-widest uppercase text-secondary/70 hover:text-secondary no-underline transition-colors">
                 ¿Olvidaste tu contraseña?

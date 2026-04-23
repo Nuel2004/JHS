@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { hermanoRepository, productoRepository } from '@/database/repositories';
 import type { Hermano } from '@/interfaces/Hermano';
 import { SectionLabel } from '@/components/landing/Helpers';
@@ -8,12 +8,15 @@ import { toast } from 'react-hot-toast';
 import {
   Euro, Users, CheckCircle2, ShoppingBag,
   Loader2, Search, Trash2, Plus, TrendingDown, TrendingUp, Wallet,
+  BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const CUOTA_ANUAL = 10;
 const GASTOS_KEY = 'jhs_gastos_tienda';
+const MOVIMIENTOS_KEY = 'jhs_movimientos';
 
+// ── Legacy Gastos tab ─────────────────────────────────────────────────────────
 type CategoriaGasto = 'Material' | 'Mantenimiento' | 'Personal' | 'Otros';
 
 interface GastoTienda {
@@ -31,6 +34,42 @@ const CATEGORIA_COLORS: Record<CategoriaGasto, string> = {
   Otros:         'text-primary/60 bg-muted border-secondary/20',
 };
 
+// ── Balance types ─────────────────────────────────────────────────────────────
+type TipoMovimiento = 'ingreso' | 'gasto';
+
+const CATEGORIAS_INGRESO = [
+  'Donativo Particular',
+  'Donativo Bolsa',
+  'Otro Ingreso',
+] as const;
+
+const CATEGORIAS_GASTO_BAL = [
+  'Palmas',
+  'Merchandising',
+  'Fotocopias',
+  'Coste Reparto',
+  'Comisión Banco',
+  'Donativo',
+  'Flores',
+  'Inversión',
+  'Otros',
+] as const;
+
+type CategoriaIngreso     = typeof CATEGORIAS_INGRESO[number];
+type CategoriaGastoBalance = typeof CATEGORIAS_GASTO_BAL[number];
+type CategoriaMovimiento  = CategoriaIngreso | CategoriaGastoBalance;
+
+interface MovimientoManual {
+  id: string;
+  tipo: TipoMovimiento;
+  concepto: string;
+  persona: string;
+  importe: number;
+  fecha: string;
+  categoria: CategoriaMovimiento;
+}
+
+// ── Shared config ─────────────────────────────────────────────────────────────
 const ESTADO_CONFIG = {
   activo:         { label: 'Activo',    color: 'text-secondary border-secondary/30 bg-secondary/5' },
   pendiente_pago: { label: 'Pendiente', color: 'text-amber-600 border-amber-400/30 bg-amber-50' },
@@ -43,8 +82,7 @@ const PEDIDO_ESTADO_COLOR: Record<string, string> = {
   entregado: 'text-primary/40 border-secondary/15 bg-muted/40',
 };
 
-// ── Componentes auxiliares ────────────────────────────────────────────────────
-
+// ── Utility components ────────────────────────────────────────────────────────
 function SummaryCard({ icon: Icon, label, value, sub, highlight = false, danger = false }: {
   icon: React.ElementType; label: string; value: string; sub?: string;
   highlight?: boolean; danger?: boolean;
@@ -81,7 +119,6 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 }
 
 // ── Tab 1: Cuotas de hermanos ─────────────────────────────────────────────────
-
 function CuentasHermanosTab({ hermanos }: { hermanos: Hermano[] }) {
   const [filtro, setFiltro] = useState('');
   const [estadoFiltro, setEstadoFiltro] = useState<'todos' | 'activo' | 'pendiente_pago' | 'baja'>('todos');
@@ -180,8 +217,7 @@ function CuentasHermanosTab({ hermanos }: { hermanos: Hermano[] }) {
   );
 }
 
-// ── Tab 2: Ingresos de tienda (pedidos) ──────────────────────────────────────
-
+// ── Tab 2: Ingresos de tienda ─────────────────────────────────────────────────
 function IngresostiendaTab({ pedidos }: { pedidos: any[] }) {
   const [filtroEstado, setFiltroEstado] = useState<'todos' | 'pendiente' | 'pagado' | 'entregado'>('todos');
 
@@ -270,7 +306,6 @@ function IngresostiendaTab({ pedidos }: { pedidos: any[] }) {
 }
 
 // ── Tab 3: Gastos de tienda ───────────────────────────────────────────────────
-
 function GastosTiendaTab({ palmasPedidos }: { palmasPedidos: any[] }) {
   const [gastos, setGastos] = useState<GastoTienda[]>([]);
   const [concepto, setConcepto] = useState('');
@@ -316,8 +351,8 @@ function GastosTiendaTab({ palmasPedidos }: { palmasPedidos: any[] }) {
     toast.success('Gasto eliminado');
   };
 
-  const totalGastos  = gastos.reduce((acc, g) => acc + g.importe, 0);
-  const totalPalmas  = palmasPedidos.reduce((acc, p) => acc + Number(p.total), 0);
+  const totalGastos    = gastos.reduce((acc, g) => acc + g.importe, 0);
+  const totalPalmas    = palmasPedidos.reduce((acc, p) => acc + Number(p.total), 0);
   const totalCombinado = totalGastos + totalPalmas;
 
   return (
@@ -396,7 +431,6 @@ function GastosTiendaTab({ palmasPedidos }: { palmasPedidos: any[] }) {
             ))}
           </div>
 
-          {/* Gastos manuales */}
           {gastos.map((g) => (
             <div key={g.id} className="grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-muted/20 transition-colors">
               <p className="col-span-8 md:col-span-4 font-serif text-sm text-primary truncate">{g.concepto}</p>
@@ -423,7 +457,6 @@ function GastosTiendaTab({ palmasPedidos }: { palmasPedidos: any[] }) {
             </div>
           ))}
 
-          {/* Palmas automáticas (una por cofrade) */}
           {palmasPedidos.length > 0 && (
             <>
               <div className="px-4 py-2 bg-amber-50/60">
@@ -465,13 +498,432 @@ function GastosTiendaTab({ palmasPedidos }: { palmasPedidos: any[] }) {
   );
 }
 
-// ── Página principal ──────────────────────────────────────────────────────────
+// ── Tab 4: Balance Económico ──────────────────────────────────────────────────
+function BalanceTab({
+  hermanos,
+  pedidos,
+}: {
+  hermanos: Hermano[];
+  pedidos: any[];
+}) {
+  const [movimientos, setMovimientos] = useState<MovimientoManual[]>([]);
+  const [tipo, setTipo]           = useState<TipoMovimiento>('ingreso');
+  const [concepto, setConcepto]   = useState('');
+  const [persona, setPersona]     = useState('');
+  const [importe, setImporte]     = useState('');
+  const [fecha, setFecha]         = useState(new Date().toISOString().slice(0, 10));
+  const [categoria, setCategoria] = useState<CategoriaMovimiento>('Donativo Particular');
 
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(MOVIMIENTOS_KEY);
+      if (stored) setMovimientos(JSON.parse(stored));
+    } catch { /* noop */ }
+  }, []);
+
+  const persistir = (nuevos: MovimientoManual[]) => {
+    setMovimientos(nuevos);
+    localStorage.setItem(MOVIMIENTOS_KEY, JSON.stringify(nuevos));
+  };
+
+  const agregar = () => {
+    if (!concepto.trim()) { toast.error('Escribe un concepto'); return; }
+    const valor = parseFloat(importe.replace(',', '.'));
+    if (isNaN(valor) || valor <= 0) { toast.error('Importe no válido'); return; }
+    const nuevo: MovimientoManual = {
+      id: crypto.randomUUID(),
+      tipo,
+      concepto: concepto.trim(),
+      persona: persona.trim(),
+      importe: valor,
+      fecha,
+      categoria,
+    };
+    persistir([...movimientos, nuevo]);
+    setConcepto('');
+    setPersona('');
+    setImporte('');
+    setFecha(new Date().toISOString().slice(0, 10));
+    toast.success(tipo === 'ingreso' ? 'Ingreso registrado' : 'Gasto registrado');
+  };
+
+  const eliminar = (id: string) => {
+    persistir(movimientos.filter((m) => m.id !== id));
+    toast.success('Movimiento eliminado');
+  };
+
+  // Build unified ledger rows from all sources
+  const filas = useMemo(() => {
+    type Fila = {
+      id: string;
+      fecha: string;
+      persona: string;
+      concepto: string;
+      categoria: string;
+      ingreso: number;
+      gasto: number;
+      deletable: boolean;
+      movimientoId?: string;
+    };
+    const rows: Fila[] = [];
+
+    // Cuotas (one row per active hermano)
+    hermanos
+      .filter((h) => h.estado === 'activo')
+      .forEach((h) => {
+        const nombre = [h.apellidos, h.nombre].filter(Boolean).join(', ');
+        rows.push({
+          id: `cuota-${h.id}`,
+          fecha: h.fecha_alta ?? '',
+          persona: nombre,
+          concepto: 'Cuota anual',
+          categoria: 'Cuota',
+          ingreso: CUOTA_ANUAL,
+          gasto: 0,
+          deletable: false,
+        });
+      });
+
+    // Tienda pedidos (paid/delivered)
+    pedidos
+      .filter((p) => p.estado === 'pagado' || p.estado === 'entregado')
+      .forEach((p) => {
+        const nombre = p.hermanos
+          ? [p.hermanos.apellidos, p.hermanos.nombre].filter(Boolean).join(', ')
+          : '—';
+        rows.push({
+          id: `pedido-${p.id}`,
+          fecha: p.fecha ?? '',
+          persona: nombre,
+          concepto: `${p.productos?.nombre ?? 'Producto'} × ${p.cantidad}`,
+          categoria: 'Tienda',
+          ingreso: Number(p.total),
+          gasto: 0,
+          deletable: false,
+        });
+      });
+
+    // Manual movimientos
+    movimientos.forEach((m) => {
+      rows.push({
+        id: `manual-${m.id}`,
+        fecha: m.fecha,
+        persona: m.persona,
+        concepto: m.concepto,
+        categoria: m.categoria,
+        ingreso: m.tipo === 'ingreso' ? m.importe : 0,
+        gasto:   m.tipo === 'gasto'   ? m.importe : 0,
+        deletable: true,
+        movimientoId: m.id,
+      });
+    });
+
+    // Sort ascending by date
+    rows.sort((a, b) => {
+      if (!a.fecha && !b.fecha) return 0;
+      if (!a.fecha) return 1;
+      if (!b.fecha) return -1;
+      return a.fecha.localeCompare(b.fecha);
+    });
+
+    return rows;
+  }, [hermanos, pedidos, movimientos]);
+
+  // Running saldo
+  const filasConSaldo = useMemo(() => {
+    let saldo = 0;
+    return filas.map((f) => {
+      saldo += f.ingreso - f.gasto;
+      return { ...f, saldo };
+    });
+  }, [filas]);
+
+  const totalIngresos = filas.reduce((s, f) => s + f.ingreso, 0);
+  const totalGastos   = filas.reduce((s, f) => s + f.gasto, 0);
+  const saldoFinal    = totalIngresos - totalGastos;
+
+  const categoriasActuales = tipo === 'ingreso'
+    ? (CATEGORIAS_INGRESO as readonly string[])
+    : (CATEGORIAS_GASTO_BAL as readonly string[]);
+
+  const formatFecha = (f: string) => {
+    if (!f) return '—';
+    try {
+      // Date-only strings need T00:00:00 to avoid UTC-shift
+      const d = f.length === 10 ? new Date(f + 'T00:00:00') : new Date(f);
+      return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' });
+    } catch { return f; }
+  };
+
+  return (
+    <div>
+      {/* Totals row */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="border border-secondary/15 p-4">
+          <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-2">Total ingresos</p>
+          <p className="font-display text-2xl text-secondary">+{totalIngresos.toFixed(2)} €</p>
+        </div>
+        <div className="border border-red-200/40 bg-red-50/20 p-4">
+          <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-2">Total gastos</p>
+          <p className="font-display text-2xl text-red-500">-{totalGastos.toFixed(2)} €</p>
+        </div>
+        <div className={cn('border p-4', saldoFinal >= 0 ? 'border-secondary/40 bg-secondary/5' : 'border-red-300/40 bg-red-50/40')}>
+          <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-2">Saldo final</p>
+          <p className={cn('font-display text-2xl', saldoFinal >= 0 ? 'text-secondary' : 'text-red-500')}>
+            {saldoFinal >= 0 ? '+' : ''}{saldoFinal.toFixed(2)} €
+          </p>
+        </div>
+      </div>
+
+      {/* Form: add movement */}
+      <div className="border border-secondary/15 p-5 mb-6">
+        <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-4">Registrar movimiento</p>
+
+        {/* Tipo toggle */}
+        <div className="flex gap-1 mb-4">
+          {(['ingreso', 'gasto'] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => {
+                setTipo(t);
+                setCategoria(t === 'ingreso' ? 'Donativo Particular' : 'Palmas');
+              }}
+              className={cn(
+                'px-4 py-1.5 text-[9px] tracking-widest uppercase font-body border transition-colors',
+                tipo === t
+                  ? t === 'ingreso'
+                    ? 'border-secondary bg-secondary/10 text-secondary'
+                    : 'border-red-400 bg-red-50 text-red-600'
+                  : 'border-secondary/20 text-primary/40 hover:text-primary/70'
+              )}
+            >
+              {t === 'ingreso' ? '+ Ingreso' : '− Gasto'}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+          <Input
+            placeholder="Concepto *"
+            className="rounded-none border-secondary/30 bg-background text-sm"
+            value={concepto}
+            onChange={(e) => setConcepto(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && agregar()}
+          />
+          <Input
+            placeholder="Persona (opcional)"
+            className="rounded-none border-secondary/30 bg-background text-sm"
+            value={persona}
+            onChange={(e) => setPersona(e.target.value)}
+          />
+          <Input
+            placeholder="Importe (€) *"
+            type="number"
+            min="0"
+            step="0.01"
+            className="rounded-none border-secondary/30 bg-background text-sm"
+            value={importe}
+            onChange={(e) => setImporte(e.target.value)}
+          />
+          <Input
+            type="date"
+            className="rounded-none border-secondary/30 bg-background text-sm"
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <div className="flex gap-1 flex-wrap">
+            {categoriasActuales.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategoria(cat as CategoriaMovimiento)}
+                className={cn(
+                  'px-3 py-1.5 text-[9px] tracking-widest uppercase font-body border transition-colors',
+                  categoria === cat
+                    ? tipo === 'ingreso'
+                      ? 'border-secondary bg-secondary/10 text-secondary'
+                      : 'border-red-400 bg-red-50 text-red-600'
+                    : 'border-secondary/20 text-primary/40 hover:text-primary/70'
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+          <Button
+            onClick={agregar}
+            className={cn(
+              'ml-auto rounded-none text-xs tracking-widest uppercase gap-2 shrink-0',
+              tipo === 'ingreso'
+                ? 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'
+                : 'bg-red-500 hover:bg-red-600 text-white'
+            )}
+          >
+            <Plus size={13} />
+            Añadir {tipo}
+          </Button>
+        </div>
+      </div>
+
+      {/* Ledger table */}
+      {filasConSaldo.length === 0 ? (
+        <p className="text-center font-body text-sm text-primary/30 py-10 border border-dashed border-secondary/20">
+          Sin movimientos registrados.
+        </p>
+      ) : (
+        <div className="border border-secondary/10 overflow-x-auto">
+          {/* Header — desktop only */}
+          <div className="hidden lg:grid grid-cols-12 gap-2 px-4 py-2 bg-muted/30 border-b border-secondary/10">
+            {[
+              { label: 'Fecha',     span: 'col-span-1' },
+              { label: 'Persona',   span: 'col-span-2' },
+              { label: 'Concepto',  span: 'col-span-3' },
+              { label: 'Categoría', span: 'col-span-2' },
+              { label: 'Ingreso',   span: 'col-span-1' },
+              { label: 'Gasto',     span: 'col-span-1' },
+              { label: 'Saldo',     span: 'col-span-1' },
+              { label: '',          span: 'col-span-1' },
+            ].map(({ label, span }, i) => (
+              <p key={i} className={cn('font-body text-[9px] tracking-widest uppercase text-primary/40', span)}>
+                {label}
+              </p>
+            ))}
+          </div>
+
+          <div className="divide-y divide-secondary/8">
+            {filasConSaldo.map((fila) => (
+              <div
+                key={fila.id}
+                className="grid grid-cols-12 gap-2 px-4 py-3 items-start lg:items-center hover:bg-muted/20 transition-colors"
+              >
+                {/* Fecha */}
+                <p className="col-span-3 lg:col-span-1 font-body text-[10px] text-primary/50 mt-0.5">
+                  {formatFecha(fila.fecha)}
+                </p>
+
+                {/* Persona */}
+                <p className="col-span-5 lg:col-span-2 font-serif text-xs text-primary truncate">
+                  {fila.persona || '—'}
+                </p>
+
+                {/* Concepto + categoria (mobile shows concepto only) */}
+                <div className="col-span-4 lg:col-span-3">
+                  <p className="font-body text-xs text-primary/80 truncate">{fila.concepto}</p>
+                  {/* Categoria — visible only on mobile */}
+                  <span className={cn(
+                    'lg:hidden inline-block mt-0.5 px-1.5 py-0.5 text-[8px] tracking-widest uppercase border font-body',
+                    fila.ingreso > 0
+                      ? 'text-secondary border-secondary/30 bg-secondary/5'
+                      : 'text-red-500 border-red-200 bg-red-50/50'
+                  )}>
+                    {fila.categoria}
+                  </span>
+                </div>
+
+                {/* Categoría — desktop */}
+                <div className="hidden lg:block col-span-2">
+                  <span className={cn(
+                    'inline-block px-2 py-0.5 text-[8px] tracking-widest uppercase border font-body',
+                    fila.ingreso > 0
+                      ? 'text-secondary border-secondary/30 bg-secondary/5'
+                      : 'text-red-500 border-red-200 bg-red-50/50'
+                  )}>
+                    {fila.categoria}
+                  </span>
+                </div>
+
+                {/* Ingreso — desktop */}
+                <p className={cn(
+                  'hidden lg:block col-span-1 font-display text-sm',
+                  fila.ingreso > 0 ? 'text-secondary' : 'text-primary/20'
+                )}>
+                  {fila.ingreso > 0 ? `+${fila.ingreso.toFixed(2)}` : '—'}
+                </p>
+
+                {/* Gasto — desktop */}
+                <p className={cn(
+                  'hidden lg:block col-span-1 font-display text-sm',
+                  fila.gasto > 0 ? 'text-red-500' : 'text-primary/20'
+                )}>
+                  {fila.gasto > 0 ? `-${fila.gasto.toFixed(2)}` : '—'}
+                </p>
+
+                {/* Saldo — desktop */}
+                <p className={cn(
+                  'hidden lg:block col-span-1 font-display text-sm font-medium',
+                  fila.saldo >= 0 ? 'text-secondary' : 'text-red-500'
+                )}>
+                  {fila.saldo >= 0 ? '+' : ''}{fila.saldo.toFixed(2)}
+                </p>
+
+                {/* Delete / source label */}
+                <div className="col-span-12 lg:col-span-1 flex items-center justify-between lg:justify-end mt-1 lg:mt-0">
+                  {/* Mobile: amounts + saldo */}
+                  <div className="flex gap-3 lg:hidden">
+                    {fila.ingreso > 0 && (
+                      <span className="font-display text-sm text-secondary">+{fila.ingreso.toFixed(2)} €</span>
+                    )}
+                    {fila.gasto > 0 && (
+                      <span className="font-display text-sm text-red-500">-{fila.gasto.toFixed(2)} €</span>
+                    )}
+                    <span className={cn(
+                      'font-display text-sm',
+                      fila.saldo >= 0 ? 'text-secondary' : 'text-red-500'
+                    )}>
+                      = {fila.saldo >= 0 ? '+' : ''}{fila.saldo.toFixed(2)} €
+                    </span>
+                  </div>
+
+                  {fila.deletable ? (
+                    <button
+                      onClick={() => fila.movimientoId && eliminar(fila.movimientoId)}
+                      className="p-1.5 text-primary/20 hover:text-red-500 transition-colors"
+                      title="Eliminar"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  ) : (
+                    <span className="text-[8px] text-primary/20 uppercase tracking-widest">
+                      {fila.id.startsWith('cuota') ? 'auto' : 'tienda'}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer totals */}
+          <div className="grid grid-cols-12 gap-2 px-4 py-3 bg-muted/30 border-t border-secondary/10">
+            <p className="col-span-8 lg:col-span-6 font-body text-[9px] tracking-widest uppercase text-primary/40">
+              {filasConSaldo.length} movimiento{filasConSaldo.length !== 1 ? 's' : ''}
+            </p>
+            <p className="hidden lg:block col-span-1 font-display text-sm text-secondary">
+              +{totalIngresos.toFixed(2)}
+            </p>
+            <p className="hidden lg:block col-span-1 font-display text-sm text-red-500">
+              -{totalGastos.toFixed(2)}
+            </p>
+            <p className={cn(
+              'col-span-4 lg:col-span-1 font-display text-sm text-right lg:text-left',
+              saldoFinal >= 0 ? 'text-secondary' : 'text-red-500'
+            )}>
+              {saldoFinal >= 0 ? '+' : ''}{saldoFinal.toFixed(2)} €
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Página principal ──────────────────────────────────────────────────────────
 export default function AdminCuentasPage() {
-  const [hermanos, setHermanos]   = useState<Hermano[]>([]);
-  const [pedidos, setPedidos]     = useState<any[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [tab, setTab]             = useState<'cuotas' | 'tienda' | 'gastos'>('cuotas');
+  const [hermanos, setHermanos] = useState<Hermano[]>([]);
+  const [pedidos, setPedidos]   = useState<any[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [tab, setTab]           = useState<'cuotas' | 'tienda' | 'gastos' | 'balance'>('cuotas');
   const [gastosTotales, setGastosTotales] = useState(0);
 
   useEffect(() => {
@@ -509,12 +961,10 @@ export default function AdminCuentasPage() {
 
   const recaudadoCuotas = activos * CUOTA_ANUAL;
 
-  // Solo pedidos pagados o entregados cuentan como ingreso real
   const recaudadoTienda = pedidos
     .filter((p) => p.estado === 'pagado' || p.estado === 'entregado')
     .reduce((acc, p) => acc + Number(p.total), 0);
 
-  // Palmas entregadas/pagadas a cofrades (gasto automático)
   const palmasPedidos = pedidos.filter(
     (p) => p.productos?.nombre === 'Palma Hermano' &&
            (p.estado === 'pagado' || p.estado === 'entregado')
@@ -527,7 +977,6 @@ export default function AdminCuentasPage() {
 
   return (
     <div className="p-4 md:p-8">
-      {/* Cabecera */}
       <div className="mb-8">
         <SectionLabel>Administración</SectionLabel>
         <h1 className="font-display text-3xl md:text-4xl text-primary mt-1">Cuentas</h1>
@@ -542,7 +991,6 @@ export default function AdminCuentasPage() {
         </div>
       ) : (
         <>
-          {/* Tarjetas resumen — fila superior */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
             <SummaryCard
               icon={Users}
@@ -560,7 +1008,7 @@ export default function AdminCuentasPage() {
               icon={TrendingUp}
               label="Total ingresos"
               value={`${totalIngresos.toFixed(2)} €`}
-              sub={`Cuotas + tienda`}
+              sub="Cuotas + tienda"
               highlight
             />
             <SummaryCard
@@ -572,7 +1020,6 @@ export default function AdminCuentasPage() {
             />
           </div>
 
-          {/* Tarjeta balance — fila inferior destacada */}
           <div className={cn(
             'border p-5 mb-8 flex items-center justify-between',
             balance >= 0 ? 'border-secondary/40 bg-secondary/5' : 'border-red-300/40 bg-red-50/40'
@@ -590,7 +1037,7 @@ export default function AdminCuentasPage() {
           </div>
 
           {/* Tabs */}
-          <div className="border-b border-secondary/15 mb-6 flex gap-0">
+          <div className="border-b border-secondary/15 mb-6 flex gap-0 overflow-x-auto">
             <TabButton active={tab === 'cuotas'} onClick={() => setTab('cuotas')}>
               <span className="flex items-center gap-2"><CheckCircle2 size={11} /> Cuotas</span>
             </TabButton>
@@ -600,11 +1047,15 @@ export default function AdminCuentasPage() {
             <TabButton active={tab === 'gastos'} onClick={() => setTab('gastos')}>
               <span className="flex items-center gap-2"><Euro size={11} /> Gastos</span>
             </TabButton>
+            <TabButton active={tab === 'balance'} onClick={() => setTab('balance')}>
+              <span className="flex items-center gap-2"><BookOpen size={11} /> Balance</span>
+            </TabButton>
           </div>
 
           {tab === 'cuotas'  && <CuentasHermanosTab hermanos={hermanos} />}
           {tab === 'tienda'  && <IngresostiendaTab pedidos={pedidos} />}
           {tab === 'gastos'  && <GastosTiendaTab palmasPedidos={palmasPedidos} />}
+          {tab === 'balance' && <BalanceTab hermanos={hermanos} pedidos={pedidos} />}
         </>
       )}
     </div>
