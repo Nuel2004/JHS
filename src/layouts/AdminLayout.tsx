@@ -120,7 +120,7 @@ export default function AdminLayout() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden fixed inset-0 z-40 bg-black/60"
+              className="md:hidden fixed inset-0 z-50 bg-black/60"
               onClick={() => setDrawerOpen(false)}
             />
             <motion.aside
@@ -128,7 +128,7 @@ export default function AdminLayout() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.25 }}
-              className="md:hidden fixed top-0 left-0 bottom-0 z-50 w-56 bg-primary text-primary-foreground flex flex-col"
+              className="md:hidden fixed top-0 left-0 bottom-0 z-[60] w-56 bg-primary text-primary-foreground flex flex-col"
             >
               <button
                 onClick={() => setDrawerOpen(false)}
