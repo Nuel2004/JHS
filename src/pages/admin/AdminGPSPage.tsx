@@ -153,7 +153,7 @@ function PasoCard({ paso, hermanoId }: PasoCardProps) {
 
 export default function AdminGPSPage() {
   const { sessionHermano } = useAuthStore();
-  const { pasos, setPasos } = useProcesionStore();
+  const { pasos, setPasos, updatePaso } = useProcesionStore();
   const hermano = sessionHermano!.hermano;
   const [loading, setLoading] = useState(true);
 
@@ -162,6 +162,8 @@ export default function AdminGPSPage() {
       if (data) setPasos(data);
       setLoading(false);
     });
+    const unsub = pasoRepository.suscribirRealtime(updatePaso);
+    return unsub;
   }, []);
 
   return (
