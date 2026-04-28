@@ -27,7 +27,16 @@ function EstadoBadge({ estado, esCofrade }: { estado: string; esCofrade: boolean
   );
 }
 
-const ACCESOS = [
+type AccesoItem = {
+  to?: string;
+  href?: string;
+  icon: React.ElementType;
+  title: string;
+  desc: string;
+  cofrade: boolean;
+};
+
+const ACCESOS: AccesoItem[] = [
   {
     to: '/mi/puesto',
     icon: Cross,
@@ -43,18 +52,18 @@ const ACCESOS = [
     cofrade: false,
   },
   {
-    to: '/tienda',
+    to: '/mi/tienda',
     icon: ShoppingBag,
     title: 'Tienda',
     desc: 'Palmas, medallas y materiales oficiales',
     cofrade: false,
   },
   {
-    to: '/procesion',
+    href: '/#procesion',
     icon: MapPin,
     title: 'GPS en vivo',
     desc: 'Sigue el paso en tiempo real durante la procesión',
-    cofrade: true,
+    cofrade: false,
   },
 ];
 
@@ -102,27 +111,37 @@ export default function DashboardPage() {
 
       {/* Grid de accesos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-        {ACCESOS.map(({ to, icon: Icon, title, desc, cofrade }) => {
+        {ACCESOS.map(({ to, href, icon: Icon, title, desc, cofrade }) => {
+          const key = to ?? href!;
           const bloqueado = cofrade && !isCofrade;
+          const cardContent = (
+            <div className="border border-secondary/15 p-5 h-full flex items-center gap-4 group-hover:border-secondary/40 group-hover:bg-secondary/4 transition-all">
+              <div className="w-10 h-10 shrink-0 flex items-center justify-center border border-secondary/25 text-secondary group-hover:bg-secondary/8 transition-colors">
+                <Icon size={16} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-display text-sm text-primary">{title}</p>
+                <p className="font-body text-[11px] text-primary/45 mt-0.5 leading-snug">{desc}</p>
+              </div>
+              <ChevronRight size={14} className="shrink-0 text-primary/20 group-hover:text-secondary transition-colors" />
+            </div>
+          );
+
+          if (href) {
+            return (
+              <a key={key} href={href} className="no-underline group block">
+                {cardContent}
+              </a>
+            );
+          }
+
           return (
             <Link
-              key={to}
-              to={bloqueado ? '#' : to}
+              key={key}
+              to={bloqueado ? '#' : to!}
               className={cn('no-underline group block', bloqueado && 'pointer-events-none opacity-35')}
             >
-              <div className="border border-secondary/15 p-5 h-full flex items-center gap-4 group-hover:border-secondary/40 group-hover:bg-secondary/4 transition-all">
-                {/* Icono */}
-                <div className="w-10 h-10 shrink-0 flex items-center justify-center border border-secondary/25 text-secondary group-hover:bg-secondary/8 transition-colors">
-                  <Icon size={16} />
-                </div>
-                {/* Texto */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-display text-sm text-primary">{title}</p>
-                  <p className="font-body text-[11px] text-primary/45 mt-0.5 leading-snug">{desc}</p>
-                </div>
-                {/* Flecha */}
-                <ChevronRight size={14} className="shrink-0 text-primary/20 group-hover:text-secondary transition-colors" />
-              </div>
+              {cardContent}
             </Link>
           );
         })}
