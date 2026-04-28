@@ -27,14 +27,9 @@ function EstadoBadge({ estado, esCofrade }: { estado: string; esCofrade: boolean
   );
 }
 
-type AccesoItem = {
-  to?: string;
-  href?: string;
-  icon: React.ElementType;
-  title: string;
-  desc: string;
-  cofrade: boolean;
-};
+type AccesoItem =
+  | { to: string; href?: never; icon: React.ElementType; title: string; desc: string; cofrade: boolean }
+  | { to?: never; href: string; icon: React.ElementType; title: string; desc: string; cofrade: boolean };
 
 const ACCESOS: AccesoItem[] = [
   {
@@ -111,8 +106,9 @@ export default function DashboardPage() {
 
       {/* Grid de accesos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-        {ACCESOS.map(({ to, href, icon: Icon, title, desc, cofrade }) => {
-          const key = to ?? href!;
+        {ACCESOS.map((item) => {
+          const { icon: Icon, title, desc, cofrade } = item;
+          const key = 'to' in item ? item.to : item.href;
           const bloqueado = cofrade && !isCofrade;
           const cardContent = (
             <div className="border border-secondary/15 p-5 h-full flex items-center gap-4 group-hover:border-secondary/40 group-hover:bg-secondary/4 transition-all">
@@ -127,9 +123,10 @@ export default function DashboardPage() {
             </div>
           );
 
-          if (href) {
+          if ('href' in item) {
+            // href items are always public routes; cofrade gating is not applied here
             return (
-              <a key={key} href={href} className="no-underline group block">
+              <a key={key} href={item.href} className="no-underline group block">
                 {cardContent}
               </a>
             );
@@ -138,7 +135,7 @@ export default function DashboardPage() {
           return (
             <Link
               key={key}
-              to={bloqueado ? '#' : to!}
+              to={bloqueado ? '#' : item.to}
               className={cn('no-underline group block', bloqueado && 'pointer-events-none opacity-35')}
             >
               {cardContent}
