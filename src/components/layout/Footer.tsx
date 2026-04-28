@@ -8,15 +8,36 @@ export function Footer() {
                 </p>
             </div>
             <div className="flex gap-8 flex-wrap justify-center">
-                {["Historia", "Noticias", "Tienda", "Contacto", "Privacidad"].map((l) => (
-                    <a
-                        key={l}
-                        href="#"
-                        className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
-                    >
-                        {l}
-                    </a>
-                ))}
+                <a
+                    href="#"
+                    className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
+                >
+                    Historia
+                </a>
+                <a
+                    href="/noticias"
+                    className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
+                >
+                    Noticias
+                </a>
+                <a
+                    href="/#tienda"
+                    className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
+                >
+                    Tienda
+                </a>
+                <a
+                    href="/contacto"
+                    className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
+                >
+                    Contacto
+                </a>
+                <a
+                    href="#"
+                    className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
+                >
+                    Privacidad
+                </a>
             </div>
             <p className="font-body text-[0.8rem] text-primary/40">
                 © 2026 Jesús Salvador de los Hombres · Montijo
