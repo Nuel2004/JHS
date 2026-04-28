@@ -51,8 +51,11 @@ const ICON_MAP: Record<TipoPunto, L.DivIcon> = {
     paso_obligado: circleIcon("#c8a951", 12, "#c8a95180"),
 };
 
+const _pasoIconCache = new Map<string, L.DivIcon>();
+
 function pasoIcon(color: string): L.DivIcon {
-    return L.divIcon({
+    if (_pasoIconCache.has(color)) return _pasoIconCache.get(color)!;
+    const icon = L.divIcon({
         className: "",
         html: `
             <div style="position:relative;width:28px;height:28px;display:flex;align-items:center;justify-content:center">
@@ -63,6 +66,8 @@ function pasoIcon(color: string): L.DivIcon {
         iconAnchor: [14, 14],
         popupAnchor: [0, -14],
     });
+    _pasoIconCache.set(color, icon);
+    return icon;
 }
 
 export function GpsSection() {
