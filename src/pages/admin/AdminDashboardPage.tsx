@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabaseClient } from '@/database/supabase/Client';
 import { SectionLabel } from '@/components/landing/Helpers';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -79,11 +80,11 @@ export default function AdminDashboardPage() {
                 { label: 'Gestionar GPS', href: '/admin/gps' },
                 { label: 'Ver pedidos', href: '/admin/tienda' },
               ].map(({ label, href }) => (
-                <a key={href} href={href}
+                <Link key={href} to={href}
                   className="px-4 py-2 border border-secondary/30 font-serif text-[10px] tracking-widest uppercase
                              text-secondary hover:bg-secondary/10 transition-colors no-underline">
                   {label}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
