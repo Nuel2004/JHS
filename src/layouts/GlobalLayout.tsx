@@ -21,6 +21,9 @@ export default function GlobalLayout() {
       'reading-mode',
       isReadingMode && !isAdminRoute
     );
+    return () => {
+      document.documentElement.classList.remove('reading-mode');
+    };
   }, [isReadingMode, location.pathname]);
 
   return (
