@@ -1,16 +1,27 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useReadingModeStore } from '../stores/readingModeStore';
 
 export default function GlobalLayout() {
   const [showTop, setShowTop] = useState(false);
+  const { isReadingMode } = useReadingModeStore();
+  const location = useLocation();
 
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 400);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    const isAdminRoute = location.pathname.startsWith('/admin');
+    document.documentElement.classList.toggle(
+      'reading-mode',
+      isReadingMode && !isAdminRoute
+    );
+  }, [isReadingMode, location.pathname]);
 
   return (
     <>
