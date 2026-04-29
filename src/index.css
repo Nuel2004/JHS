@@ -68,5 +68,5 @@ html.reading-mode body {
 /* Navbar: overrides para textos hardcodeados en px */
 html.reading-mode nav a,
 html.reading-mode nav button {
-  font-size: 0.85rem;
+  font-size: 0.85em;
 }
