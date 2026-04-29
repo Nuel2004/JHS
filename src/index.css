@@ -35,7 +35,7 @@
   :root {
     --radius: 0.5rem;
   }
-  
+
   body {
     @apply bg-background text-foreground font-body antialiased;
   }
@@ -43,4 +43,30 @@
   h1, h2, h3, .font-display {
     @apply font-display;
   }
+}
+
+/* === MODO LECTURA === */
+html.reading-mode {
+  --color-background: #FFFFFF;
+  --color-foreground: #000000;
+  --color-primary: #000000;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #7A5600;
+  --color-secondary-foreground: #FFFFFF;
+  --color-accent: #C9A800;
+  --color-accent-foreground: #000000;
+  --color-muted: #F0F0F0;
+  --color-muted-foreground: #111111;
+  --color-border: rgba(0, 0, 0, 0.25);
+}
+
+html.reading-mode body {
+  font-size: 118%;
+  line-height: 1.7;
+}
+
+/* Navbar: overrides para textos hardcodeados en px */
+html.reading-mode nav a,
+html.reading-mode nav button {
+  font-size: 0.85rem;
 }
