@@ -58,9 +58,9 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-2">
           <button
             onClick={toggleReadingMode}
-            aria-label="Activar modo lectura"
+            aria-label="Modo lectura"
             aria-pressed={isReadingMode}
-            className={`font-body text-[10px] tracking-widest uppercase transition-colors flex items-center px-2 py-1
+            className={`font-body text-[10px] tracking-widest uppercase transition-colors flex items-center px-2 py-1 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-secondary
               ${isReadingMode
                 ? 'text-secondary font-semibold'
                 : 'text-primary/35 hover:text-secondary'}`}
@@ -176,7 +176,7 @@ export function Navbar() {
               ))}
 
               <motion.button
-                onClick={toggleReadingMode}
+                onClick={() => { toggleReadingMode(); setMenuOpen(false); }}
                 initial={{ x: -12, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: PUBLIC_LINKS.length * 0.05, duration: 0.2 }}
@@ -186,7 +186,7 @@ export function Navbar() {
                             ${isReadingMode ? 'text-secondary' : 'text-primary/60 hover:text-secondary'}`}
               >
                 Modo Lectura
-                <span className={`text-[9px] px-1.5 py-0.5 font-bold
+                <span aria-hidden="true" className={`text-[9px] px-1.5 py-0.5 font-bold
                   ${isReadingMode ? 'bg-secondary text-secondary-foreground' : 'bg-primary/10 text-primary/40'}`}>
                   Aa
                 </span>
