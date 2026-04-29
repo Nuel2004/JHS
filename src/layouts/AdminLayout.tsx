@@ -1,4 +1,4 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
@@ -6,7 +6,7 @@ import { hermanoRepository } from '../database/repositories';
 import { toast } from 'react-hot-toast';
 import {
   LayoutDashboard, Users, Newspaper, MapPin, ShoppingBag,
-  LogOut, ChevronRight, Landmark, ListOrdered, Menu, X,
+  LogOut, ChevronRight, Landmark, ListOrdered, Menu, X, Home,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -60,6 +60,15 @@ function SidebarContent({ onNavClick, onLogout, nombre, apellidos }: {
         <p className="font-body text-[10px] text-primary-foreground/50 truncate">
           {nombre} {apellidos}
         </p>
+        <Link
+          to="/"
+          onClick={onNavClick}
+          className="mt-2 flex items-center gap-2 text-[10px] tracking-widest uppercase
+                     text-primary-foreground/40 hover:text-secondary transition-colors"
+        >
+          <Home size={12} />
+          Ver web
+        </Link>
         <button
           onClick={onLogout}
           className="mt-2 flex items-center gap-2 text-[10px] tracking-widest uppercase
