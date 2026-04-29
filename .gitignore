@@ -14,10 +14,22 @@ dist-ssr
 .claude
 .env
 .env.*
+.superpowers
 jhs.txt
 supabase.txt
 supabase-email-confirmation.html
 ejecutar.md
+
+# Build cache
+.vite
+coverage/
+.nyc_output/
+
+# Claude Code / AI tools
+.agents/
+.continue/
+skills-lock.json
+scripts/
 
 # Editor directories and files
 .vscode/*
@@ -29,3 +41,10 @@ ejecutar.md
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+*~
+
+# Windows
+Thumbs.db
+desktop.ini
