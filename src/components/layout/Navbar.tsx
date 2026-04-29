@@ -5,6 +5,7 @@ import { hermanoRepository } from '@/database/repositories';
 import { toast } from 'react-hot-toast';
 import { LogOut, User, ShieldCheck, Menu, X, ChevronRight, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
+import { useReadingModeStore } from '@/stores/readingModeStore';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const PUBLIC_LINKS = [
@@ -16,6 +17,7 @@ const PUBLIC_LINKS = [
 
 export function Navbar() {
   const { isAuthenticated, isAdmin, sessionHermano, clearSession } = useAuthStore();
+  const { isReadingMode, toggleReadingMode } = useReadingModeStore();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -54,6 +56,17 @@ export function Navbar() {
 
         {/* Acciones — desktop */}
         <div className="hidden md:flex items-center gap-2">
+          <button
+            onClick={toggleReadingMode}
+            aria-label="Activar modo lectura"
+            aria-pressed={isReadingMode}
+            className={`font-body text-[10px] tracking-widest uppercase transition-colors flex items-center px-2 py-1
+              ${isReadingMode
+                ? 'text-secondary font-semibold'
+                : 'text-primary/35 hover:text-secondary'}`}
+          >
+            Aa
+          </button>
           {isAuthenticated ? (
             <>
               {isAdmin && (
@@ -161,6 +174,23 @@ export function Navbar() {
                   <ChevronRight size={11} className="text-primary/20 group-hover:text-secondary transition-colors" />
                 </motion.a>
               ))}
+
+              <motion.button
+                onClick={toggleReadingMode}
+                initial={{ x: -12, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: PUBLIC_LINKS.length * 0.05, duration: 0.2 }}
+                aria-pressed={isReadingMode}
+                className={`w-full text-left flex items-center justify-between py-2.5 border-b border-secondary/8
+                            font-body text-[11px] tracking-[0.2em] uppercase transition-colors
+                            ${isReadingMode ? 'text-secondary' : 'text-primary/60 hover:text-secondary'}`}
+              >
+                Modo Lectura
+                <span className={`text-[9px] px-1.5 py-0.5 font-bold
+                  ${isReadingMode ? 'bg-secondary text-secondary-foreground' : 'bg-primary/10 text-primary/40'}`}>
+                  Aa
+                </span>
+              </motion.button>
 
               <div className="pt-4 space-y-2">
                 {isAuthenticated ? (
