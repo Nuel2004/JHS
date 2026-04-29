@@ -21,10 +21,13 @@ export default function GlobalLayout() {
       'reading-mode',
       isReadingMode && !isAdminRoute
     );
+  }, [isReadingMode, location.pathname]);
+
+  useEffect(() => {
     return () => {
       document.documentElement.classList.remove('reading-mode');
     };
-  }, [isReadingMode, location.pathname]);
+  }, []);
 
   return (
     <>

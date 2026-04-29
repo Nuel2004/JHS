@@ -57,6 +57,7 @@ export function Navbar() {
         {/* Acciones — desktop */}
         <div className="hidden md:flex items-center gap-2">
           <button
+            type="button"
             onClick={toggleReadingMode}
             aria-label="Modo lectura"
             aria-pressed={isReadingMode}
@@ -176,6 +177,7 @@ export function Navbar() {
               ))}
 
               <motion.button
+                type="button"
                 onClick={() => { toggleReadingMode(); setMenuOpen(false); }}
                 initial={{ x: -12, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
