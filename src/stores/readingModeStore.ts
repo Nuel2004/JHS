@@ -6,6 +6,7 @@ interface ReadingModeState {
   toggleReadingMode: () => void;
 }
 
+/** Persists reading mode preference to localStorage under 'jhs-reading-mode-v1'. */
 export const useReadingModeStore = create<ReadingModeState>()(
   persist(
     (set) => ({
@@ -13,8 +14,9 @@ export const useReadingModeStore = create<ReadingModeState>()(
       toggleReadingMode: () => set((s) => ({ isReadingMode: !s.isReadingMode })),
     }),
     {
-      name: 'jhs-reading-mode',
+      name: 'jhs-reading-mode-v1',
       storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ isReadingMode: state.isReadingMode }),
     }
   )
 );
