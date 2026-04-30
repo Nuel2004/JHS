@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 // ── Definición de puestos con límite de huecos ──────────────────────────────
 const PUESTOS: Record<string, { label: string; desc: string; max: number }> = {
   'Cruz de Guía': { label: 'Cruz de Guía',  desc: 'Abre el cortejo portando la cruz',              max: 1  },
-  'Báculo':       { label: 'Báculo',         desc: 'Flanquea la cruz y el estandarte (6 en total)', max: 6  },
+  'Báculo':       { label: 'Báculo',         desc: 'Flanquea la cruz y el estandarte (6 en total)', max: 4  },
   'Palma Chica':  { label: 'Palma',          desc: 'Acompañamiento con palma procesional',           max: 40 },
   'Estandarte':   { label: 'Estandarte',     desc: 'Portador del estandarte de la hermandad',        max: 1  },
   'Palma Grande': { label: 'Palma Grande',   desc: 'Palma rizada artesanal, precede al paso',        max: 20 },
@@ -22,8 +22,8 @@ const PUESTOS: Record<string, { label: string; desc: string; max: number }> = {
 // ── Esquema visual del cortejo (frente → fondo) ──────────────────────────────
 type Elemento = { puesto: string; tag: string; destacado?: boolean };
 type Fila =
-  | { id: string; label: string; esPaso?: false; elementos: Elemento[] }
-  | { id: string; label: string; esPaso: true; elementos: Elemento[] };
+  | { id: string; label: string; esPaso?: false; esVertical?: boolean; elementos: Elemento[] }
+  | { id: string; label: string; esPaso: true; esVertical?: boolean; elementos: Elemento[] };
 
 const FILAS: Fila[] = [
   {
@@ -38,6 +38,7 @@ const FILAS: Fila[] = [
   {
     id: 'palmas',
     label: 'Palmas',
+    esVertical: true,
     elementos: Array(7).fill(null).map(() => ({ puesto: 'Palma Chica', tag: 'Palma' })),
   },
   {
@@ -45,15 +46,14 @@ const FILAS: Fila[] = [
     label: 'Estandarte',
     elementos: [
       { puesto: 'Báculo',     tag: 'Báculo'    },
-      { puesto: 'Báculo',     tag: 'Báculo'    },
       { puesto: 'Estandarte', tag: 'Estandarte', destacado: true },
-      { puesto: 'Báculo',     tag: 'Báculo'    },
       { puesto: 'Báculo',     tag: 'Báculo'    },
     ],
   },
   {
     id: 'palmas-grandes',
     label: 'Palmas Grandes',
+    esVertical: true,
     elementos: Array(5).fill(null).map(() => ({ puesto: 'Palma Grande', tag: 'P. Grande' })),
   },
   {
@@ -68,18 +68,18 @@ const FILAS: Fila[] = [
 const COLOR: Record<string, string> = {
   'Cruz de Guía': 'border-secondary bg-secondary/15 text-secondary',
   'Báculo':       'border-secondary/50 bg-secondary/5 text-secondary/70',
-  'Palma Chica':  'border-green-700/40 bg-green-900/10 text-green-400/80',
+  'Palma Chica':  'border-amber-700/40 bg-amber-900/10 text-amber-400/80',
   'Estandarte':   'border-secondary bg-secondary/15 text-secondary',
-  'Palma Grande': 'border-green-600/60 bg-green-900/15 text-green-300/90',
+  'Palma Grande': 'border-amber-600/60 bg-amber-900/20 text-amber-300/90',
   'Costalero':    'border-primary/40 bg-primary/10 text-primary/70',
 };
 
 const COLOR_SELECTED: Record<string, string> = {
   'Cruz de Guía': 'border-secondary bg-secondary/30 text-secondary ring-1 ring-secondary/60',
   'Báculo':       'border-secondary bg-secondary/20 text-secondary ring-1 ring-secondary/40',
-  'Palma Chica':  'border-green-500 bg-green-900/25 text-green-300 ring-1 ring-green-500/50',
+  'Palma Chica':  'border-amber-500 bg-amber-900/25 text-amber-300 ring-1 ring-amber-500/50',
   'Estandarte':   'border-secondary bg-secondary/30 text-secondary ring-1 ring-secondary/60',
-  'Palma Grande': 'border-green-400 bg-green-900/30 text-green-200 ring-1 ring-green-400/60',
+  'Palma Grande': 'border-amber-400 bg-amber-900/30 text-amber-200 ring-1 ring-amber-400/60',
   'Costalero':    'border-primary/60 bg-primary/20 text-primary ring-1 ring-primary/40',
 };
 
@@ -168,6 +168,31 @@ export default function PuestoPage() {
                 <span className="font-body text-[10px] text-primary/35">Costalero · máx. {PUESTOS['Costalero'].max}</span>
               </button>
 
+            ) : fila.esVertical ? (
+              /* Fila de palmas — elementos verticales ─────────────────── */
+              <div className="flex items-end justify-center gap-2">
+                {fila.elementos.map((el, ei) => {
+                  const isSelected = seleccion === el.puesto;
+                  return (
+                    <button
+                      key={`${fila.id}-${ei}`}
+                      type="button"
+                      onClick={() => setSeleccion(el.puesto)}
+                      className={cn(
+                        'transition-all duration-200 border flex items-center justify-center',
+                        'w-7 h-20',
+                        isSelected
+                          ? (COLOR_SELECTED[el.puesto] ?? 'border-secondary bg-secondary/20 text-secondary ring-1 ring-secondary/40')
+                          : (COLOR[el.puesto] ?? 'border-secondary/20 text-primary/60')
+                      )}
+                    >
+                      <span className="font-body text-[8px] tracking-[0.1em] uppercase [writing-mode:vertical-rl] rotate-180">
+                        {el.tag}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             ) : (
               /* Fila estándar ─────────────────────────────────────────── */
               <div className="flex items-center justify-center gap-2 flex-wrap">
