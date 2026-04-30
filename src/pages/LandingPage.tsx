@@ -8,6 +8,7 @@ import { TiendaSection } from "@/components/landing/TiendaSection";
 import { CtaFinal } from "@/components/landing/CtaFinal";
 import { VerseOfTheDay } from "@/components/landing/VerseOfTheDay";
 import { HistoriaSection } from "@/components/landing/HistoriaSection";
+import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 
 export default function LandingPage() {
     return (
@@ -22,6 +23,7 @@ export default function LandingPage() {
             <TiendaSection />
             <CtaFinal />
             <Footer />
+            <ChatbotWidget />
         </main>
     );
 }

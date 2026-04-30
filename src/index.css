@@ -58,15 +58,16 @@ html.reading-mode {
   --color-muted: #F0F0F0;
   --color-muted-foreground: #111111;
   --color-border: rgba(0, 0, 0, 0.25);
+  /* Escalar en html hace que todos los rem de Tailwind crezcan proporcionalmente */
+  font-size: 125%;
 }
 
 html.reading-mode body {
-  font-size: 118%;
-  line-height: 1.7;
+  line-height: 1.8;
 }
 
-/* Navbar: overrides para textos hardcodeados en px */
+/* Navbar: reducir ligeramente para que no se desborde */
 html.reading-mode nav a,
 html.reading-mode nav button {
-  font-size: 0.85em;
+  font-size: 0.8em;
 }
