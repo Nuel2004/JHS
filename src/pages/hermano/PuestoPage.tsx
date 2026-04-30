@@ -39,7 +39,7 @@ const FILAS: Fila[] = [
     id: 'palmas',
     label: 'Palmas',
     esVertical: true,
-    elementos: Array(7).fill(null).map(() => ({ puesto: 'Palma Chica', tag: 'Palma' })),
+    elementos: Array(6).fill(null).map(() => ({ puesto: 'Palma Chica', tag: 'Palma' })),
   },
   {
     id: 'estandarte',
@@ -54,7 +54,7 @@ const FILAS: Fila[] = [
     id: 'palmas-grandes',
     label: 'Palmas Grandes',
     esVertical: true,
-    elementos: Array(5).fill(null).map(() => ({ puesto: 'Palma Grande', tag: 'P. Grande' })),
+    elementos: Array(6).fill(null).map(() => ({ puesto: 'Palma Grande', tag: 'P. Grande' })),
   },
   {
     id: 'paso',
@@ -169,8 +169,8 @@ export default function PuestoPage() {
               </button>
 
             ) : fila.esVertical ? (
-              /* Fila de palmas — elementos verticales ─────────────────── */
-              <div className="flex items-end justify-center gap-2">
+              /* Fila de palmas — 2 columnas, mismo alto que báculos ──────── */
+              <div className="grid grid-cols-2 gap-1 w-fit mx-auto">
                 {fila.elementos.map((el, ei) => {
                   const isSelected = seleccion === el.puesto;
                   return (
@@ -180,13 +180,13 @@ export default function PuestoPage() {
                       onClick={() => setSeleccion(el.puesto)}
                       className={cn(
                         'transition-all duration-200 border flex items-center justify-center',
-                        'w-7 h-20',
+                        'w-9 h-9',
                         isSelected
                           ? (COLOR_SELECTED[el.puesto] ?? 'border-secondary bg-secondary/20 text-secondary ring-1 ring-secondary/40')
                           : (COLOR[el.puesto] ?? 'border-secondary/20 text-primary/60')
                       )}
                     >
-                      <span className="font-body text-[8px] tracking-[0.1em] uppercase [writing-mode:vertical-rl] rotate-180">
+                      <span className="font-body text-[7px] tracking-[0.05em] uppercase">
                         {el.tag}
                       </span>
                     </button>
