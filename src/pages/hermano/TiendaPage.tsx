@@ -36,6 +36,9 @@ export default function TiendaPage() {
     ]).then(([prods, peds]) => {
       setProductos(prods.data ?? []);
       setPedidos(peds.data ?? []);
+    }).catch(() => {
+      toast.error('Error al cargar la tienda. Recarga la página.');
+    }).finally(() => {
       setLoading(false);
     });
   }, [hermanoId]);
@@ -49,7 +52,7 @@ export default function TiendaPage() {
     productoRepository.obtenerPedidosPorHermano(hermanoId).then(({ data }) => {
       if (data) setPedidos(data);
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const totalUnidades = items.reduce((acc, i) => acc + i.cantidad, 0);
 
@@ -58,6 +61,10 @@ export default function TiendaPage() {
 
   const checkoutCarrito = async () => {
     setLoadingCheckout(true);
+    if (items.length === 0) {
+      setLoadingCheckout(false);
+      return;
+    }
     const pedidosCreados: Array<{
       pedido_id: number;
       nombre: string;
@@ -72,7 +79,7 @@ export default function TiendaPage() {
         item.cantidad,
       );
       if (error || !data) {
-        toast.error('Error al registrar el pedido. Inténtalo de nuevo.');
+        toast.error('Error al registrar el pedido. Si ves pedidos pendientes en "Mis pedidos", contacta con la hermandad.');
         setLoadingCheckout(false);
         return;
       }
@@ -96,7 +103,11 @@ export default function TiendaPage() {
         },
       );
       if (stripeError) throw stripeError;
-      if (stripeData?.url) window.location.href = stripeData.url;
+      if (stripeData?.url) {
+        window.location.href = stripeData.url;
+      } else {
+        throw new Error('No se recibió URL de pago');
+      }
     } catch {
       toast.success('Pedidos registrados. Podrás pagarlos desde "Mis pedidos".');
       vaciarCarrito();
@@ -216,7 +227,7 @@ export default function TiendaPage() {
                           <button
                             type="button"
                             aria-label={`Aumentar cantidad de ${p.nombre}`}
-                            onClick={() => actualizarCantidad(p.id, enCarrito + 1)}
+                            onClick={() => actualizarCantidad(p.id, Math.min(enCarrito + 1, p.stock))}
                             className="w-7 h-7 flex items-center justify-center border border-secondary/30 text-primary/60 hover:border-secondary text-sm"
                           >
                             +
