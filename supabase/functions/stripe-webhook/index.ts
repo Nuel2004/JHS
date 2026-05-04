@@ -31,12 +31,23 @@ Deno.serve(async (req) => {
         .update({ estado: 'activo' })
         .eq('id', hermano_id);
     } else if (type === 'carrito' && pedido_ids) {
-      const ids = JSON.parse(pedido_ids) as number[];
-      for (const id of ids) {
-        await supabase
-          .from('pedidos')
-          .update({ estado: 'pagado', pago_id: session.payment_intent as string })
-          .eq('id', id);
+      let ids: number[];
+      try {
+        ids = JSON.parse(pedido_ids) as number[];
+      } catch {
+        console.error('pedido_ids no es JSON válido:', pedido_ids);
+        return new Response('pedido_ids inválido', { status: 400 });
+      }
+      const paymentId = typeof session.payment_intent === 'string'
+        ? session.payment_intent
+        : null;
+      const { error } = await supabase
+        .from('pedidos')
+        .update({ estado: 'pagado', pago_id: paymentId })
+        .in('id', ids);
+      if (error) {
+        console.error('Error al actualizar pedidos carrito:', error.message);
+        return new Response('Error en pedidos', { status: 500 });
       }
     } else if (type === 'pedido' && pedido_id) {
       await supabase
