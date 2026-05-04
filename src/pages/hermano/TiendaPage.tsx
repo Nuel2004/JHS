@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { productoRepository } from '@/database/repositories';
 import { useAuthStore } from '@/stores/authStore';
+import { useCarritoStore } from '@/stores/carritoStore';
 import type { Producto, Pedido } from '@/interfaces/Producto';
 import { SectionLabel } from '@/components/landing/Helpers';
+import { supabaseClient } from '@/database/supabase/Client';
 import { toast } from 'react-hot-toast';
-import { Loader2, Package, X } from 'lucide-react';
+import { Loader2, Package, ShoppingCart } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import CartDrawer from '@/components/tienda/CartDrawer';
 
 const ESTADO_BADGE: Record<string, string> = {
   pendiente: 'text-amber-600 border-amber-400/30 bg-amber-50',
@@ -16,12 +20,14 @@ const ESTADO_BADGE: Record<string, string> = {
 export default function TiendaPage() {
   const { sessionHermano } = useAuthStore();
   const hermanoId = sessionHermano!.hermano.id;
+  const { items, agregarItem, actualizarCantidad, vaciarCarrito } = useCarritoStore();
 
-  const [productos, setProductos] = useState<Producto[]>([]);
-  const [pedidos, setPedidos]     = useState<Pedido[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [confirmando, setConfirmando] = useState<number | null>(null);
-  const [comprando, setComprando]     = useState<number | null>(null);
+  const [productos, setProductos]             = useState<Producto[]>([]);
+  const [pedidos, setPedidos]                 = useState<Pedido[]>([]);
+  const [loading, setLoading]                 = useState(true);
+  const [drawerOpen, setDrawerOpen]           = useState(false);
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const [searchParams, setSearchParams]       = useSearchParams();
 
   useEffect(() => {
     Promise.all([
@@ -34,17 +40,72 @@ export default function TiendaPage() {
     });
   }, [hermanoId]);
 
-  const comprar = async (producto: Producto) => {
-    setComprando(producto.id);
-    setConfirmando(null);
-    const { data, error } = await productoRepository.crearPedido(hermanoId, producto.id, 1);
-    if (error) {
-      toast.error(error);
-    } else {
-      if (data) setPedidos((prev) => [data, ...prev]);
-      toast.success(`Pedido de "${producto.nombre}" registrado`);
+  // Limpiar carrito y refrescar pedidos al volver de Stripe con éxito
+  useEffect(() => {
+    if (searchParams.get('pagado') !== '1') return;
+    vaciarCarrito();
+    toast.success('¡Pedido pagado con éxito!');
+    setSearchParams({});
+    productoRepository.obtenerPedidosPorHermano(hermanoId).then(({ data }) => {
+      if (data) setPedidos(data);
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const totalUnidades = items.reduce((acc, i) => acc + i.cantidad, 0);
+
+  const cantidadEnCarrito = (productoId: number) =>
+    items.find((i) => i.producto.id === productoId)?.cantidad ?? 0;
+
+  const checkoutCarrito = async () => {
+    setLoadingCheckout(true);
+    const pedidosCreados: Array<{
+      pedido_id: number;
+      nombre: string;
+      precio: number;
+      cantidad: number;
+    }> = [];
+
+    for (const item of items) {
+      const { data, error } = await productoRepository.crearPedido(
+        hermanoId,
+        item.producto.id,
+        item.cantidad,
+      );
+      if (error || !data) {
+        toast.error('Error al registrar el pedido. Inténtalo de nuevo.');
+        setLoadingCheckout(false);
+        return;
+      }
+      pedidosCreados.push({
+        pedido_id: data.id,
+        nombre: item.producto.nombre,
+        precio: item.producto.precio,
+        cantidad: item.cantidad,
+      });
     }
-    setComprando(null);
+
+    try {
+      const { data: stripeData, error: stripeError } = await supabaseClient.functions.invoke(
+        'create-checkout-session',
+        {
+          body: {
+            type: 'carrito',
+            hermano_id: hermanoId,
+            items: pedidosCreados,
+          },
+        },
+      );
+      if (stripeError) throw stripeError;
+      if (stripeData?.url) window.location.href = stripeData.url;
+    } catch {
+      toast.success('Pedidos registrados. Podrás pagarlos desde "Mis pedidos".');
+      vaciarCarrito();
+      setDrawerOpen(false);
+      productoRepository.obtenerPedidosPorHermano(hermanoId).then(({ data }) => {
+        if (data) setPedidos(data);
+      });
+    }
+    setLoadingCheckout(false);
   };
 
   const nombreProducto = (id: number) =>
@@ -59,132 +120,159 @@ export default function TiendaPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-12">
-      {/* Cabecera */}
-      <SectionLabel>Tienda oficial</SectionLabel>
-      <h1 className="font-display text-4xl text-primary mt-1 mb-2">
-        Materiales y merchandising
-      </h1>
-      <p className="font-body text-sm text-primary/55 mb-8 max-w-lg">
-        Adquiere los materiales de la hermandad. Los pedidos quedan registrados
-        y se tramitarán en los próximos días.
-      </p>
+    <>
+      <CartDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onCheckout={checkoutCarrito}
+        loadingCheckout={loadingCheckout}
+      />
 
-      {/* Grid de productos */}
-      {productos.length === 0 ? (
-        <p className="text-center font-body text-sm text-primary/35 py-16 border border-dashed border-secondary/20">
-          No hay productos disponibles actualmente.
+      <div className="max-w-5xl mx-auto px-6 py-12">
+        {/* Cabecera */}
+        <SectionLabel>Tienda oficial</SectionLabel>
+        <h1 className="font-display text-4xl text-primary mt-1 mb-2">
+          Materiales y merchandising
+        </h1>
+        <p className="font-body text-sm text-primary/55 mb-8 max-w-lg">
+          Adquiere los materiales de la hermandad. Los pedidos quedan registrados
+          y se tramitarán en los próximos días.
         </p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
-          {productos.map((p) => (
-            <div
-              key={p.id}
-              className="border border-secondary/15 flex flex-col hover:border-secondary/30 transition-colors"
-            >
-              {/* Imagen / placeholder */}
-              <div className="h-28 bg-primary flex items-center justify-center border-b border-secondary/10">
-                {p.imagen_url
-                  ? <img src={p.imagen_url} alt={p.nombre} className="h-full w-full object-cover" />
-                  : <Package size={32} className="text-secondary/40" />
-                }
-              </div>
 
-              <div className="p-5 flex-1 flex flex-col">
-                {/* Nombre + categoría */}
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <p className="font-serif text-sm text-primary leading-snug">{p.nombre}</p>
-                  {p.categoria && (
-                    <span className="shrink-0 px-1.5 py-0.5 border border-secondary/20 text-[9px] tracking-widest uppercase font-body text-primary/40">
-                      {p.categoria}
-                    </span>
-                  )}
-                </div>
+        {/* Botón carrito flotante */}
+        <button
+          type="button"
+          aria-label={`Abrir carrito${totalUnidades > 0 ? `, ${totalUnidades} unidades` : ''}`}
+          onClick={() => setDrawerOpen(true)}
+          className="fixed top-20 right-6 z-30 flex items-center gap-2 px-3 py-2 bg-white border border-secondary/20 shadow-md hover:border-secondary/50 transition-colors"
+        >
+          <ShoppingCart size={16} className="text-secondary" />
+          {totalUnidades > 0 && (
+            <span className="w-5 h-5 flex items-center justify-center bg-secondary text-secondary-foreground text-[10px] font-body rounded-full">
+              {totalUnidades}
+            </span>
+          )}
+        </button>
 
-                {/* Descripción */}
-                {p.descripcion && (
-                  <p className="font-body text-[11px] text-primary/50 italic leading-relaxed mb-3">
-                    {p.descripcion}
-                  </p>
-                )}
-
-                {/* Precio + acción */}
-                <div className="mt-auto">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-display text-2xl text-secondary">{p.precio.toFixed(2)}€</p>
-                    {p.stock > 0 && p.stock < 10 && (
-                      <p className="font-body text-[9px] text-amber-600">
-                        Últimas {p.stock} ud.
-                      </p>
+        {/* Grid de productos */}
+        {productos.length === 0 ? (
+          <p className="text-center font-body text-sm text-primary/35 py-16 border border-dashed border-secondary/20">
+            No hay productos disponibles actualmente.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
+            {productos.map((p) => {
+              const enCarrito = cantidadEnCarrito(p.id);
+              return (
+                <div
+                  key={p.id}
+                  className="border border-secondary/15 flex flex-col hover:border-secondary/30 transition-colors"
+                >
+                  {/* Imagen con badge de categoría superpuesto */}
+                  <div className="relative h-48 bg-primary flex items-center justify-center border-b border-secondary/10 overflow-hidden">
+                    {p.imagen_url
+                      ? <img src={p.imagen_url} alt={p.nombre} className="h-full w-full object-cover" />
+                      : <Package size={40} className="text-secondary/30" />
+                    }
+                    {p.categoria && (
+                      <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-black/50 text-white text-[9px] tracking-widest uppercase font-body">
+                        {p.categoria}
+                      </span>
                     )}
                   </div>
 
-                  {confirmando === p.id ? (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => comprar(p)}
-                        disabled={comprando === p.id}
-                        className="flex-1 py-1.5 bg-secondary text-secondary-foreground text-[9px] tracking-widest uppercase font-body hover:bg-secondary/90 transition-colors flex items-center justify-center"
-                      >
-                        {comprando === p.id
-                          ? <Loader2 size={10} className="animate-spin" />
-                          : 'Confirmar'}
-                      </button>
-                      <button
-                        onClick={() => setConfirmando(null)}
-                        className="px-2.5 py-1.5 border border-secondary/20 text-primary/40 hover:text-primary/70 transition-colors"
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setConfirmando(p.id)}
-                      disabled={p.stock === 0}
-                      className="w-full py-1.5 border border-secondary text-[9px] tracking-widest uppercase font-body text-secondary hover:bg-secondary hover:text-secondary-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      {p.stock === 0 ? 'Agotado' : 'Comprar'}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                  <div className="p-5 flex-1 flex flex-col">
+                    <p className="font-serif text-sm text-primary leading-snug mb-1">{p.nombre}</p>
 
-      {/* Mis pedidos */}
-      <div className="border-t border-secondary/10 pt-8">
-        <p className="font-serif text-[10px] tracking-widest uppercase text-primary/40 mb-4">
-          Mis pedidos
-        </p>
-        {pedidos.length === 0 ? (
-          <p className="font-body text-sm text-primary/35 italic">
-            Aún no has realizado ningún pedido.
-          </p>
-        ) : (
-          <div className="border border-secondary/10 divide-y divide-secondary/8">
-            {pedidos.map((ped) => {
-              const badge = ESTADO_BADGE[ped.estado] ?? ESTADO_BADGE.pendiente;
-              return (
-                <div key={ped.id} className="flex items-center gap-3 px-4 py-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-serif text-sm text-primary">
-                      {nombreProducto(ped.producto_id)}
-                    </p>
-                    <p className="font-body text-[10px] text-primary/35">
-                      {new Date(ped.fecha).toLocaleDateString('es-ES')} · {ped.cantidad} ud. · {Number(ped.total).toFixed(2)}€
-                    </p>
+                    {p.descripcion && (
+                      <p className="font-body text-[11px] text-primary/50 italic leading-relaxed mb-3">
+                        {p.descripcion}
+                      </p>
+                    )}
+
+                    <div className="mt-auto">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="font-display text-2xl text-secondary">{p.precio.toFixed(2)}€</p>
+                        {p.stock > 0 && p.stock < 10 && (
+                          <p className="font-body text-[9px] text-amber-600">
+                            Últimas {p.stock} ud.
+                          </p>
+                        )}
+                      </div>
+
+                      {enCarrito > 0 ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            aria-label={`Reducir cantidad de ${p.nombre}`}
+                            onClick={() => actualizarCantidad(p.id, enCarrito - 1)}
+                            className="w-7 h-7 flex items-center justify-center border border-secondary/30 text-primary/60 hover:border-secondary text-sm"
+                          >
+                            −
+                          </button>
+                          <span className="flex-1 text-center font-body text-sm text-primary">
+                            {enCarrito}
+                          </span>
+                          <button
+                            type="button"
+                            aria-label={`Aumentar cantidad de ${p.nombre}`}
+                            onClick={() => actualizarCantidad(p.id, enCarrito + 1)}
+                            className="w-7 h-7 flex items-center justify-center border border-secondary/30 text-primary/60 hover:border-secondary text-sm"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => agregarItem(p)}
+                          disabled={p.stock === 0}
+                          className="w-full py-1.5 border border-secondary text-[9px] tracking-widest uppercase font-body text-secondary hover:bg-secondary hover:text-secondary-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          {p.stock === 0 ? 'Agotado' : 'Añadir al carrito'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <span className={cn('px-2 py-0.5 border text-[9px] tracking-widest uppercase font-body', badge)}>
-                    {ped.estado}
-                  </span>
                 </div>
               );
             })}
           </div>
         )}
+
+        {/* Mis pedidos */}
+        <div className="border-t border-secondary/10 pt-8">
+          <p className="font-serif text-[10px] tracking-widest uppercase text-primary/40 mb-4">
+            Mis pedidos
+          </p>
+          {pedidos.length === 0 ? (
+            <p className="font-body text-sm text-primary/35 italic">
+              Aún no has realizado ningún pedido.
+            </p>
+          ) : (
+            <div className="border border-secondary/10 divide-y divide-secondary/8">
+              {pedidos.map((ped) => {
+                const badge = ESTADO_BADGE[ped.estado] ?? ESTADO_BADGE.pendiente;
+                return (
+                  <div key={ped.id} className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-serif text-sm text-primary truncate">
+                        {nombreProducto(ped.producto_id)}
+                      </p>
+                      <p className="font-body text-[10px] text-primary/35">
+                        {new Date(ped.fecha).toLocaleDateString('es-ES')} · {ped.cantidad} ud. · {Number(ped.total).toFixed(2)}€
+                      </p>
+                    </div>
+                    <span className={cn('px-2 py-0.5 border text-[9px] tracking-widest uppercase font-body shrink-0', badge)}>
+                      {ped.estado}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
