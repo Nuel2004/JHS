@@ -83,6 +83,12 @@ Deno.serve(async (req) => {
       metadata,
     });
 
+    if (!session.url) {
+      return new Response(JSON.stringify({ error: 'Stripe did not return a checkout URL' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

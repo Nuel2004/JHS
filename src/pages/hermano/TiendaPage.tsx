@@ -52,7 +52,7 @@ export default function TiendaPage() {
     productoRepository.obtenerPedidosPorHermano(hermanoId).then(({ data }) => {
       if (data) setPedidos(data);
     });
-  }, [searchParams]);
+  }, [searchParams, vaciarCarrito]);
 
   const totalUnidades = items.reduce((acc, i) => acc + i.cantidad, 0);
 
@@ -79,7 +79,13 @@ export default function TiendaPage() {
         item.cantidad,
       );
       if (error || !data) {
-        toast.error('Error al registrar el pedido. Si ves pedidos pendientes en "Mis pedidos", contacta con la hermandad.');
+        if (pedidosCreados.length > 0) {
+          await supabaseClient
+            .from('pedidos')
+            .delete()
+            .in('id', pedidosCreados.map((p) => p.pedido_id));
+        }
+        toast.error('Error al registrar el pedido. Inténtalo de nuevo.');
         setLoadingCheckout(false);
         return;
       }
@@ -105,9 +111,9 @@ export default function TiendaPage() {
       if (stripeError) throw stripeError;
       if (stripeData?.url) {
         window.location.href = stripeData.url;
-      } else {
-        throw new Error('No se recibió URL de pago');
+        return;
       }
+      throw new Error('No se recibió URL de pago');
     } catch {
       toast.success('Pedidos registrados. Podrás pagarlos desde "Mis pedidos".');
       vaciarCarrito();

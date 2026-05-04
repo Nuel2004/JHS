@@ -18,7 +18,7 @@ export interface Pedido {
   cantidad: number;
   total: number;
   estado: 'pendiente' | 'pagado' | 'entregado';
-  pago_id: number | null;
+  pago_id: string | null;
   fecha: string;
 }
 

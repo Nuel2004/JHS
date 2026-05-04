@@ -52,7 +52,10 @@ Deno.serve(async (req) => {
     } else if (type === 'pedido' && pedido_id) {
       await supabase
         .from('pedidos')
-        .update({ estado: 'pagado', pago_id: session.payment_intent as string })
+        .update({
+          estado: 'pagado',
+          pago_id: typeof session.payment_intent === 'string' ? session.payment_intent : null,
+        })
         .eq('id', pedido_id);
     }
   }

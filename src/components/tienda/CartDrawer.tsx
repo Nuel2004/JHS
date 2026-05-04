@@ -15,7 +15,10 @@ export default function CartDrawer({ open, onClose, onCheckout, loadingCheckout 
   const [confirmarVaciar, setConfirmarVaciar] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setConfirmarVaciar(false);
+      return;
+    }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
@@ -91,7 +94,7 @@ export default function CartDrawer({ open, onClose, onCheckout, loadingCheckout 
                   </span>
                   <button
                     type="button"
-                    onClick={() => actualizarCantidad(item.producto.id, item.cantidad + 1)}
+                    onClick={() => actualizarCantidad(item.producto.id, Math.min(item.cantidad + 1, item.producto.stock))}
                     aria-label={`Aumentar cantidad de ${item.producto.nombre}`}
                     className="w-5 h-5 flex items-center justify-center border border-secondary/20 text-primary/50 hover:border-secondary/50 text-xs"
                   >
