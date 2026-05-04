@@ -5,13 +5,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!);
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!);
     const body = await req.json();
     const { type, hermano_id } = body;
     const origin = req.headers.get('origin') ?? 'http://localhost:5173';
@@ -39,6 +40,12 @@ Deno.serve(async (req) => {
         precio: number;
         cantidad: number;
       }>;
+      if (!Array.isArray(items) || items.length === 0) {
+        return new Response(JSON.stringify({ error: 'items must be a non-empty array' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       line_items = items.map((item) => ({
         price_data: {
           currency: 'eur',
