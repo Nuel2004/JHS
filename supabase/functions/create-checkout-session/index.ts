@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
         quantity: item.cantidad,
       }));
       metadata.pedido_ids = JSON.stringify(items.map((i) => i.pedido_id));
-      success_url = `${origin}/mi/tienda?pagado=1`;
+      success_url = `${origin}/mi/pedidos?pagado=1`;
       cancel_url  = `${origin}/mi/tienda`;
     } else {
       // Caso legacy: type === 'pedido' (un solo producto)
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
         quantity: 1,
       }];
       metadata.pedido_id = String(pedido_id);
-      success_url = `${origin}/mi/tienda?pagado=1`;
+      success_url = `${origin}/mi/pedidos?pagado=1`;
       cancel_url  = `${origin}/mi/tienda`;
     }
 
