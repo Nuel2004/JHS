@@ -35,6 +35,7 @@ import AdminTiendaPage from './pages/admin/AdminTiendaPage';
 
 // Hermano — tienda
 import TiendaPage from './pages/hermano/TiendaPage';
+import PedidosPage from './pages/hermano/PedidosPage';
 
 const router = createBrowserRouter([
   {
@@ -77,6 +78,7 @@ const router = createBrowserRouter([
               { path: '/dashboard', element: <DashboardPage /> },
               { path: '/mi/cuotas', element: <CuotasPage /> },
               { path: '/mi/tienda', element: <TiendaPage /> },
+              { path: '/mi/pedidos', element: <PedidosPage /> },
             ],
           },
           // Solo cofrades activos
