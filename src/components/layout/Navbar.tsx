@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/authStore';
 import { hermanoRepository } from '@/database/repositories';
 import { toast } from 'react-hot-toast';
-import { LogOut, User, ShieldCheck, Menu, X, ChevronRight, ShoppingBag } from 'lucide-react';
+import { LogOut, User, ShieldCheck, Menu, X, ChevronRight, ShoppingBag, Package } from 'lucide-react';
 import { useState } from 'react';
 import { useReadingModeStore } from '@/stores/readingModeStore';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -90,6 +90,16 @@ export function Navbar() {
                 >
                   <ShoppingBag size={11} />
                   Tienda
+                </Button>
+              </NavLink>
+              <NavLink to="/mi/pedidos">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-body text-[10px] tracking-widest uppercase text-primary/60 hover:text-secondary hover:bg-secondary/5 gap-1.5 rounded-none"
+                >
+                  <Package size={11} />
+                  Pedidos
                 </Button>
               </NavLink>
               <NavLink to="/dashboard">
@@ -213,6 +223,14 @@ export function Navbar() {
                       className="flex items-center justify-between py-2 font-body text-[11px] tracking-widest uppercase text-primary/60 no-underline"
                     >
                       <span className="flex items-center gap-2"><ShoppingBag size={12} /> Tienda</span>
+                      <ChevronRight size={11} className="text-primary/20" />
+                    </Link>
+                    <Link
+                      to="/mi/pedidos"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center justify-between py-2 font-body text-[11px] tracking-widest uppercase text-primary/60 no-underline"
+                    >
+                      <span className="flex items-center gap-2"><Package size={12} /> Pedidos</span>
                       <ChevronRight size={11} className="text-primary/20" />
                     </Link>
                     <Link
