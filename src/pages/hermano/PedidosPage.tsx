@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useCarritoStore } from '@/stores/carritoStore';
@@ -30,7 +30,6 @@ const BADGE: Record<string, { label: string; className: string }> = {
 
 export default function PedidosPage() {
   const { sessionHermano } = useAuthStore();
-  const hermanoId = sessionHermano!.hermano.id;
   const { vaciarCarrito } = useCarritoStore();
 
   const [pedidos, setPedidos] = useState<PedidoConProducto[]>([]);
@@ -39,18 +38,21 @@ export default function PedidosPage() {
   const [mostrarBanner, setMostrarBanner] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const fetchPedidos = async () => {
+  const hermanoId = sessionHermano?.hermano.id;
+
+  const fetchPedidos = useCallback(async () => {
+    if (!hermanoId) return;
     const { data, error } = await supabaseClient
       .from('pedidos')
       .select('*, productos(nombre, imagen_url)')
       .eq('hermano_id', hermanoId)
       .order('fecha', { ascending: false });
     if (!error && data) setPedidos(data as PedidoConProducto[]);
-  };
+  }, [hermanoId]);
 
   useEffect(() => {
     fetchPedidos().finally(() => setLoading(false));
-  }, [hermanoId]);
+  }, [fetchPedidos]);
 
   useEffect(() => {
     if (searchParams.get('pagado') !== '1') return;
@@ -58,7 +60,9 @@ export default function PedidosPage() {
     setMostrarBanner(true);
     setSearchParams({});
     fetchPedidos();
-  }, [searchParams]);
+  }, [searchParams, fetchPedidos]);
+
+  if (!sessionHermano) return null;
 
   const pagarPedido = async (pedido: PedidoConProducto) => {
     setLoadingPago(pedido.id);
@@ -66,7 +70,7 @@ export default function PedidosPage() {
       const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', {
         body: {
           type: 'pedido',
-          hermano_id: hermanoId,
+          hermano_id: sessionHermano.hermano.id,
           pedido_id: pedido.id,
           nombre: pedido.productos?.nombre ?? 'Pedido',
           total: pedido.total,
@@ -74,6 +78,7 @@ export default function PedidosPage() {
       });
       if (error) throw error;
       if (data?.url) {
+        setLoadingPago(null);
         window.location.href = data.url;
         return;
       }
