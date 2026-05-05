@@ -1,21 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { productoRepository } from '@/database/repositories';
 import { useAuthStore } from '@/stores/authStore';
 import { useCarritoStore } from '@/stores/carritoStore';
-import type { Producto, Pedido } from '@/interfaces/Producto';
+import type { Producto } from '@/interfaces/Producto';
 import { SectionLabel } from '@/components/landing/Helpers';
 import { supabaseClient } from '@/database/supabase/Client';
 import { toast } from 'react-hot-toast';
 import { Loader2, Package, ShoppingCart } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import CartDrawer from '@/components/tienda/CartDrawer';
-
-const ESTADO_BADGE: Record<string, string> = {
-  pendiente: 'text-amber-600 border-amber-400/30 bg-amber-50',
-  pagado:    'text-secondary border-secondary/30 bg-secondary/5',
-  entregado: 'text-primary/40 border-secondary/15 bg-muted/40',
-};
 
 export default function TiendaPage() {
   const { sessionHermano } = useAuthStore();
@@ -23,36 +16,19 @@ export default function TiendaPage() {
   const { items, agregarItem, actualizarCantidad, vaciarCarrito } = useCarritoStore();
 
   const [productos, setProductos]             = useState<Producto[]>([]);
-  const [pedidos, setPedidos]                 = useState<Pedido[]>([]);
   const [loading, setLoading]                 = useState(true);
   const [drawerOpen, setDrawerOpen]           = useState(false);
   const [loadingCheckout, setLoadingCheckout] = useState(false);
-  const [searchParams, setSearchParams]       = useSearchParams();
 
   useEffect(() => {
-    Promise.all([
-      productoRepository.obtenerActivos(),
-      productoRepository.obtenerPedidosPorHermano(hermanoId),
-    ]).then(([prods, peds]) => {
-      setProductos(prods.data ?? []);
-      setPedidos(peds.data ?? []);
+    productoRepository.obtenerActivos().then(({ data }) => {
+      setProductos(data ?? []);
     }).catch(() => {
       toast.error('Error al cargar la tienda. Recarga la página.');
     }).finally(() => {
       setLoading(false);
     });
   }, [hermanoId]);
-
-  // Limpiar carrito y refrescar pedidos al volver de Stripe con éxito
-  useEffect(() => {
-    if (searchParams.get('pagado') !== '1') return;
-    vaciarCarrito();
-    toast.success('¡Pedido pagado con éxito!');
-    setSearchParams({});
-    productoRepository.obtenerPedidosPorHermano(hermanoId).then(({ data }) => {
-      if (data) setPedidos(data);
-    });
-  }, [searchParams, vaciarCarrito]);
 
   const totalUnidades = items.reduce((acc, i) => acc + i.cantidad, 0);
 
@@ -118,15 +94,9 @@ export default function TiendaPage() {
       toast.success('Pedidos registrados. Podrás pagarlos desde "Mis pedidos".');
       vaciarCarrito();
       setDrawerOpen(false);
-      productoRepository.obtenerPedidosPorHermano(hermanoId).then(({ data }) => {
-        if (data) setPedidos(data);
-      });
     }
     setLoadingCheckout(false);
   };
-
-  const nombreProducto = (id: number) =>
-    productos.find((p) => p.id === id)?.nombre ?? `Producto #${id}`;
 
   if (loading) {
     return (
@@ -257,37 +227,17 @@ export default function TiendaPage() {
           </div>
         )}
 
-        {/* Mis pedidos */}
-        <div className="border-t border-secondary/10 pt-8">
-          <p className="font-serif text-[10px] tracking-widest uppercase text-primary/40 mb-4">
+        {/* Enlace a pedidos */}
+        <div className="border-t border-secondary/10 pt-6 flex items-center justify-between">
+          <p className="font-serif text-[10px] tracking-widest uppercase text-primary/40">
             Mis pedidos
           </p>
-          {pedidos.length === 0 ? (
-            <p className="font-body text-sm text-primary/35 italic">
-              Aún no has realizado ningún pedido.
-            </p>
-          ) : (
-            <div className="border border-secondary/10 divide-y divide-secondary/8">
-              {pedidos.map((ped) => {
-                const badge = ESTADO_BADGE[ped.estado] ?? ESTADO_BADGE.pendiente;
-                return (
-                  <div key={ped.id} className="flex items-center gap-3 px-4 py-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-serif text-sm text-primary truncate">
-                        {nombreProducto(ped.producto_id)}
-                      </p>
-                      <p className="font-body text-[10px] text-primary/35">
-                        {new Date(ped.fecha).toLocaleDateString('es-ES')} · {ped.cantidad} ud. · {Number(ped.total).toFixed(2)}€
-                      </p>
-                    </div>
-                    <span className={cn('px-2 py-0.5 border text-[9px] tracking-widest uppercase font-body shrink-0', badge)}>
-                      {ped.estado}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <Link
+            to="/mi/pedidos"
+            className="font-body text-[9px] tracking-widest uppercase text-secondary/70 hover:text-secondary transition-colors"
+          >
+            Ver historial →
+          </Link>
         </div>
       </div>
     </>
