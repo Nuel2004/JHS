@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { hermanoRepository } from "@/database/repositories";
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SectionLabel, GoldenDivider } from "@/components/landing/Helpers";
 import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
+import { Loader2, Paperclip, X } from "lucide-react";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -17,6 +17,9 @@ export default function RegisterPage() {
     const [quiereSerHermano, setQuiereSerHermano] = useState(true);
 
     const [bautizado, setBautizado] = useState<boolean | null>(null);
+    const [fotoBautismo, setFotoBautismo] = useState<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const [formData, setFormData] = useState({
         nombre: "",
         apellidos: "",
@@ -32,16 +35,23 @@ export default function RegisterPage() {
         (e: React.ChangeEvent<HTMLInputElement>) =>
             setFormData(prev => ({ ...prev, [key]: e.target.value }));
 
+    const handleBautizadoChange = (val: boolean) => {
+        setBautizado(val);
+        if (!val) setFotoBautismo(null);
+    };
+
     const handleSubmit = async (e: { preventDefault(): void }) => {
         e.preventDefault();
         if (!formData.genero) { toast.error("Selecciona un género"); return; }
         if (bautizado === null) { toast.error("Indica si estás bautizado"); return; }
+        if (bautizado && !fotoBautismo) { toast.error("Adjunta una fotografía de tu fe de bautismo"); return; }
         setLoading(true);
 
         const resultado = await hermanoRepository.registrar({
             ...formData,
             genero: formData.genero as "Mujer" | "Hombre" | "Otro",
             bautizado,
+            foto_bautismo: fotoBautismo,
             quiere_ser_hermano: quiereSerHermano,
         });
 
@@ -149,7 +159,7 @@ export default function RegisterPage() {
                                 {([true, false] as const).map((val) => (
                                     <div
                                         key={String(val)}
-                                        onClick={() => setBautizado(val)}
+                                        onClick={() => handleBautizadoChange(val)}
                                         className={cn(
                                             "p-3 border cursor-pointer transition-all select-none text-center",
                                             bautizado === val
@@ -161,6 +171,51 @@ export default function RegisterPage() {
                                     </div>
                                 ))}
                             </div>
+
+                            {/* Input foto bautismo — solo visible si bautizado = true */}
+                            {bautizado === true && (
+                                <div className="mt-3 border border-dashed border-secondary/30 p-4 bg-secondary/3">
+                                    <p className="font-body text-[10px] uppercase tracking-widest text-primary/50 mb-2">
+                                        Fe de bautismo *
+                                    </p>
+                                    <p className="font-body text-[11px] text-primary/40 mb-3">
+                                        Adjunta una fotografía o escaneo de tu fe de bautismo para que podamos verificarla.
+                                    </p>
+
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="image/*,.pdf"
+                                        className="hidden"
+                                        onChange={(e) => setFotoBautismo(e.target.files?.[0] ?? null)}
+                                    />
+
+                                    {fotoBautismo ? (
+                                        <div className="flex items-center gap-2">
+                                            <Paperclip size={12} className="text-secondary shrink-0" />
+                                            <span className="font-body text-xs text-primary/70 truncate flex-1">
+                                                {fotoBautismo.name}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => { setFotoBautismo(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                                                className="text-primary/30 hover:text-red-500 transition-colors"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="flex items-center gap-2 border border-secondary/30 px-3 py-2 font-body text-[10px] tracking-widest uppercase text-secondary hover:bg-secondary/5 transition-colors"
+                                        >
+                                            <Paperclip size={11} />
+                                            Seleccionar archivo
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-2">

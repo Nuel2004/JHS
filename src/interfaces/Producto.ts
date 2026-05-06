@@ -26,3 +26,13 @@ export interface ItemCarrito {
   producto: Producto;
   cantidad: number;
 }
+
+export interface ProductoCreate {
+  nombre: string;
+  descripcion?: string | null;
+  precio: number;
+  stock: number;
+  categoria?: CategoriaProducto | null;
+  imagen_url?: string | null;
+  activo?: boolean;
+}

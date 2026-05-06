@@ -1,17 +1,31 @@
+import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { SectionLabel, GoldenDivider } from '@/components/landing/Helpers';
 import { Card, CardContent } from '@/components/ui/card';
-import { CheckCircle2, Clock, CreditCard, Home } from 'lucide-react';
+import { CheckCircle2, Clock, CreditCard, Home, Loader2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { supabaseClient } from '@/database/supabase/Client';
 
 export default function CuotasPage() {
   const { sessionHermano } = useAuthStore();
   const hermano = sessionHermano!.hermano;
   const activo = hermano.estado === 'activo';
   const anioActual = new Date().getFullYear();
+  const [loadingStripe, setLoadingStripe] = useState(false);
 
-  const handlePagarStripe = () => {
-    // TODO: redirigir a Stripe Checkout con la session_url
-    alert('Integración Stripe pendiente — conecta tu clave en el backend');
+  const handlePagarStripe = async () => {
+    setLoadingStripe(true);
+    try {
+      const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', {
+        body: { type: 'cuota', hermano_id: hermano.id },
+      });
+      if (error) throw error;
+      if (data?.url) window.location.href = data.url;
+    } catch {
+      toast.error('No se pudo iniciar el pago. Inténtalo de nuevo.');
+    } finally {
+      setLoadingStripe(false);
+    }
   };
 
   return (
@@ -51,10 +65,14 @@ export default function CuotasPage() {
 
           <button
             onClick={handlePagarStripe}
+            disabled={loadingStripe}
             className="w-full text-left px-5 py-4 border border-secondary/20 hover:border-secondary/50
-                       hover:bg-secondary/5 transition-all flex items-center gap-4"
+                       hover:bg-secondary/5 transition-all flex items-center gap-4 disabled:opacity-60"
           >
-            <CreditCard size={18} className="text-secondary shrink-0" />
+            {loadingStripe
+              ? <Loader2 size={18} className="text-secondary shrink-0 animate-spin" />
+              : <CreditCard size={18} className="text-secondary shrink-0" />
+            }
             <div>
               <p className="font-serif text-sm text-primary">Pago online con tarjeta</p>
               <p className="font-body text-[11px] text-primary/45">Procesado de forma segura mediante Stripe</p>

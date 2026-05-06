@@ -1,6 +1,6 @@
 import { supabaseClient } from './Client';
 import type { ProductoRepository } from '../repositories/ProductoRepository';
-import type { Producto, Pedido } from '../../interfaces/Producto';
+import type { Producto, Pedido, ProductoCreate } from '../../interfaces/Producto';
 
 export class SupabaseProductoRepository implements ProductoRepository {
 
@@ -66,6 +66,36 @@ export class SupabaseProductoRepository implements ProductoRepository {
     } catch (error: any) {
       return { error: error.message };
     }
+  }
+
+  async crearProducto(datos: ProductoCreate): Promise<{ data?: Producto; error?: string }> {
+    try {
+      const { data, error } = await supabaseClient.from('productos').insert([datos]).select().single();
+      if (error) throw error;
+      return { data };
+    } catch (error: any) {
+      return { error: error.message };
+    }
+  }
+
+  async actualizarProducto(id: number, datos: Partial<ProductoCreate>): Promise<{ error?: string }> {
+    const { error } = await supabaseClient.from('productos').update(datos).eq('id', id);
+    return { error: error?.message };
+  }
+
+  async eliminarProducto(id: number): Promise<{ error?: string }> {
+    const { error } = await supabaseClient.from('productos').delete().eq('id', id);
+    return { error: error?.message };
+  }
+
+  async actualizarEstadoPedido(pedidoId: number, estado: 'pendiente' | 'pagado' | 'entregado'): Promise<{ error?: string }> {
+    const { error } = await supabaseClient.from('pedidos').update({ estado }).eq('id', pedidoId);
+    return { error: error?.message };
+  }
+
+  async eliminarPedido(pedidoId: number): Promise<{ error?: string }> {
+    const { error } = await supabaseClient.from('pedidos').delete().eq('id', pedidoId);
+    return { error: error?.message };
   }
 
   async actualizarStock(productoId: number, stock: number): Promise<{ error?: string }> {

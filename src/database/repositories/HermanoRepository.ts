@@ -12,6 +12,7 @@ export interface RegistroDatos {
   fecha_nacimiento: string;
   telefono: string;
   bautizado: boolean;
+  foto_bautismo?: File | null;
   quiere_ser_hermano: boolean;
 }
 

@@ -1,56 +1,309 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { productoRepository } from '@/database/repositories';
-import type { Producto } from '@/interfaces/Producto';
+import type { Producto, ProductoCreate, CategoriaProducto } from '@/interfaces/Producto';
 import { SectionLabel } from '@/components/landing/Helpers';
 import { toast } from 'react-hot-toast';
-import { Loader2, Package, Check, Edit2 } from 'lucide-react';
+import {
+  Loader2, Package, Edit2, Trash2, Plus, X, Check,
+  ChevronRight, AlertTriangle,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type Tab = 'productos' | 'pedidos';
+type EstadoPedido = 'pendiente' | 'pagado' | 'entregado';
 
-const ESTADO_COLOR: Record<string, string> = {
+const ESTADO_COLOR: Record<EstadoPedido, string> = {
   pendiente: 'text-amber-600 border-amber-400/30 bg-amber-50',
   pagado:    'text-secondary border-secondary/30 bg-secondary/5',
   entregado: 'text-primary/40 border-secondary/15 bg-muted/40',
 };
 
+const ESTADO_SIGUIENTE: Record<EstadoPedido, EstadoPedido> = {
+  pendiente: 'pagado',
+  pagado:    'entregado',
+  entregado: 'pendiente',
+};
+
+const CATEGORIAS: CategoriaProducto[] = ['Palma', 'Traje', 'Merchandising'];
+
+const PRODUCTO_VACIO: ProductoCreate = {
+  nombre: '',
+  descripcion: '',
+  precio: 0,
+  stock: 0,
+  categoria: null,
+  imagen_url: '',
+  activo: true,
+};
+
+/* ── Modal crear / editar producto ── */
+function ProductoModal({
+  inicial,
+  onGuardar,
+  onCerrar,
+}: {
+  inicial: ProductoCreate & { id?: number };
+  onGuardar: (datos: ProductoCreate & { id?: number }) => Promise<void>;
+  onCerrar: () => void;
+}) {
+  const [form, setForm] = useState(inicial);
+  const [guardando, setGuardando] = useState(false);
+
+  const set = (k: keyof ProductoCreate, v: any) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!form.nombre.trim()) { toast.error('El nombre es obligatorio'); return; }
+    if (form.precio < 0)     { toast.error('El precio no puede ser negativo'); return; }
+    setGuardando(true);
+    await onGuardar(form);
+    setGuardando(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white w-full max-w-md border border-secondary/20 shadow-xl">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-secondary/10">
+          <h2 className="font-display text-lg text-primary">
+            {inicial.id ? 'Editar producto' : 'Nuevo producto'}
+          </h2>
+          <button onClick={onCerrar} className="text-primary/30 hover:text-primary transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <div>
+            <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+              Nombre *
+            </label>
+            <input
+              value={form.nombre}
+              onChange={(e) => set('nombre', e.target.value)}
+              className="w-full border border-secondary/20 px-3 py-2 font-body text-sm focus:outline-none focus:border-secondary"
+              placeholder="Ej. Palma Grande"
+            />
+          </div>
+
+          <div>
+            <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+              Descripción
+            </label>
+            <input
+              value={form.descripcion ?? ''}
+              onChange={(e) => set('descripcion', e.target.value || null)}
+              className="w-full border border-secondary/20 px-3 py-2 font-body text-sm focus:outline-none focus:border-secondary"
+              placeholder="Descripción breve"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+                Precio (€) *
+              </label>
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={form.precio}
+                onChange={(e) => set('precio', parseFloat(e.target.value) || 0)}
+                className="w-full border border-secondary/20 px-3 py-2 font-body text-sm focus:outline-none focus:border-secondary"
+              />
+            </div>
+            <div>
+              <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+                Stock
+              </label>
+              <input
+                type="number"
+                min={0}
+                value={form.stock}
+                onChange={(e) => set('stock', Math.max(0, parseInt(e.target.value) || 0))}
+                className="w-full border border-secondary/20 px-3 py-2 font-body text-sm focus:outline-none focus:border-secondary"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+              Categoría
+            </label>
+            <select
+              value={form.categoria ?? ''}
+              onChange={(e) => set('categoria', e.target.value || null)}
+              className="w-full border border-secondary/20 px-3 py-2 font-body text-sm focus:outline-none focus:border-secondary bg-white"
+            >
+              <option value="">— Sin categoría —</option>
+              {CATEGORIAS.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+              URL imagen
+            </label>
+            <input
+              value={form.imagen_url ?? ''}
+              onChange={(e) => set('imagen_url', e.target.value || null)}
+              className="w-full border border-secondary/20 px-3 py-2 font-body text-sm focus:outline-none focus:border-secondary"
+              placeholder="https://..."
+            />
+          </div>
+
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={form.activo ?? true}
+              onChange={(e) => set('activo', e.target.checked)}
+              className="accent-secondary"
+            />
+            <span className="font-body text-sm text-primary/60">Activo (visible en tienda)</span>
+          </label>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-2">
+            <button
+              type="button"
+              onClick={onCerrar}
+              className="flex-1 border border-secondary/20 py-2 font-body text-xs tracking-widest uppercase text-primary/50 hover:bg-muted/30 transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={guardando}
+              className="flex-1 bg-secondary text-white py-2 font-body text-xs tracking-widest uppercase hover:bg-secondary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {guardando ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ── Diálogo de confirmación ── */
+function ConfirmDialog({
+  mensaje,
+  onConfirmar,
+  onCancelar,
+}: {
+  mensaje: string;
+  onConfirmar: () => void;
+  onCancelar: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white w-full max-w-sm border border-red-200 shadow-xl p-6">
+        <div className="flex items-start gap-3 mb-5">
+          <AlertTriangle size={18} className="text-red-500 shrink-0 mt-0.5" />
+          <p className="font-body text-sm text-primary">{mensaje}</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={onCancelar}
+            className="flex-1 border border-secondary/20 py-2 font-body text-xs tracking-widest uppercase text-primary/50 hover:bg-muted/30 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={onConfirmar}
+            className="flex-1 bg-red-500 text-white py-2 font-body text-xs tracking-widest uppercase hover:bg-red-600 transition-colors"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Página principal ── */
 export default function AdminTiendaPage() {
   const [tab, setTab]           = useState<Tab>('productos');
   const [productos, setProductos] = useState<Producto[]>([]);
   const [pedidos, setPedidos]     = useState<any[]>([]);
   const [loading, setLoading]     = useState(true);
-  const [editStock, setEditStock] = useState<{ id: number; valor: number } | null>(null);
-  const [guardando, setGuardando] = useState(false);
 
-  useEffect(() => {
-    Promise.all([
+  // Modales producto
+  const [modalProducto, setModalProducto] = useState<(ProductoCreate & { id?: number }) | null>(null);
+  // Confirm eliminar
+  const [confirmEliminar, setConfirmEliminar] = useState<{ tipo: 'producto' | 'pedido'; id: number } | null>(null);
+  // Estado pedido en proceso
+  const [cambiandoEstado, setCambiandoEstado] = useState<number | null>(null);
+
+  const cargar = useCallback(async () => {
+    const [prods, peds] = await Promise.all([
       productoRepository.obtenerTodos(),
       productoRepository.obtenerTodosPedidos(),
-    ]).then(([prods, peds]) => {
-      setProductos(prods.data ?? []);
-      setPedidos(peds.data ?? []);
-      setLoading(false);
-    });
+    ]);
+    setProductos(prods.data ?? []);
+    setPedidos(peds.data ?? []);
+    setLoading(false);
   }, []);
 
-  const guardarStock = async () => {
-    if (!editStock) return;
-    setGuardando(true);
-    const { error } = await productoRepository.actualizarStock(editStock.id, editStock.valor);
+  useEffect(() => { cargar(); }, [cargar]);
+
+  /* ── Acciones producto ── */
+  const handleGuardarProducto = async (datos: ProductoCreate & { id?: number }) => {
+    const { id, ...campos } = datos;
+    if (id) {
+      const { error } = await productoRepository.actualizarProducto(id, campos);
+      if (error) { toast.error(error); return; }
+      setProductos((prev) => prev.map((p) => p.id === id ? { ...p, ...campos } as Producto : p));
+      toast.success('Producto actualizado');
+    } else {
+      const { data, error } = await productoRepository.crearProducto(campos);
+      if (error || !data) { toast.error(error ?? 'Error al crear'); return; }
+      setProductos((prev) => [...prev, data]);
+      toast.success('Producto creado');
+    }
+    setModalProducto(null);
+  };
+
+  const handleEliminarProducto = async (id: number) => {
+    const { error } = await productoRepository.eliminarProducto(id);
+    if (error) { toast.error(error); return; }
+    setProductos((prev) => prev.filter((p) => p.id !== id));
+    toast.success('Producto eliminado');
+    setConfirmEliminar(null);
+  };
+
+  /* ── Acciones pedido ── */
+  const handleAvanzarEstado = async (pedidoId: number, estadoActual: EstadoPedido) => {
+    const siguiente = ESTADO_SIGUIENTE[estadoActual];
+    setCambiandoEstado(pedidoId);
+    const { error } = await productoRepository.actualizarEstadoPedido(pedidoId, siguiente);
     if (error) {
       toast.error(error);
     } else {
-      setProductos((prev) =>
-        prev.map((p) => p.id === editStock.id ? { ...p, stock: editStock.valor } : p)
+      setPedidos((prev) =>
+        prev.map((p) => p.id === pedidoId ? { ...p, estado: siguiente } : p)
       );
-      toast.success('Stock actualizado');
-      setEditStock(null);
+      toast.success(`Pedido marcado como ${siguiente}`);
     }
-    setGuardando(false);
+    setCambiandoEstado(null);
   };
 
-  const totalPedidos  = pedidos.length;
-  const totalRecaudado = pedidos.reduce((acc, p) => acc + Number(p.total ?? 0), 0);
+  const handleEliminarPedido = async (id: number) => {
+    const { error } = await productoRepository.eliminarPedido(id);
+    if (error) { toast.error(error); return; }
+    setPedidos((prev) => prev.filter((p) => p.id !== id));
+    toast.success('Pedido eliminado');
+    setConfirmEliminar(null);
+  };
+
+  const totalRecaudado = pedidos
+    .filter((p) => p.estado === 'pagado' || p.estado === 'entregado')
+    .reduce((acc, p) => acc + Number(p.total ?? 0), 0);
 
   return (
     <div className="p-4 md:p-8">
@@ -72,32 +325,44 @@ export default function AdminTiendaPage() {
         </div>
         <div className="border border-secondary/15 p-4">
           <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-2">Pedidos</p>
-          <p className="font-display text-3xl text-primary">{totalPedidos}</p>
+          <p className="font-display text-3xl text-primary">{pedidos.length}</p>
           <p className="font-body text-[9px] text-primary/30 mt-0.5">totales</p>
         </div>
         <div className="border border-secondary/40 bg-secondary/5 p-4 col-span-2 md:col-span-1">
           <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-2">Recaudado</p>
           <p className="font-display text-3xl text-secondary">{totalRecaudado.toFixed(2)}€</p>
-          <p className="font-body text-[9px] text-primary/30 mt-0.5">total pedidos</p>
+          <p className="font-body text-[9px] text-primary/30 mt-0.5">pedidos pagados/entregados</p>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-secondary/15 mb-6">
-        {(['productos', 'pedidos'] as Tab[]).map((t) => (
+      {/* Tabs + botón añadir */}
+      <div className="flex items-center border-b border-secondary/15 mb-6">
+        <div className="flex flex-1">
+          {(['productos', 'pedidos'] as Tab[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={cn(
+                'px-5 py-2.5 font-body text-[10px] tracking-widest uppercase border-b-2 -mb-px transition-colors',
+                tab === t
+                  ? 'border-secondary text-secondary'
+                  : 'border-transparent text-primary/40 hover:text-primary/70'
+              )}
+            >
+              {t === 'productos' ? 'Productos' : 'Pedidos'}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'productos' && (
           <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={cn(
-              'px-5 py-2.5 font-body text-[10px] tracking-widest uppercase border-b-2 -mb-px transition-colors',
-              tab === t
-                ? 'border-secondary text-secondary'
-                : 'border-transparent text-primary/40 hover:text-primary/70'
-            )}
+            onClick={() => setModalProducto(PRODUCTO_VACIO)}
+            className="flex items-center gap-1.5 px-3 py-1.5 border border-secondary text-secondary hover:bg-secondary hover:text-white transition-colors font-body text-[10px] tracking-widest uppercase mb-px"
           >
-            {t === 'productos' ? 'Productos' : 'Pedidos'}
+            <Plus size={11} />
+            Nuevo
           </button>
-        ))}
+        )}
       </div>
 
       {loading ? (
@@ -110,7 +375,7 @@ export default function AdminTiendaPage() {
         <div className="border border-secondary/10 divide-y divide-secondary/8">
           {productos.length === 0 ? (
             <p className="px-4 py-8 font-body text-sm text-primary/35 italic text-center">
-              No hay productos en la base de datos.
+              No hay productos. Crea el primero con el botón "Nuevo".
             </p>
           ) : (
             productos.map((p) => (
@@ -125,54 +390,35 @@ export default function AdminTiendaPage() {
                   </p>
                 </div>
 
-                {/* Stock editable */}
-                <div className="flex items-center gap-2">
-                  {editStock?.id === p.id ? (
-                    <>
-                      <input
-                        type="number"
-                        min={0}
-                        value={editStock.valor}
-                        onChange={(e) =>
-                          setEditStock({ id: p.id, valor: Math.max(0, Number(e.target.value)) })
-                        }
-                        onKeyDown={(e) => e.key === 'Enter' && guardarStock()}
-                        className="w-16 border border-secondary/30 px-2 py-1 font-body text-xs text-center focus:outline-none focus:border-secondary"
-                        autoFocus
-                      />
-                      <button
-                        onClick={guardarStock}
-                        disabled={guardando}
-                        className="p-1 border border-secondary text-secondary hover:bg-secondary hover:text-white transition-colors"
-                      >
-                        {guardando
-                          ? <Loader2 size={10} className="animate-spin" />
-                          : <Check size={10} />}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <span className={cn(
-                        'font-body text-[11px]',
-                        p.stock === 0 ? 'text-red-500' : p.stock < 5 ? 'text-amber-600' : 'text-primary/50'
-                      )}>
-                        {p.stock} ud.
-                      </span>
-                      <button
-                        onClick={() => setEditStock({ id: p.id, valor: p.stock })}
-                        className="p-1 text-primary/25 hover:text-secondary transition-colors"
-                      >
-                        <Edit2 size={11} />
-                      </button>
-                    </>
-                  )}
+                {/* Stock */}
+                <span className={cn(
+                  'font-body text-[11px]',
+                  p.stock === 0 ? 'text-red-500' : p.stock < 5 ? 'text-amber-600' : 'text-primary/50'
+                )}>
+                  {p.stock} ud.
+                </span>
 
-                  {/* Indicador activo */}
-                  <span
-                    className={cn('ml-1 w-1.5 h-1.5 rounded-full', p.activo ? 'bg-secondary' : 'bg-primary/20')}
-                    title={p.activo ? 'Activo' : 'Inactivo'}
-                  />
-                </div>
+                {/* Indicador activo */}
+                <span
+                  className={cn('w-1.5 h-1.5 rounded-full', p.activo ? 'bg-secondary' : 'bg-primary/20')}
+                  title={p.activo ? 'Activo' : 'Inactivo'}
+                />
+
+                {/* Acciones */}
+                <button
+                  onClick={() => setModalProducto({ ...p })}
+                  className="p-1 text-primary/25 hover:text-secondary transition-colors"
+                  title="Editar"
+                >
+                  <Edit2 size={12} />
+                </button>
+                <button
+                  onClick={() => setConfirmEliminar({ tipo: 'producto', id: p.id })}
+                  className="p-1 text-primary/25 hover:text-red-500 transition-colors"
+                  title="Eliminar"
+                >
+                  <Trash2 size={12} />
+                </button>
               </div>
             ))
           )}
@@ -198,17 +444,63 @@ export default function AdminTiendaPage() {
                     {new Date(ped.fecha).toLocaleDateString('es-ES')}
                   </p>
                 </div>
-                <span className={cn(
-                  'px-2 py-0.5 border text-[9px] tracking-widest uppercase font-body',
-                  ESTADO_COLOR[ped.estado] ?? 'text-primary/40 border-secondary/15 bg-muted/40'
-                )}>
+
+                {/* Badge estado con botón para avanzar */}
+                <button
+                  onClick={() => handleAvanzarEstado(ped.id, ped.estado)}
+                  disabled={cambiandoEstado === ped.id}
+                  title="Avanzar estado"
+                  className={cn(
+                    'flex items-center gap-1 px-2 py-0.5 border text-[9px] tracking-widest uppercase font-body transition-opacity hover:opacity-70',
+                    ESTADO_COLOR[ped.estado as EstadoPedido] ?? 'text-primary/40 border-secondary/15 bg-muted/40'
+                  )}
+                >
+                  {cambiandoEstado === ped.id
+                    ? <Loader2 size={8} className="animate-spin" />
+                    : <ChevronRight size={8} />
+                  }
                   {ped.estado}
-                </span>
+                </button>
+
+                {/* Eliminar pedido */}
+                <button
+                  onClick={() => setConfirmEliminar({ tipo: 'pedido', id: ped.id })}
+                  className="p-1 text-primary/25 hover:text-red-500 transition-colors"
+                  title="Eliminar pedido"
+                >
+                  <Trash2 size={12} />
+                </button>
               </div>
             ))
           )}
         </div>
 
+      )}
+
+      {/* Modal crear/editar producto */}
+      {modalProducto && (
+        <ProductoModal
+          inicial={modalProducto}
+          onGuardar={handleGuardarProducto}
+          onCerrar={() => setModalProducto(null)}
+        />
+      )}
+
+      {/* Confirm eliminar */}
+      {confirmEliminar && (
+        <ConfirmDialog
+          mensaje={
+            confirmEliminar.tipo === 'producto'
+              ? '¿Eliminar este producto? Esta acción no se puede deshacer.'
+              : '¿Eliminar este pedido? Esta acción no se puede deshacer.'
+          }
+          onConfirmar={() =>
+            confirmEliminar.tipo === 'producto'
+              ? handleEliminarProducto(confirmEliminar.id)
+              : handleEliminarPedido(confirmEliminar.id)
+          }
+          onCancelar={() => setConfirmEliminar(null)}
+        />
       )}
     </div>
   );

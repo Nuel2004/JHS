@@ -507,6 +507,7 @@ function BalanceTab({
   pedidos: any[];
 }) {
   const [movimientos, setMovimientos] = useState<MovimientoManual[]>([]);
+  const [gastosLegacy, setGastosLegacy] = useState<GastoTienda[]>([]);
   const [tipo, setTipo]           = useState<TipoMovimiento>('ingreso');
   const [concepto, setConcepto]   = useState('');
   const [persona, setPersona]     = useState('');
@@ -518,6 +519,8 @@ function BalanceTab({
     try {
       const stored = localStorage.getItem(MOVIMIENTOS_KEY);
       if (stored) setMovimientos(JSON.parse(stored));
+      const storedGastos = localStorage.getItem(GASTOS_KEY);
+      if (storedGastos) setGastosLegacy(JSON.parse(storedGastos));
     } catch { /* noop */ }
   }, []);
 
@@ -618,6 +621,40 @@ function BalanceTab({
       });
     });
 
+    // Gastos de hermandad (del tab Gastos)
+    gastosLegacy.forEach((g) => {
+      rows.push({
+        id: `gasto-${g.id}`,
+        fecha: g.fecha,
+        persona: '',
+        concepto: g.concepto,
+        categoria: g.categoria,
+        ingreso: 0,
+        gasto: g.importe,
+        deletable: false,
+      });
+    });
+
+    // Palmas como gasto (para cuadrar con el resumen superior)
+    pedidos
+      .filter((p) => p.productos?.nombre === 'Palma Hermano' &&
+             (p.estado === 'pagado' || p.estado === 'entregado'))
+      .forEach((p) => {
+        const nombre = p.hermanos
+          ? [p.hermanos.apellidos, p.hermanos.nombre].filter(Boolean).join(', ')
+          : '—';
+        rows.push({
+          id: `palma-gasto-${p.id}`,
+          fecha: p.fecha ?? '',
+          persona: nombre,
+          concepto: `Palma — coste cofradía`,
+          categoria: 'Palmas',
+          ingreso: 0,
+          gasto: Number(p.total),
+          deletable: false,
+        });
+      });
+
     // Sort ascending by date
     rows.sort((a, b) => {
       if (!a.fecha && !b.fecha) return 0;
@@ -627,7 +664,7 @@ function BalanceTab({
     });
 
     return rows;
-  }, [hermanos, pedidos, movimientos]);
+  }, [hermanos, pedidos, movimientos, gastosLegacy]);
 
   // Running saldo
   const filasConSaldo = useMemo(() => {
@@ -886,7 +923,10 @@ function BalanceTab({
                     </button>
                   ) : (
                     <span className="text-[8px] text-primary/20 uppercase tracking-widest">
-                      {fila.id.startsWith('cuota') ? 'auto' : 'tienda'}
+                      {fila.id.startsWith('cuota-') ? 'auto'
+                        : fila.id.startsWith('pedido-') ? 'tienda'
+                        : fila.id.startsWith('gasto-') ? 'gastos'
+                        : 'palmas'}
                     </span>
                   )}
                 </div>

@@ -13,6 +13,7 @@ export interface Hermano {
   email: string;
   telefono: string;
   bautizado: boolean;
+  foto_bautismo_url: string | null;
   es_cofrade: boolean;
   estado: EstadoHermano;
   rol: RolUsuario;

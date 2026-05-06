@@ -14,6 +14,21 @@ export class SupabaseHermanoRepository implements HermanoRepository {
       if (authError) throw authError;
       if (!authData.user) throw new Error('No se pudo crear el usuario de autenticación.');
 
+      // Subir foto de bautismo si se ha aportado
+      let foto_bautismo_url: string | null = null;
+      if (datos.bautizado && datos.foto_bautismo) {
+        const ext = datos.foto_bautismo.name.split('.').pop() ?? 'jpg';
+        const path = `${authData.user.id}/bautismo.${ext}`;
+        const { error: uploadError } = await supabaseClient.storage
+          .from('bautismos')
+          .upload(path, datos.foto_bautismo, { upsert: true });
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabaseClient.storage
+          .from('bautismos')
+          .getPublicUrl(path);
+        foto_bautismo_url = urlData.publicUrl;
+      }
+
       const { error: dbError } = await supabaseClient
         .from('hermanos')
         .insert([{
@@ -29,6 +44,7 @@ export class SupabaseHermanoRepository implements HermanoRepository {
           estado: datos.quiere_ser_hermano ? 'pendiente_pago' : 'baja',
           es_cofrade: false,
           bautizado: datos.bautizado,
+          foto_bautismo_url,
         }]);
 
       if (dbError) throw dbError;
