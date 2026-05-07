@@ -41,7 +41,7 @@ export function HistoriaSection() {
           <span className="text-secondary font-semibold">«La Burrita»</span>, nació en Montijo en{" "}
           <span className="text-primary/90">1981</span> impulsada por la devoción al Domingo de Ramos.
           Tiene su sede canónica en la Parroquia de San Pedro Apóstol y une a su comunidad
-          en la Estación de Penitencia y en la vida social y caritativa de la localidad.
+          en la procesión del Domingo de Ramos y en la vida social y caritativa de la localidad.
         </motion.p>
 
         {/* Timeline */}

@@ -40,7 +40,7 @@ export function Hero() {
           className="font-body text-[10px] tracking-[0.5em] uppercase text-secondary mb-8 flex items-center justify-center gap-4"
         >
           <span className="inline-block h-px w-12 bg-secondary/40" />
-          Hermandad · Montijo · Badajoz
+          Fundada en 1981 · Montijo · Badajoz
           <span className="inline-block h-px w-12 bg-secondary/40" />
         </motion.p>
 
@@ -71,8 +71,9 @@ export function Hero() {
           {...fadeUp(0.4)}
           className="font-body text-base md:text-lg leading-[1.9] text-primary/65 max-w-lg mx-auto mb-12"
         >
-          Una cofradía con raíces en la fe y el servicio, que une a su comunidad
-          en la Estación de Penitencia y en la vida cotidiana.
+          Desde 1981 abrimos la Semana Santa de Montijo con la procesión de
+          la Burrita. Únete, sigue el recorrido en directo y gestiona tu
+          hermandad desde cualquier lugar.
         </motion.p>
 
         {/* CTAs */}

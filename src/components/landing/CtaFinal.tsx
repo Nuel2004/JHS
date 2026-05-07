@@ -25,8 +25,7 @@ export function CtaFinal() {
         </h2>
 
         <p className="font-body text-sm text-primary-foreground/50 max-w-md mx-auto mb-10 leading-relaxed">
-          Participa en la Estación de Penitencia, accede a la tienda oficial
-          y gestiona tu cuota desde cualquier dispositivo.
+          Accede a la tienda oficial y gestiona tu cuota desde cualquier dispositivo.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">

@@ -138,7 +138,7 @@ export default function AdminProcesionPage() {
     <div className="p-4 md:p-8">
       {/* Cabecera */}
       <div className="mb-8">
-        <SectionLabel>Estación de Penitencia</SectionLabel>
+        <SectionLabel>Procesión</SectionLabel>
         <h1 className="font-display text-3xl md:text-4xl text-primary mt-1">Gestión de puestos</h1>
         <p className="font-body text-sm text-primary/50 mt-1">
           Asigna y gestiona las posiciones de cada cofrade en la procesión

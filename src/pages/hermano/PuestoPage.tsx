@@ -106,7 +106,7 @@ export default function PuestoPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-12">
-      <SectionLabel>Estación de Penitencia</SectionLabel>
+      <SectionLabel>Procesión</SectionLabel>
       <h1 className="font-display text-4xl text-primary mt-1 mb-2">Mi puesto</h1>
       <p className="font-body text-sm text-primary/55 mb-2">
         Selecciona tu preferencia en el esquema del cortejo. La junta directiva confirmará la asignación final.

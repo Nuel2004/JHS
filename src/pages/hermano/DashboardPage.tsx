@@ -36,7 +36,7 @@ const ACCESOS: AccesoItem[] = [
     to: '/mi/puesto',
     icon: Cross,
     title: 'Mi puesto en procesión',
-    desc: 'Elige qué portarás en la estación de penitencia',
+    desc: 'Elige tu posición en la procesión',
     cofrade: true,
   },
   {

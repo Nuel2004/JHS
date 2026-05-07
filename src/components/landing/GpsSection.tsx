@@ -100,7 +100,7 @@ export function GpsSection() {
                 {/* Columna izquierda: texto */}
                 <div>
                     <SectionLabel className="text-secondary [&>div]:bg-secondary">
-                        Estación de Penitencia
+                        Procesión
                     </SectionLabel>
                     <h2 className="font-display text-3xl md:text-4xl text-primary-foreground mb-6 leading-tight">
                         Sigue los pasos<br />

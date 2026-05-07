@@ -1,8 +1,8 @@
 const STATS = [
+  { num: "1981", label: "Año de fundación" },
   { num: "10€", label: "Cuota anual" },
-  { num: "GPS", label: "Seguimiento en vivo" },
-  { num: "4", label: "Niveles de acceso" },
-  { num: "100%", label: "Online" },
+  { num: "GPS", label: "Seguimiento en directo" },
+  { num: "100%", label: "Gestión online" },
 ];
 
 export function StatsBar() {
