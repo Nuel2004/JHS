@@ -59,6 +59,9 @@ export interface HermanoRepository {
   /** Cambia el estado a 'baja' — solo admin */
   darDeBaja(hermanoId: number): Promise<{ error?: string }>;
 
+  /** Cambia el rol de un hermano — solo superadmin */
+  cambiarRol(hermanoId: number, rol: import('../../interfaces/Hermano').RolUsuario): Promise<{ error?: string }>;
+
   /** Envía email de recuperación de contraseña */
   recuperarPassword(email: string): Promise<{ error?: string }>;
 }

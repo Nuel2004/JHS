@@ -8,13 +8,22 @@ import { toast } from 'react-hot-toast';
 import {
   Euro, Users, CheckCircle2, ShoppingBag,
   Loader2, Search, Trash2, Plus, TrendingDown, TrendingUp, Wallet,
-  BookOpen,
+  BookOpen, Clock, CalendarDays, BarChart2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, Legend,
+} from 'recharts';
 
 const CUOTA_ANUAL = 10;
 const GASTOS_KEY = 'jhs_gastos_tienda';
 const MOVIMIENTOS_KEY = 'jhs_movimientos';
+const MARGEN_TIENDA = 0.30;
+const COSTE_TIENDA  = 1 - MARGEN_TIENDA; // 0.70
+
+// Las palmas se compran para los cofrades: coste 100%, sin margen
+const esPalma = (p: any) => String(p.productos?.nombre ?? '').toLowerCase().includes('palma');
 
 // ── Legacy Gastos tab ─────────────────────────────────────────────────────────
 type CategoriaGasto = 'Material' | 'Mantenimiento' | 'Personal' | 'Otros';
@@ -306,7 +315,7 @@ function IngresostiendaTab({ pedidos }: { pedidos: any[] }) {
 }
 
 // ── Tab 3: Gastos de tienda ───────────────────────────────────────────────────
-function GastosTiendaTab({ palmasPedidos }: { palmasPedidos: any[] }) {
+function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
   const [gastos, setGastos] = useState<GastoTienda[]>([]);
   const [concepto, setConcepto] = useState('');
   const [importe, setImporte] = useState('');
@@ -351,9 +360,13 @@ function GastosTiendaTab({ palmasPedidos }: { palmasPedidos: any[] }) {
     toast.success('Gasto eliminado');
   };
 
-  const totalGastos    = gastos.reduce((acc, g) => acc + g.importe, 0);
-  const totalPalmas    = palmasPedidos.reduce((acc, p) => acc + Number(p.total), 0);
-  const totalCombinado = totalGastos + totalPalmas;
+  const palmasPedidos  = pedidosVendidos.filter(esPalma);
+  const otrosPedidos   = pedidosVendidos.filter((p: any) => !esPalma(p));
+
+  const totalGastos        = gastos.reduce((acc, g) => acc + g.importe, 0);
+  const totalPalmas        = palmasPedidos.reduce((acc: number, p: any) => acc + Number(p.total), 0);
+  const totalOtros         = otrosPedidos.reduce((acc: number, p: any) => acc + Number(p.total) * COSTE_TIENDA, 0);
+  const totalCombinado     = totalGastos + totalPalmas + totalOtros;
 
   return (
     <div>
@@ -411,7 +424,7 @@ function GastosTiendaTab({ palmasPedidos }: { palmasPedidos: any[] }) {
         </div>
       </div>
 
-      {(gastos.length === 0 && palmasPedidos.length === 0) ? (
+      {(gastos.length === 0 && palmasPedidos.length === 0 && otrosPedidos.length === 0) ? (
         <p className="text-center font-body text-sm text-primary/30 py-10 border border-dashed border-secondary/20">
           No hay gastos registrados aún.
         </p>
@@ -461,19 +474,19 @@ function GastosTiendaTab({ palmasPedidos }: { palmasPedidos: any[] }) {
             <>
               <div className="px-4 py-2 bg-amber-50/60">
                 <p className="font-body text-[9px] tracking-widest uppercase text-amber-700/60">
-                  Palmas cofrades — automático ({palmasPedidos.length})
+                  Palmas — coste completo · automático ({palmasPedidos.length})
                 </p>
               </div>
               {palmasPedidos.map((p: any) => (
                 <div key={`palma-${p.id}`} className="grid grid-cols-12 gap-3 px-4 py-3 items-center bg-amber-50/30 hover:bg-amber-50/50 transition-colors">
                   <div className="col-span-8 md:col-span-4">
                     <p className="font-serif text-sm text-primary">
-                      Palma — {p.hermanos?.apellidos}, {p.hermanos?.nombre}
+                      {p.productos?.nombre ?? 'Palma'} × {p.cantidad} — {p.hermanos?.apellidos}, {p.hermanos?.nombre}
                     </p>
                   </div>
                   <div className="hidden md:block col-span-2">
                     <span className="inline-block px-2 py-0.5 text-[9px] tracking-widest uppercase border font-body text-amber-700 bg-amber-50 border-amber-200">
-                      Material
+                      Palmas
                     </span>
                   </div>
                   <p className="hidden md:block col-span-2 font-body text-xs text-primary/50">
@@ -481,6 +494,37 @@ function GastosTiendaTab({ palmasPedidos }: { palmasPedidos: any[] }) {
                   </p>
                   <p className="col-span-3 font-display text-base text-red-500">
                     -{Number(p.total).toFixed(2)} €
+                  </p>
+                  <div className="col-span-1" />
+                </div>
+              ))}
+            </>
+          )}
+
+          {otrosPedidos.length > 0 && (
+            <>
+              <div className="px-4 py-2 bg-blue-50/60">
+                <p className="font-body text-[9px] tracking-widest uppercase text-blue-700/60">
+                  Coste otros productos — automático ({otrosPedidos.length}) · margen {Math.round(MARGEN_TIENDA * 100)}%
+                </p>
+              </div>
+              {otrosPedidos.map((p: any) => (
+                <div key={`coste-${p.id}`} className="grid grid-cols-12 gap-3 px-4 py-3 items-center bg-blue-50/20 hover:bg-blue-50/40 transition-colors">
+                  <div className="col-span-8 md:col-span-4">
+                    <p className="font-serif text-sm text-primary">
+                      {p.productos?.nombre ?? 'Producto'} × {p.cantidad} — {p.hermanos?.apellidos}, {p.hermanos?.nombre}
+                    </p>
+                  </div>
+                  <div className="hidden md:block col-span-2">
+                    <span className="inline-block px-2 py-0.5 text-[9px] tracking-widest uppercase border font-body text-blue-700 bg-blue-50 border-blue-200">
+                      Coste producto
+                    </span>
+                  </div>
+                  <p className="hidden md:block col-span-2 font-body text-xs text-primary/50">
+                    {new Date(p.fecha).toLocaleDateString('es-ES')}
+                  </p>
+                  <p className="col-span-3 font-display text-base text-red-500">
+                    -{(Number(p.total) * COSTE_TIENDA).toFixed(2)} €
                   </p>
                   <div className="col-span-1" />
                 </div>
@@ -635,22 +679,22 @@ function BalanceTab({
       });
     });
 
-    // Palmas como gasto (para cuadrar con el resumen superior)
+    // Coste de productos vendidos: palmas al 100%, otros al 70%
     pedidos
-      .filter((p) => p.productos?.nombre === 'Palma Hermano' &&
-             (p.estado === 'pagado' || p.estado === 'entregado'))
+      .filter((p) => p.estado === 'pagado' || p.estado === 'entregado')
       .forEach((p) => {
         const nombre = p.hermanos
           ? [p.hermanos.apellidos, p.hermanos.nombre].filter(Boolean).join(', ')
           : '—';
+        const coste = esPalma(p) ? Number(p.total) : Number(p.total) * COSTE_TIENDA;
         rows.push({
-          id: `palma-gasto-${p.id}`,
+          id: `coste-${p.id}`,
           fecha: p.fecha ?? '',
           persona: nombre,
-          concepto: `Palma — coste cofradía`,
-          categoria: 'Palmas',
+          concepto: `${p.productos?.nombre ?? 'Producto'} × ${p.cantidad} — coste`,
+          categoria: esPalma(p) ? 'Palmas' : 'Coste producto',
           ingreso: 0,
-          gasto: Number(p.total),
+          gasto: coste,
           deletable: false,
         });
       });
@@ -926,7 +970,7 @@ function BalanceTab({
                       {fila.id.startsWith('cuota-') ? 'auto'
                         : fila.id.startsWith('pedido-') ? 'tienda'
                         : fila.id.startsWith('gasto-') ? 'gastos'
-                        : 'palmas'}
+                        : 'coste'}
                     </span>
                   )}
                 </div>
@@ -958,12 +1002,216 @@ function BalanceTab({
   );
 }
 
+// ── Tab 5: Antigüedad ─────────────────────────────────────────────────────────
+function AntiguedadTab({ hermanos }: { hermanos: Hermano[] }) {
+  const hoy = new Date();
+  const calcAnios = (fecha: string) => {
+    const d = fecha.length === 10 ? new Date(fecha + 'T00:00:00') : new Date(fecha);
+    return Math.floor((hoy.getTime() - d.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
+  };
+
+  const filas = hermanos
+    .filter((h) => h.estado === 'activo' && h.fecha_alta)
+    .map((h) => ({ ...h, anios: calcAnios(h.fecha_alta), cuotasEst: calcAnios(h.fecha_alta) * CUOTA_ANUAL }))
+    .sort((a, b) => b.anios - a.anios);
+
+  if (filas.length === 0) {
+    return <p className="font-body text-sm text-primary/35 italic py-10 text-center">No hay hermanos activos con fecha de alta registrada.</p>;
+  }
+
+  return (
+    <div>
+      <div className="border border-secondary/10 divide-y divide-secondary/8">
+        <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-2 bg-muted/30">
+          {[
+            { label: 'Hermano',          span: 'col-span-4' },
+            { label: 'Fecha de alta',    span: 'col-span-2' },
+            { label: 'Años en hermandad', span: 'col-span-3' },
+            { label: 'Cuotas est.',      span: 'col-span-3' },
+          ].map(({ label, span }) => (
+            <p key={label} className={`font-body text-[9px] tracking-widest uppercase text-primary/40 ${span}`}>{label}</p>
+          ))}
+        </div>
+
+        {filas.map((h) => (
+          <div key={h.id} className="grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-muted/20 transition-colors">
+            <div className="col-span-12 md:col-span-4">
+              <p className="font-serif text-sm text-primary">{h.apellidos}, {h.nombre}</p>
+              <p className="font-body text-[10px] text-primary/35 md:hidden">
+                Alta: {new Date(h.fecha_alta + 'T00:00:00').toLocaleDateString('es-ES')}
+              </p>
+            </div>
+            <p className="hidden md:block col-span-2 font-body text-xs text-primary/55">
+              {new Date(h.fecha_alta + 'T00:00:00').toLocaleDateString('es-ES')}
+            </p>
+            <div className="col-span-7 md:col-span-3 flex items-center gap-2">
+              <span className={`font-display text-lg ${h.anios >= 10 ? 'text-secondary' : 'text-primary'}`}>
+                {h.anios}
+              </span>
+              <span className="font-body text-[10px] text-primary/40">
+                año{h.anios !== 1 ? 's' : ''}
+                {h.anios >= 10 && <span className="ml-1.5 px-1.5 py-0.5 bg-secondary/10 text-secondary text-[8px] tracking-widest uppercase border border-secondary/20">Veterano</span>}
+              </span>
+            </div>
+            <p className="col-span-5 md:col-span-3 font-body text-xs text-primary/70 text-right md:text-left">
+              ~{h.cuotasEst} €
+              <span className="block text-[9px] text-primary/35">{h.anios} × {CUOTA_ANUAL} €/año</span>
+            </p>
+          </div>
+        ))}
+      </div>
+      <p className="font-body text-[10px] text-primary/30 mt-3 text-right">
+        {filas.length} hermano{filas.length !== 1 ? 's' : ''} activo{filas.length !== 1 ? 's' : ''} · cuotas estimadas (un pago por año)
+      </p>
+    </div>
+  );
+}
+
+// ── Tab 6: Estadísticas ───────────────────────────────────────────────────────
+function EstadisticasTab({
+  hermanos,
+  pedidos,
+  gastosTotales,
+}: {
+  hermanos: Hermano[];
+  pedidos: any[];
+  gastosTotales: number;
+}) {
+  const hoy = new Date();
+  const calcAnios = (fecha: string) => {
+    const d = fecha.length === 10 ? new Date(fecha + 'T00:00:00') : new Date(fecha);
+    return Math.floor((hoy.getTime() - d.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
+  };
+
+  const activos    = hermanos.filter((h) => h.estado === 'activo').length;
+  const pendientes = hermanos.filter((h) => h.estado === 'pendiente_pago').length;
+  const bajas      = hermanos.filter((h) => h.estado === 'baja').length;
+
+  const pedidosVendidos    = pedidos.filter((p) => p.estado === 'pagado' || p.estado === 'entregado');
+  const pedidosPendientesArr = pedidos.filter((p) => p.estado === 'pendiente');
+  const recaudadoCuotas    = activos * CUOTA_ANUAL;
+  const recaudadoTienda    = pedidosVendidos.reduce((acc: number, p: any) => acc + Number(p.total), 0);
+  const costosProductos    = pedidosVendidos.reduce((acc: number, p: any) => acc + (esPalma(p) ? Number(p.total) : Number(p.total) * COSTE_TIENDA), 0);
+  const tasaCobro          = hermanos.length > 0 ? Math.round((activos / hermanos.length) * 100) : 0;
+  const cuotaNoRecaudada   = pendientes * CUOTA_ANUAL;
+  const pedidosPendientesCount = pedidosPendientesArr.length;
+  const pedidosPendientesTotal = pedidosPendientesArr.reduce((acc: number, p: any) => acc + Number(p.total), 0);
+  const ticketMedio        = pedidosVendidos.length > 0 ? recaudadoTienda / pedidosVendidos.length : 0;
+  const activosConFecha    = hermanos.filter((h) => h.estado === 'activo' && h.fecha_alta);
+  const veteranos10        = activosConFecha.filter((h) => calcAnios(h.fecha_alta) >= 10).length;
+  const antiguedadMedia    = activosConFecha.length > 0
+    ? Math.round(activosConFecha.reduce((s, h) => s + calcAnios(h.fecha_alta), 0) / activosConFecha.length)
+    : 0;
+
+  // Chart data
+  const barData = [
+    { name: 'Cuotas',     valor: recaudadoCuotas,   tipo: 'ingreso' },
+    { name: 'Tienda',     valor: recaudadoTienda,   tipo: 'ingreso' },
+    { name: 'Coste prod.', valor: costosProductos,  tipo: 'gasto'   },
+    { name: 'Gastos',     valor: gastosTotales,     tipo: 'gasto'   },
+  ];
+  const pieHermanos = [
+    { name: 'Activos',    value: activos    },
+    { name: 'Pendientes', value: pendientes },
+    { name: 'Baja',       value: bajas      },
+  ].filter((d) => d.value > 0);
+  const PIE_COLORS = ['#4a7c59', '#d97706', '#dc2626'];
+
+  return (
+    <div className="space-y-8">
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <SummaryCard icon={CheckCircle2} label="Tasa de cobro" value={`${tasaCobro} %`}
+          sub={`${activos} de ${hermanos.length} hermanos al día`} highlight={tasaCobro >= 80} />
+        <SummaryCard icon={Clock} label="Cuota pendiente" value={`${cuotaNoRecaudada.toFixed(2)} €`}
+          sub={`${pendientes} pendiente${pendientes !== 1 ? 's' : ''} × ${CUOTA_ANUAL} €`} danger={cuotaNoRecaudada > 0} />
+        <SummaryCard icon={ShoppingBag} label="Pedidos sin cobrar" value={`${pedidosPendientesTotal.toFixed(2)} €`}
+          sub={`${pedidosPendientesCount} pedido${pedidosPendientesCount !== 1 ? 's' : ''} pendiente${pedidosPendientesCount !== 1 ? 's' : ''}`} danger={pedidosPendientesCount > 0} />
+        <SummaryCard icon={Euro} label="Ticket medio tienda"
+          value={ticketMedio > 0 ? `${ticketMedio.toFixed(2)} €` : '—'} sub="Por pedido cobrado" />
+        <SummaryCard icon={CalendarDays} label="Antigüedad media" value={`${antiguedadMedia} años`}
+          sub={`Entre ${activosConFecha.length} hermanos activos`} />
+        <SummaryCard icon={CalendarDays} label="Veteranos 10+ años" value={String(veteranos10)}
+          sub={`${activosConFecha.length > 0 ? Math.round((veteranos10 / activosConFecha.length) * 100) : 0} % del total activo`}
+          highlight={veteranos10 > 0} />
+      </div>
+
+      {/* Gráficas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Desglose financiero */}
+        <div className="border border-secondary/15 p-5">
+          <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-4">Desglose financiero (€)</p>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={barData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#6b7280' }} />
+              <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} width={45} />
+              <Tooltip
+                formatter={(v) => [`${Number(v).toFixed(2)} €`]}
+                contentStyle={{ fontSize: 11, border: '1px solid #d1d5db', borderRadius: 0 }}
+              />
+              <Bar dataKey="valor" radius={0} maxBarSize={48}>
+                {barData.map((entry, i) => (
+                  <Cell key={i} fill={entry.tipo === 'ingreso' ? '#4a7c59' : '#dc2626'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+          <div className="flex gap-4 mt-2 justify-center">
+            <span className="flex items-center gap-1.5 font-body text-[9px] text-primary/50">
+              <span className="w-2.5 h-2.5 bg-[#4a7c59] inline-block" /> Ingreso
+            </span>
+            <span className="flex items-center gap-1.5 font-body text-[9px] text-primary/50">
+              <span className="w-2.5 h-2.5 bg-[#dc2626] inline-block" /> Gasto
+            </span>
+          </div>
+        </div>
+
+        {/* Distribución de hermanos */}
+        <div className="border border-secondary/15 p-5">
+          <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-4">Distribución de hermanos</p>
+          {hermanos.length === 0 ? (
+            <p className="text-center font-body text-sm text-primary/30 py-16">Sin datos</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie
+                  data={pieHermanos}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={85}
+                  dataKey="value"
+                  labelLine={false}
+                >
+                  {pieHermanos.map((_, i) => (
+                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(v) => [Number(v), 'hermanos']}
+                  contentStyle={{ fontSize: 11, border: '1px solid #d1d5db', borderRadius: 0 }}
+                />
+                <Legend
+                  iconType="square"
+                  iconSize={9}
+                  formatter={(v) => <span style={{ fontSize: 10, color: '#6b7280' }}>{v}</span>}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Página principal ──────────────────────────────────────────────────────────
 export default function AdminCuentasPage() {
   const [hermanos, setHermanos] = useState<Hermano[]>([]);
   const [pedidos, setPedidos]   = useState<any[]>([]);
   const [loading, setLoading]   = useState(true);
-  const [tab, setTab]           = useState<'cuotas' | 'tienda' | 'gastos' | 'balance'>('cuotas');
+  const [tab, setTab]           = useState<'cuotas' | 'tienda' | 'gastos' | 'balance' | 'antiguedad' | 'estadisticas'>('cuotas');
   const [gastosTotales, setGastosTotales] = useState(0);
 
   useEffect(() => {
@@ -1005,13 +1253,12 @@ export default function AdminCuentasPage() {
     .filter((p) => p.estado === 'pagado' || p.estado === 'entregado')
     .reduce((acc, p) => acc + Number(p.total), 0);
 
-  const palmasPedidos = pedidos.filter(
-    (p) => p.productos?.nombre === 'Palma Hermano' &&
-           (p.estado === 'pagado' || p.estado === 'entregado')
+  const pedidosVendidos = pedidos.filter(
+    (p) => p.estado === 'pagado' || p.estado === 'entregado'
   );
-  const gastosPalmas = palmasPedidos.reduce((acc, p) => acc + Number(p.total), 0);
+  const costosProductos = pedidosVendidos.reduce((acc, p) => acc + (esPalma(p) ? Number(p.total) : Number(p.total) * COSTE_TIENDA), 0);
 
-  const totalGastosConPalmas = gastosTotales + gastosPalmas;
+  const totalGastosConPalmas = gastosTotales + costosProductos;
   const totalIngresos        = recaudadoCuotas + recaudadoTienda;
   const balance              = totalIngresos - totalGastosConPalmas;
 
@@ -1055,7 +1302,7 @@ export default function AdminCuentasPage() {
               icon={TrendingDown}
               label="Gastos"
               value={`${totalGastosConPalmas.toFixed(2)} €`}
-              sub={`Manuales + ${palmasPedidos.length} palmas`}
+              sub={`Manuales + coste ${pedidosVendidos.length} producto${pedidosVendidos.length !== 1 ? 's' : ''}`}
               danger={totalGastosConPalmas > 0}
             />
           </div>
@@ -1090,12 +1337,20 @@ export default function AdminCuentasPage() {
             <TabButton active={tab === 'balance'} onClick={() => setTab('balance')}>
               <span className="flex items-center gap-2"><BookOpen size={11} /> Balance</span>
             </TabButton>
+            <TabButton active={tab === 'antiguedad'} onClick={() => setTab('antiguedad')}>
+              <span className="flex items-center gap-2"><CalendarDays size={11} /> Antigüedad</span>
+            </TabButton>
+            <TabButton active={tab === 'estadisticas'} onClick={() => setTab('estadisticas')}>
+              <span className="flex items-center gap-2"><BarChart2 size={11} /> Estadísticas</span>
+            </TabButton>
           </div>
 
-          {tab === 'cuotas'  && <CuentasHermanosTab hermanos={hermanos} />}
-          {tab === 'tienda'  && <IngresostiendaTab pedidos={pedidos} />}
-          {tab === 'gastos'  && <GastosTiendaTab palmasPedidos={palmasPedidos} />}
-          {tab === 'balance' && <BalanceTab hermanos={hermanos} pedidos={pedidos} />}
+          {tab === 'cuotas'       && <CuentasHermanosTab hermanos={hermanos} />}
+          {tab === 'tienda'       && <IngresostiendaTab pedidos={pedidos} />}
+          {tab === 'gastos'       && <GastosTiendaTab pedidosVendidos={pedidosVendidos} />}
+          {tab === 'balance'      && <BalanceTab hermanos={hermanos} pedidos={pedidos} />}
+          {tab === 'antiguedad'   && <AntiguedadTab hermanos={hermanos} />}
+          {tab === 'estadisticas' && <EstadisticasTab hermanos={hermanos} pedidos={pedidos} gastosTotales={gastosTotales} />}
         </>
       )}
     </div>

@@ -31,6 +31,7 @@ interface AuthState {
   sessionHermano: SessionHermano | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   isCofrade: boolean;
 
   setSession: (session: SessionHermano) => void;
@@ -44,13 +45,15 @@ export const useAuthStore = create<AuthState>()(
       sessionHermano: null,
       isAuthenticated: false,
       isAdmin: false,
+      isSuperAdmin: false,
       isCofrade: false,
 
       setSession: (session) =>
         set({
           sessionHermano: session,
           isAuthenticated: true,
-          isAdmin: session.hermano.rol === 'admin',
+          isAdmin: session.hermano.rol === 'admin' || session.hermano.rol === 'superadmin',
+          isSuperAdmin: session.hermano.rol === 'superadmin',
           isCofrade: session.hermano.es_cofrade && session.hermano.estado === 'activo',
         }),
 
@@ -63,6 +66,7 @@ export const useAuthStore = create<AuthState>()(
           sessionHermano: null,
           isAuthenticated: false,
           isAdmin: false,
+          isSuperAdmin: false,
           isCofrade: false,
         });
       },
@@ -84,6 +88,7 @@ export const useAuthStore = create<AuthState>()(
         sessionHermano: state.sessionHermano,
         isAuthenticated: state.isAuthenticated,
         isAdmin: state.isAdmin,
+        isSuperAdmin: state.isSuperAdmin,
         isCofrade: state.isCofrade,
       }),
     }

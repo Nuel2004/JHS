@@ -31,9 +31,16 @@ function SidebarContent({ onNavClick, onLogout, nombre, apellidos }: {
         <p className="font-display text-[11px] tracking-[0.25em] uppercase text-secondary">
           Hermandad JHS
         </p>
-        <p className="font-body text-[10px] text-primary-foreground/50 mt-0.5 tracking-widest uppercase">
-          Panel Admin
-        </p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <p className="font-body text-[10px] text-primary-foreground/50 tracking-widest uppercase">
+            Panel Admin
+          </p>
+          {isSuperAdmin && (
+            <span className="font-body text-[8px] tracking-widest uppercase px-1.5 py-0.5 border border-secondary/50 text-secondary bg-secondary/10">
+              Super
+            </span>
+          )}
+        </div>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
@@ -83,7 +90,7 @@ function SidebarContent({ onNavClick, onLogout, nombre, apellidos }: {
 }
 
 export default function AdminLayout() {
-  const { sessionHermano, clearSession } = useAuthStore();
+  const { sessionHermano, clearSession, isSuperAdmin } = useAuthStore();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -109,7 +116,14 @@ export default function AdminLayout() {
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-primary border-b border-white/10 h-14 flex items-center justify-between px-4">
         <div>
           <p className="font-display text-[11px] tracking-[0.25em] uppercase text-secondary">Hermandad JHS</p>
-          <p className="font-body text-[9px] text-primary-foreground/50 tracking-widest uppercase">Panel Admin</p>
+          <div className="flex items-center gap-2">
+            <p className="font-body text-[9px] text-primary-foreground/50 tracking-widest uppercase">Panel Admin</p>
+            {isSuperAdmin && (
+              <span className="font-body text-[7px] tracking-widest uppercase px-1 py-0.5 border border-secondary/50 text-secondary bg-secondary/10">
+                Super
+              </span>
+            )}
+          </div>
         </div>
         <button
           onClick={() => setDrawerOpen(true)}

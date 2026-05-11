@@ -125,6 +125,11 @@ export class SupabaseHermanoRepository implements HermanoRepository {
     return { error: error?.message };
   }
 
+  async cambiarRol(hermanoId: number, rol: import('../../interfaces/Hermano').RolUsuario): Promise<{ error?: string }> {
+    const { error } = await supabaseClient.from('hermanos').update({ rol }).eq('id', hermanoId);
+    return { error: error?.message };
+  }
+
   async recuperarPassword(email: string): Promise<{ error?: string }> {
     const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,

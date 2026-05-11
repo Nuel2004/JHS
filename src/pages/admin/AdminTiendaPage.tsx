@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useAuthStore } from '@/stores/authStore';
 import { productoRepository } from '@/database/repositories';
 import type { Producto, ProductoCreate, CategoriaProducto } from '@/interfaces/Producto';
 import { SectionLabel } from '@/components/landing/Helpers';
@@ -228,6 +229,7 @@ function ConfirmDialog({
 
 /* ── Página principal ── */
 export default function AdminTiendaPage() {
+  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin);
   const [tab, setTab]           = useState<Tab>('productos');
   const [productos, setProductos] = useState<Producto[]>([]);
   const [pedidos, setPedidos]     = useState<any[]>([]);
@@ -354,7 +356,7 @@ export default function AdminTiendaPage() {
           ))}
         </div>
 
-        {tab === 'productos' && (
+        {tab === 'productos' && isSuperAdmin && (
           <button
             onClick={() => setModalProducto(PRODUCTO_VACIO)}
             className="flex items-center gap-1.5 px-3 py-1.5 border border-secondary text-secondary hover:bg-secondary hover:text-white transition-colors font-body text-[10px] tracking-widest uppercase mb-px"

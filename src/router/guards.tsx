@@ -22,6 +22,15 @@ export function AdminRoute() {
   return <Outlet />;
 }
 
+/** Requiere sesión + rol superadmin */
+export function SuperadminRoute() {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin);
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isSuperAdmin) return <Navigate to="/admin/dashboard" replace />;
+  return <Outlet />;
+}
+
 /** Requiere sesión + ser cofrade activo */
 export function CofradeRoute() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);

@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { hermanoRepository } from '@/database/repositories';
-import type { Hermano, EstadoHermano, Genero } from '@/interfaces/Hermano';
+import type { Hermano, EstadoHermano, Genero, RolUsuario } from '@/interfaces/Hermano';
 import type { EditarHermanoDatos } from '@/database/repositories/HermanoRepository';
 import { SectionLabel } from '@/components/landing/Helpers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'react-hot-toast';
 import {
   CheckCircle2, Search, UserCheck, Home, Loader2,
-  Pencil, X, UserX, Save, ChevronRight,
+  Pencil, X, UserX, Save, ChevronRight, ShieldCheck, ShieldOff,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,11 +25,12 @@ const ESTADO_CONFIG: Record<EstadoHermano, { label: string; color: string }> = {
 
 interface EditPanelProps {
   hermano: Hermano;
+  isSuperAdmin: boolean;
   onClose: () => void;
   onSaved: (updated: Hermano) => void;
 }
 
-function EditPanel({ hermano, onClose, onSaved }: EditPanelProps) {
+function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) {
   const [form, setForm] = useState<EditarHermanoDatos>({
     nombre: hermano.nombre,
     apellidos: hermano.apellidos,
@@ -42,9 +44,22 @@ function EditPanel({ hermano, onClose, onSaved }: EditPanelProps) {
   });
   const [guardando, setGuardando] = useState(false);
   const [confirmandoBaja, setConfirmandoBaja] = useState(false);
+  const [cambiandoRol, setCambiandoRol] = useState(false);
 
   const set = <K extends keyof EditarHermanoDatos>(key: K, value: EditarHermanoDatos[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  const cambiarRol = async (nuevoRol: RolUsuario) => {
+    setCambiandoRol(true);
+    const { error } = await hermanoRepository.cambiarRol(hermano.id, nuevoRol);
+    if (error) {
+      toast.error(error);
+    } else {
+      toast.success(`Rol cambiado a ${nuevoRol}`);
+      onSaved({ ...hermano, rol: nuevoRol });
+    }
+    setCambiandoRol(false);
+  };
 
   const guardar = async () => {
     setGuardando(true);
@@ -223,6 +238,42 @@ function EditPanel({ hermano, onClose, onSaved }: EditPanelProps) {
               <InfoRow label="Stripe ID" value={hermano.stripe_customer_id} />
             )}
           </div>
+
+          {/* Gestión de rol — solo superadmin */}
+          {isSuperAdmin && hermano.rol !== 'superadmin' && (
+            <div className="border border-secondary/20 p-3">
+              <p className="font-body text-[9px] tracking-widest uppercase text-primary/30 mb-2">Rol de usuario</p>
+              <div className="flex items-center justify-between gap-3">
+                <span className={cn(
+                  'font-body text-[10px] tracking-widest uppercase px-2 py-0.5 border',
+                  hermano.rol === 'admin'
+                    ? 'border-secondary/40 text-secondary bg-secondary/5'
+                    : 'border-secondary/15 text-primary/40 bg-muted/20'
+                )}>
+                  {hermano.rol === 'admin' ? 'Admin' : 'Hermano'}
+                </span>
+                {hermano.rol === 'admin' ? (
+                  <button
+                    onClick={() => cambiarRol('hermano')}
+                    disabled={cambiandoRol}
+                    className="flex items-center gap-1.5 px-3 py-1.5 border border-red-200 text-red-400 hover:bg-red-50 text-[10px] tracking-widest uppercase font-body transition-colors disabled:opacity-40"
+                  >
+                    {cambiandoRol ? <Loader2 size={11} className="animate-spin" /> : <ShieldOff size={11} />}
+                    Quitar admin
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => cambiarRol('admin')}
+                    disabled={cambiandoRol}
+                    className="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-secondary hover:bg-secondary/10 text-[10px] tracking-widest uppercase font-body transition-colors disabled:opacity-40"
+                  >
+                    {cambiandoRol ? <Loader2 size={11} className="animate-spin" /> : <ShieldCheck size={11} />}
+                    Hacer admin
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Acciones */}
@@ -236,7 +287,7 @@ function EditPanel({ hermano, onClose, onSaved }: EditPanelProps) {
             Guardar
           </Button>
 
-          {hermano.estado !== 'baja' && (
+          {isSuperAdmin && hermano.estado !== 'baja' && (
             confirmandoBaja ? (
               <div className="flex gap-2">
                 <button
@@ -281,6 +332,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 // ── Página principal ─────────────────────────────────────────────────────────
 
 export default function AdminHermanosPage() {
+  const isSuperAdmin = useAuthStore((s) => s.isSuperAdmin);
   const [hermanos, setHermanos] = useState<Hermano[]>([]);
   const [filtro, setFiltro] = useState('');
   const [loading, setLoading] = useState(true);
@@ -483,6 +535,7 @@ export default function AdminHermanosPage() {
       {editando && (
         <EditPanel
           hermano={editando}
+          isSuperAdmin={isSuperAdmin}
           onClose={() => setEditando(null)}
           onSaved={onSaved}
         />

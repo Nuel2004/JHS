@@ -41,7 +41,7 @@ export default function LoginPage() {
 
     setSession(data);
     toast.success(`Bienvenido, ${data.hermano.nombre}`);
-    navigate(data.hermano.rol === 'admin' ? '/admin/dashboard' : '/dashboard');
+    navigate(data.hermano.rol === 'admin' || data.hermano.rol === 'superadmin' ? '/admin/dashboard' : '/dashboard');
   };
 
   return (

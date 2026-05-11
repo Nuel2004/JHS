@@ -1,5 +1,5 @@
 export type EstadoHermano = 'pendiente_pago' | 'activo' | 'baja';
-export type RolUsuario = 'hermano' | 'admin';
+export type RolUsuario = 'hermano' | 'admin' | 'superadmin';
 export type Genero = 'Mujer' | 'Hombre' | 'Otro';
 
 export interface Hermano {
