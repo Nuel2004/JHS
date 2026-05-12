@@ -62,8 +62,8 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
+    <div className="p-4 md:p-8">
+      <div className="mb-6 md:mb-8">
         <SectionLabel>Panel de Control</SectionLabel>
         <h1 className="font-display text-4xl text-primary mt-1">Dashboard</h1>
         <p className="font-body text-sm text-primary/50 mt-1">

@@ -19,11 +19,12 @@ const NAV_ITEMS = [
   { to: '/admin/tienda', icon: ShoppingBag, label: 'Tienda' },
 ];
 
-function SidebarContent({ onNavClick, onLogout, nombre, apellidos }: {
+function SidebarContent({ onNavClick, onLogout, nombre, apellidos, isSuperAdmin }: {
   onNavClick?: () => void;
   onLogout: () => void;
   nombre?: string;
   apellidos?: string;
+  isSuperAdmin?: boolean;
 }) {
   return (
     <>
@@ -109,7 +110,7 @@ export default function AdminLayout() {
 
       {/* Sidebar desktop */}
       <aside className="hidden md:flex w-56 border-r border-secondary/15 flex-col bg-primary text-primary-foreground">
-        <SidebarContent onLogout={handleLogout} nombre={nombre} apellidos={apellidos} />
+        <SidebarContent onLogout={handleLogout} nombre={nombre} apellidos={apellidos} isSuperAdmin={isSuperAdmin} />
       </aside>
 
       {/* Header móvil */}
@@ -151,7 +152,7 @@ export default function AdminLayout() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.25 }}
-              className="md:hidden fixed top-0 left-0 bottom-0 z-[60] w-56 bg-primary text-primary-foreground flex flex-col"
+              className="md:hidden fixed top-0 left-0 bottom-0 z-[60] w-48 sm:w-56 bg-primary text-primary-foreground flex flex-col"
             >
               <button
                 onClick={() => setDrawerOpen(false)}
@@ -165,6 +166,7 @@ export default function AdminLayout() {
                 onLogout={handleLogout}
                 nombre={nombre}
                 apellidos={apellidos}
+                isSuperAdmin={isSuperAdmin}
               />
             </motion.aside>
           </>

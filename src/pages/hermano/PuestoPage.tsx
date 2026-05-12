@@ -105,7 +105,7 @@ export default function PuestoPage() {
   const puestoSeleccionado = seleccion ? PUESTOS[seleccion] : null;
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-12">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 md:py-12">
       <SectionLabel>Procesión</SectionLabel>
       <h1 className="font-display text-4xl text-primary mt-1 mb-2">Mi puesto</h1>
       <p className="font-body text-sm text-primary/55 mb-2">
@@ -180,7 +180,7 @@ export default function PuestoPage() {
                       onClick={() => setSeleccion(el.puesto)}
                       className={cn(
                         'transition-all duration-200 border flex items-center justify-center',
-                        'w-9 h-9',
+                        'w-10 h-10 sm:w-9 sm:h-9',
                         isSelected
                           ? (COLOR_SELECTED[el.puesto] ?? 'border-secondary bg-secondary/20 text-secondary ring-1 ring-secondary/40')
                           : (COLOR[el.puesto] ?? 'border-secondary/20 text-primary/60')

@@ -18,4 +18,7 @@ export interface NoticiaRepository {
 
   /** Obtiene todas (incluye no publicadas) — solo admin */
   obtenerTodas(): Promise<{ data?: Noticia[]; error?: string }>;
+
+  /** Sube una imagen o PDF al bucket 'noticias' de Storage */
+  subirImagen(file: File): Promise<{ url?: string; error?: string }>;
 }

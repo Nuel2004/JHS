@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { noticiaRepository } from '@/database/repositories';
 import type { Noticia } from '@/interfaces/Noticia';
 import { SectionLabel, GoldenDivider } from '@/components/landing/Helpers';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FileText } from 'lucide-react';
 
 function NoticiaCard({ noticia }: { noticia: Noticia }) {
   const fecha = new Date(noticia.fecha_publicacion).toLocaleDateString('es-ES', {
@@ -12,11 +12,23 @@ function NoticiaCard({ noticia }: { noticia: Noticia }) {
   return (
     <article className="border-b border-secondary/10 pb-8 last:border-0">
       {noticia.imagen_url && (
-        <img
-          src={noticia.imagen_url}
-          alt={noticia.titulo}
-          className="w-full h-48 object-cover mb-5 grayscale-[20%]"
-        />
+        noticia.imagen_url.toLowerCase().endsWith('.pdf') ? (
+          <a
+            href={noticia.imagen_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 mb-5 border border-secondary/20 px-4 py-3 text-secondary hover:bg-secondary/5 transition-colors w-fit font-body text-[11px] tracking-widest uppercase"
+          >
+            <FileText size={14} />
+            Ver documento adjunto
+          </a>
+        ) : (
+          <img
+            src={noticia.imagen_url}
+            alt={noticia.titulo}
+            className="w-full h-48 object-cover mb-5 grayscale-[20%]"
+          />
+        )
       )}
       <div className="flex items-center gap-3 mb-3">
         <span className="font-body text-[10px] tracking-[0.3em] uppercase text-primary/35">{fecha}</span>

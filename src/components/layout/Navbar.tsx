@@ -12,6 +12,7 @@ const PUBLIC_LINKS = [
   { href: '/#historia', label: 'Historia' },
   { href: '/#procesion', label: 'Procesión' },
   { href: '/noticias', label: 'Noticias' },
+  { href: '/redes-sociales', label: 'Redes' },
   { href: '/contacto', label: 'Contacto' },
 ];
 

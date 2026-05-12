@@ -63,4 +63,20 @@ export class SupabaseNoticiaRepository implements NoticiaRepository {
       return { error: error.message };
     }
   }
+
+  async subirImagen(file: File): Promise<{ url?: string; error?: string }> {
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const path = `${Date.now()}.${ext}`;
+    const { error } = await supabaseClient.storage
+      .from('noticias')
+      .upload(path, file, { upsert: false });
+    if (error) {
+      if (error.message.toLowerCase().includes('bucket')) {
+        return { error: 'Bucket no encontrado. Ve a Supabase → Storage → New bucket → nombre: "noticias", público: activado.' };
+      }
+      return { error: error.message };
+    }
+    const { data } = supabaseClient.storage.from('noticias').getPublicUrl(path);
+    return { url: data.publicUrl };
+  }
 }

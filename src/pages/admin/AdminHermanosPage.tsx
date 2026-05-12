@@ -99,7 +99,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
       {/* Panel */}
       <aside className="w-full max-w-md bg-background border-l border-secondary/20 flex flex-col overflow-hidden">
         {/* Cabecera */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-secondary/15">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-secondary/15">
           <div>
             <p className="font-body text-[9px] tracking-widest uppercase text-primary/40">Editar hermano</p>
             <p className="font-serif text-primary">{hermano.apellidos}, {hermano.nombre}</p>
@@ -110,7 +110,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
         </div>
 
         {/* Formulario */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-[9px] uppercase tracking-widest text-primary/50">Nombre</Label>

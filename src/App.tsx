@@ -14,6 +14,7 @@ import AdminLayout from './layouts/AdminLayout';
 import LandingPage from './pages/LandingPage';
 import NoticiasPage from './pages/public/NoticiasPage';
 import ContactoPage from './pages/public/ContactoPage';
+import RedesSocialesPage from './pages/public/RedesSocialesPage';
 
 // Auth
 import LoginPage from './pages/auth/LoginPage';
@@ -51,6 +52,7 @@ const router = createBrowserRouter([
         children: [
           { path: '/noticias', element: <NoticiasPage /> },
           { path: '/contacto', element: <ContactoPage /> },
+          { path: '/redes-sociales', element: <RedesSocialesPage /> },
         ],
       },
 

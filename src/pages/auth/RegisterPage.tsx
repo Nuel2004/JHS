@@ -65,7 +65,7 @@ export default function RegisterPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background flex flex-col items-center py-12 px-6">
+        <div className="min-h-screen bg-background flex flex-col items-center py-8 md:py-12 px-4 sm:px-6">
             <Link
                 to="/"
                 className="font-serif text-[10px] tracking-widest text-secondary uppercase mb-8 hover:text-secondary/70 transition-colors"

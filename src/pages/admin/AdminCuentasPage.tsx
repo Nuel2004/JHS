@@ -187,29 +187,52 @@ function CuentasHermanosTab({ hermanos }: { hermanos: Hermano[] }) {
           const est = ESTADO_CONFIG[h.estado] ?? ESTADO_CONFIG.baja;
           const pagado = h.estado === 'activo';
           return (
-            <div key={h.id} className="grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-muted/20 transition-colors">
-              <div className="col-span-12 md:col-span-4">
-                <p className="font-serif text-sm text-primary">{h.apellidos}, {h.nombre}</p>
-                <p className="font-body text-[10px] text-primary/35 md:hidden">{h.email}</p>
-              </div>
-              <p className="hidden md:block col-span-3 font-body text-xs text-primary/55 truncate">{h.email}</p>
-              <div className="col-span-6 md:col-span-2">
-                <span className={cn('inline-block px-2 py-0.5 text-[9px] tracking-widest uppercase border font-body', est.color)}>
-                  {est.label}
-                </span>
+            <div key={h.id}>
+              {/* Mobile card */}
+              <div className="md:hidden px-4 py-3 hover:bg-muted/20 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-serif text-sm text-primary">{h.apellidos}, {h.nombre}</p>
+                    <p className="font-body text-[10px] text-primary/35 truncate">{h.email}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={cn('inline-block px-2 py-0.5 text-[9px] tracking-widest uppercase border font-body', est.color)}>
+                      {est.label}
+                    </span>
+                    {pagado
+                      ? <span className="font-body text-xs text-secondary font-medium">{CUOTA_ANUAL} €</span>
+                      : <span className="font-body text-xs text-primary/30">—</span>
+                    }
+                  </div>
+                </div>
                 {h.pago_presencial && (
-                  <span className="ml-1 text-[8px] text-primary/30 uppercase tracking-widest">· Pres.</span>
+                  <p className="font-body text-[8px] text-primary/30 uppercase tracking-widest mt-0.5">Pago presencial</p>
                 )}
               </div>
-              <div className="col-span-3 md:col-span-1">
-                {pagado
-                  ? <span className="font-body text-xs text-secondary font-medium">{CUOTA_ANUAL} €</span>
-                  : <span className="font-body text-xs text-primary/30">—</span>
-                }
+              {/* Desktop row */}
+              <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-muted/20 transition-colors">
+                <div className="col-span-4">
+                  <p className="font-serif text-sm text-primary">{h.apellidos}, {h.nombre}</p>
+                </div>
+                <p className="col-span-3 font-body text-xs text-primary/55 truncate">{h.email}</p>
+                <div className="col-span-2">
+                  <span className={cn('inline-block px-2 py-0.5 text-[9px] tracking-widest uppercase border font-body', est.color)}>
+                    {est.label}
+                  </span>
+                  {h.pago_presencial && (
+                    <span className="ml-1 text-[8px] text-primary/30 uppercase tracking-widest">· Pres.</span>
+                  )}
+                </div>
+                <div className="col-span-1">
+                  {pagado
+                    ? <span className="font-body text-xs text-secondary font-medium">{CUOTA_ANUAL} €</span>
+                    : <span className="font-body text-xs text-primary/30">—</span>
+                  }
+                </div>
+                <p className="col-span-2 font-body text-[10px] text-primary/40">
+                  {h.fecha_alta ? new Date(h.fecha_alta).toLocaleDateString('es-ES') : '—'}
+                </p>
               </div>
-              <p className="hidden md:block col-span-2 font-body text-[10px] text-primary/40">
-                {h.fecha_alta ? new Date(h.fecha_alta).toLocaleDateString('es-ES') : '—'}
-              </p>
             </div>
           );
         })}
@@ -276,25 +299,47 @@ function IngresostiendaTab({ pedidos }: { pedidos: any[] }) {
           filtrados.map((ped: any) => {
             const badge = PEDIDO_ESTADO_COLOR[ped.estado] ?? PEDIDO_ESTADO_COLOR.pendiente;
             return (
-              <div key={ped.id} className="grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-muted/20 transition-colors">
-                <div className="col-span-12 md:col-span-4">
-                  <p className="font-serif text-sm text-primary">
-                    {ped.hermanos?.apellidos}, {ped.hermanos?.nombre}
-                  </p>
+              <div key={ped.id}>
+                {/* Mobile card */}
+                <div className="md:hidden px-4 py-3 hover:bg-muted/20 transition-colors">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-serif text-sm text-primary">
+                        {ped.hermanos?.apellidos}, {ped.hermanos?.nombre}
+                      </p>
+                      <p className="font-body text-[10px] text-primary/55 truncate mt-0.5">
+                        {ped.productos?.nombre} × {ped.cantidad}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <p className="font-display text-base text-secondary">+{Number(ped.total).toFixed(2)} €</p>
+                      <span className={cn('inline-block px-2 py-0.5 border text-[9px] tracking-widest uppercase font-body', badge)}>
+                        {ped.estado}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <p className="col-span-6 md:col-span-3 font-body text-xs text-primary/55 truncate">
-                  {ped.productos?.nombre} × {ped.cantidad}
-                </p>
-                <p className="hidden md:block col-span-2 font-body text-[10px] text-primary/40">
-                  {new Date(ped.fecha).toLocaleDateString('es-ES')}
-                </p>
-                <p className="col-span-3 md:col-span-2 font-display text-base text-secondary">
-                  +{Number(ped.total).toFixed(2)} €
-                </p>
-                <div className="col-span-3 md:col-span-1">
-                  <span className={cn('inline-block px-2 py-0.5 border text-[9px] tracking-widest uppercase font-body', badge)}>
-                    {ped.estado}
-                  </span>
+                {/* Desktop row */}
+                <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-muted/20 transition-colors">
+                  <div className="col-span-4">
+                    <p className="font-serif text-sm text-primary">
+                      {ped.hermanos?.apellidos}, {ped.hermanos?.nombre}
+                    </p>
+                  </div>
+                  <p className="col-span-3 font-body text-xs text-primary/55 truncate">
+                    {ped.productos?.nombre} × {ped.cantidad}
+                  </p>
+                  <p className="col-span-2 font-body text-[10px] text-primary/40">
+                    {new Date(ped.fecha).toLocaleDateString('es-ES')}
+                  </p>
+                  <p className="col-span-2 font-display text-base text-secondary">
+                    +{Number(ped.total).toFixed(2)} €
+                  </p>
+                  <div className="col-span-1">
+                    <span className={cn('inline-block px-2 py-0.5 border text-[9px] tracking-widest uppercase font-body', badge)}>
+                      {ped.estado}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
@@ -739,7 +784,7 @@ function BalanceTab({
   return (
     <div>
       {/* Totals row */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         <div className="border border-secondary/15 p-4">
           <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-2">Total ingresos</p>
           <p className="font-display text-2xl text-secondary">+{totalIngresos.toFixed(2)} €</p>
@@ -1034,29 +1079,57 @@ function AntiguedadTab({ hermanos }: { hermanos: Hermano[] }) {
         </div>
 
         {filas.map((h) => (
-          <div key={h.id} className="grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-muted/20 transition-colors">
-            <div className="col-span-12 md:col-span-4">
-              <p className="font-serif text-sm text-primary">{h.apellidos}, {h.nombre}</p>
-              <p className="font-body text-[10px] text-primary/35 md:hidden">
-                Alta: {new Date(h.fecha_alta + 'T00:00:00').toLocaleDateString('es-ES')}
+          <div key={h.id}>
+            {/* Mobile card */}
+            <div className="md:hidden px-4 py-3 hover:bg-muted/20 transition-colors">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-serif text-sm text-primary">{h.apellidos}, {h.nombre}</p>
+                  <p className="font-body text-[10px] text-primary/35 mt-0.5">
+                    Alta: {new Date(h.fecha_alta + 'T00:00:00').toLocaleDateString('es-ES')}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end shrink-0 gap-0.5">
+                  <div className="flex items-center gap-1">
+                    <span className={`font-display text-lg ${h.anios >= 10 ? 'text-secondary' : 'text-primary'}`}>
+                      {h.anios}
+                    </span>
+                    <span className="font-body text-[10px] text-primary/40">
+                      año{h.anios !== 1 ? 's' : ''}
+                    </span>
+                    {h.anios >= 10 && (
+                      <span className="px-1.5 py-0.5 bg-secondary/10 text-secondary text-[8px] tracking-widest uppercase border border-secondary/20">Veterano</span>
+                    )}
+                  </div>
+                  <p className="font-body text-xs text-primary/70">
+                    ~{h.cuotasEst} €
+                    <span className="ml-1 text-[9px] text-primary/35">{h.anios} × {CUOTA_ANUAL} €/año</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            {/* Desktop row */}
+            <div className="hidden md:grid grid-cols-12 gap-3 px-4 py-3 items-center hover:bg-muted/20 transition-colors">
+              <div className="col-span-4">
+                <p className="font-serif text-sm text-primary">{h.apellidos}, {h.nombre}</p>
+              </div>
+              <p className="col-span-2 font-body text-xs text-primary/55">
+                {new Date(h.fecha_alta + 'T00:00:00').toLocaleDateString('es-ES')}
+              </p>
+              <div className="col-span-3 flex items-center gap-2">
+                <span className={`font-display text-lg ${h.anios >= 10 ? 'text-secondary' : 'text-primary'}`}>
+                  {h.anios}
+                </span>
+                <span className="font-body text-[10px] text-primary/40">
+                  año{h.anios !== 1 ? 's' : ''}
+                  {h.anios >= 10 && <span className="ml-1.5 px-1.5 py-0.5 bg-secondary/10 text-secondary text-[8px] tracking-widest uppercase border border-secondary/20">Veterano</span>}
+                </span>
+              </div>
+              <p className="col-span-3 font-body text-xs text-primary/70">
+                ~{h.cuotasEst} €
+                <span className="block text-[9px] text-primary/35">{h.anios} × {CUOTA_ANUAL} €/año</span>
               </p>
             </div>
-            <p className="hidden md:block col-span-2 font-body text-xs text-primary/55">
-              {new Date(h.fecha_alta + 'T00:00:00').toLocaleDateString('es-ES')}
-            </p>
-            <div className="col-span-7 md:col-span-3 flex items-center gap-2">
-              <span className={`font-display text-lg ${h.anios >= 10 ? 'text-secondary' : 'text-primary'}`}>
-                {h.anios}
-              </span>
-              <span className="font-body text-[10px] text-primary/40">
-                año{h.anios !== 1 ? 's' : ''}
-                {h.anios >= 10 && <span className="ml-1.5 px-1.5 py-0.5 bg-secondary/10 text-secondary text-[8px] tracking-widest uppercase border border-secondary/20">Veterano</span>}
-              </span>
-            </div>
-            <p className="col-span-5 md:col-span-3 font-body text-xs text-primary/70 text-right md:text-left">
-              ~{h.cuotasEst} €
-              <span className="block text-[9px] text-primary/35">{h.anios} × {CUOTA_ANUAL} €/año</span>
-            </p>
           </div>
         ))}
       </div>
@@ -1141,22 +1214,24 @@ function EstadisticasTab({
         {/* Desglose financiero */}
         <div className="border border-secondary/15 p-5">
           <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-4">Desglose financiero (€)</p>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={barData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#6b7280' }} />
-              <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} width={45} />
-              <Tooltip
-                formatter={(v) => [`${Number(v).toFixed(2)} €`]}
-                contentStyle={{ fontSize: 11, border: '1px solid #d1d5db', borderRadius: 0 }}
-              />
-              <Bar dataKey="valor" radius={0} maxBarSize={48}>
-                {barData.map((entry, i) => (
-                  <Cell key={i} fill={entry.tipo === 'ingreso' ? '#4a7c59' : '#dc2626'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="h-48 md:h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={barData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#6b7280' }} />
+                <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} width={45} />
+                <Tooltip
+                  formatter={(v) => [`${Number(v).toFixed(2)} €`]}
+                  contentStyle={{ fontSize: 11, border: '1px solid #d1d5db', borderRadius: 0 }}
+                />
+                <Bar dataKey="valor" radius={0} maxBarSize={48}>
+                  {barData.map((entry, i) => (
+                    <Cell key={i} fill={entry.tipo === 'ingreso' ? '#4a7c59' : '#dc2626'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
           <div className="flex gap-4 mt-2 justify-center">
             <span className="flex items-center gap-1.5 font-body text-[9px] text-primary/50">
               <span className="w-2.5 h-2.5 bg-[#4a7c59] inline-block" /> Ingreso
@@ -1173,32 +1248,34 @@ function EstadisticasTab({
           {hermanos.length === 0 ? (
             <p className="text-center font-body text-sm text-primary/30 py-16">Sin datos</p>
           ) : (
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie
-                  data={pieHermanos}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={85}
-                  dataKey="value"
-                  labelLine={false}
-                >
-                  {pieHermanos.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(v) => [Number(v), 'hermanos']}
-                  contentStyle={{ fontSize: 11, border: '1px solid #d1d5db', borderRadius: 0 }}
-                />
-                <Legend
-                  iconType="square"
-                  iconSize={9}
-                  formatter={(v) => <span style={{ fontSize: 10, color: '#6b7280' }}>{v}</span>}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="h-48 md:h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieHermanos}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={85}
+                    dataKey="value"
+                    labelLine={false}
+                  >
+                    {pieHermanos.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(v) => [Number(v), 'hermanos']}
+                    contentStyle={{ fontSize: 11, border: '1px solid #d1d5db', borderRadius: 0 }}
+                  />
+                  <Legend
+                    iconType="square"
+                    iconSize={9}
+                    formatter={(v) => <span style={{ fontSize: 10, color: '#6b7280' }}>{v}</span>}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           )}
         </div>
       </div>
