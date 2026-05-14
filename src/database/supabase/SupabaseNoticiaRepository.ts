@@ -1,4 +1,4 @@
-import { supabaseClient } from './Client';
+import { supabaseClient, supabaseAdmin } from './Client';
 import type { NoticiaRepository } from '../repositories/NoticiaRepository';
 import type { Noticia, NoticiaCreate } from '../../interfaces/Noticia';
 
@@ -31,7 +31,7 @@ export class SupabaseNoticiaRepository implements NoticiaRepository {
 
   async crear(noticia: NoticiaCreate, autorId: number): Promise<{ data?: Noticia; error?: string }> {
     try {
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabaseAdmin
         .from('noticias')
         .insert([{ ...noticia, autor_id: autorId }])
         .select()
@@ -44,12 +44,12 @@ export class SupabaseNoticiaRepository implements NoticiaRepository {
   }
 
   async editar(id: number, cambios: Partial<NoticiaCreate>): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('noticias').update(cambios).eq('id', id);
+    const { error } = await supabaseAdmin.from('noticias').update(cambios).eq('id', id);
     return { error: error?.message };
   }
 
   async eliminar(id: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('noticias').delete().eq('id', id);
+    const { error } = await supabaseAdmin.from('noticias').delete().eq('id', id);
     return { error: error?.message };
   }
 
@@ -67,7 +67,7 @@ export class SupabaseNoticiaRepository implements NoticiaRepository {
   async subirImagen(file: File): Promise<{ url?: string; error?: string }> {
     const ext = file.name.split('.').pop() ?? 'jpg';
     const path = `${Date.now()}.${ext}`;
-    const { error } = await supabaseClient.storage
+    const { error } = await supabaseAdmin.storage
       .from('noticias')
       .upload(path, file, { upsert: false });
     if (error) {
@@ -76,7 +76,7 @@ export class SupabaseNoticiaRepository implements NoticiaRepository {
       }
       return { error: error.message };
     }
-    const { data } = supabaseClient.storage.from('noticias').getPublicUrl(path);
+    const { data } = supabaseAdmin.storage.from('noticias').getPublicUrl(path);
     return { url: data.publicUrl };
   }
 }
