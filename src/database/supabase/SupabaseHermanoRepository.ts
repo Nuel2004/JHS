@@ -50,7 +50,6 @@ export class SupabaseHermanoRepository implements HermanoRepository {
       if (dbError) throw dbError;
       return { success: true };
     } catch (error: any) {
-      console.error('SupabaseHermanoRepository.registrar:', error.message);
       return { success: false, error: error.message };
     }
   }

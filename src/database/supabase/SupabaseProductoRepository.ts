@@ -46,17 +46,6 @@ export class SupabaseProductoRepository implements ProductoRepository {
     }
   }
 
-  async obtenerPedidosPorHermano(hermanoId: number): Promise<{ data?: Pedido[]; error?: string }> {
-    try {
-      const { data, error } = await supabaseClient
-        .from('pedidos').select('*').eq('hermano_id', hermanoId).order('fecha', { ascending: false });
-      if (error) throw error;
-      return { data };
-    } catch (error: any) {
-      return { error: error.message };
-    }
-  }
-
   async obtenerTodosPedidos(): Promise<{ data?: Pedido[]; error?: string }> {
     try {
       const { data, error } = await supabaseClient

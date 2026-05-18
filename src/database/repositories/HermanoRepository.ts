@@ -1,6 +1,6 @@
-import type { Hermano, SessionHermano } from '../../interfaces/Hermano';
+import type { Hermano, SessionHermano, Genero } from '../../interfaces/Hermano';
 
-export type Genero = 'Mujer' | 'Hombre' | 'Otro';
+export type { Genero };
 
 export interface RegistroDatos {
   email: string;

@@ -23,9 +23,6 @@ export interface ProductoRepository {
     cantidad: number
   ): Promise<{ data?: Pedido; error?: string }>;
 
-  /** Obtiene los pedidos de un hermano */
-  obtenerPedidosPorHermano(hermanoId: number): Promise<{ data?: Pedido[]; error?: string }>;
-
   /** Obtiene todos los pedidos — solo admin */
   obtenerTodosPedidos(): Promise<{ data?: Pedido[]; error?: string }>;
 
