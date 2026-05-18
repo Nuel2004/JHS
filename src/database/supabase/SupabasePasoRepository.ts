@@ -1,5 +1,5 @@
 // src/database/supabase/SupabasePasoRepository.ts
-import { supabaseClient } from './Client';
+import { supabaseClient, supabaseAdmin } from './Client';
 import type { PasoRepository } from '../repositories/PasoRepository';
 import type { Paso } from '../../interfaces/Paso';
 
@@ -17,7 +17,7 @@ export class SupabasePasoRepository implements PasoRepository {
   }
 
   async activar(id: number, adminId: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient
+    const { error } = await supabaseAdmin
       .from('pasos_gps')
       .update({ activa: true, admin_id: adminId, ultima_actualizacion: new Date().toISOString() })
       .eq('id', id);
@@ -25,7 +25,7 @@ export class SupabasePasoRepository implements PasoRepository {
   }
 
   async desactivar(id: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient
+    const { error } = await supabaseAdmin
       .from('pasos_gps')
       .update({ activa: false, latitud_actual: null, longitud_actual: null })
       .eq('id', id);
@@ -33,7 +33,7 @@ export class SupabasePasoRepository implements PasoRepository {
   }
 
   async actualizarGPS(id: number, lat: number, lng: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient
+    const { error } = await supabaseAdmin
       .from('pasos_gps')
       .update({
         latitud_actual: lat,

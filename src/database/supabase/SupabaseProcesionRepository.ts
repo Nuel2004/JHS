@@ -1,4 +1,4 @@
-import { supabaseClient } from './Client';
+import { supabaseClient, supabaseAdmin } from './Client';
 import type { ProcesionRepository } from '../repositories/ProcesionRepository';
 import type { ProcesionEstado, RecorridoPunto } from '../../interfaces/Procesion';
 
@@ -27,7 +27,7 @@ export class SupabaseProcesionRepository implements ProcesionRepository {
   }
 
   async activar(adminId: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient
+    const { error } = await supabaseAdmin
       .from('procesion_estado')
       .update({ activa: true, admin_id: adminId, ultima_actualizacion: new Date().toISOString() })
       .eq('id', 1);
@@ -35,7 +35,7 @@ export class SupabaseProcesionRepository implements ProcesionRepository {
   }
 
   async desactivar(): Promise<{ error?: string }> {
-    const { error } = await supabaseClient
+    const { error } = await supabaseAdmin
       .from('procesion_estado')
       .update({ activa: false, latitud_actual: null, longitud_actual: null })
       .eq('id', 1);
@@ -43,7 +43,7 @@ export class SupabaseProcesionRepository implements ProcesionRepository {
   }
 
   async actualizarGPS(lat: number, lng: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient
+    const { error } = await supabaseAdmin
       .from('procesion_estado')
       .update({ latitud_actual: lat, longitud_actual: lng, ultima_actualizacion: new Date().toISOString() })
       .eq('id', 1);

@@ -78,7 +78,11 @@ export function GpsSection() {
             if (data) setPasos(data);
         });
         const unsubPasos = pasoRepository.suscribirRealtime((updatedPaso) => {
-            setPasos((prev) => prev.map((p) => (p.id === updatedPaso.id ? updatedPaso : p)));
+            setPasos((prev) => {
+                const exists = prev.some((p) => p.id === updatedPaso.id);
+                if (exists) return prev.map((p) => (p.id === updatedPaso.id ? updatedPaso : p));
+                return [...prev, updatedPaso];
+            });
         });
 
         return () => {
