@@ -74,9 +74,15 @@ export function GpsSection() {
     const [pasos, setPasos] = useState<Paso[]>([]);
 
     useEffect(() => {
-        pasoRepository.obtenerTodos().then(({ data }) => {
-            if (data) setPasos(data);
-        });
+        const fetchPasos = () => {
+            pasoRepository.obtenerTodos().then(({ data }) => {
+                if (data) setPasos(data);
+            });
+        };
+
+        fetchPasos();
+        const interval = setInterval(fetchPasos, 5000);
+
         const unsubPasos = pasoRepository.suscribirRealtime((updatedPaso) => {
             setPasos((prev) => {
                 const exists = prev.some((p) => p.id === updatedPaso.id);
@@ -86,6 +92,7 @@ export function GpsSection() {
         });
 
         return () => {
+            clearInterval(interval);
             unsubPasos();
         };
     }, []);

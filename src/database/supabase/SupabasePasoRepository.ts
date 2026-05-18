@@ -45,7 +45,7 @@ export class SupabasePasoRepository implements PasoRepository {
   }
 
   suscribirRealtime(onCambio: (paso: Paso) => void): () => void {
-    const channel = supabaseClient
+    const channel = supabaseAdmin
       .channel('pasos-gps')
       .on(
         'postgres_changes',
@@ -54,6 +54,6 @@ export class SupabasePasoRepository implements PasoRepository {
       )
       .subscribe();
 
-    return () => { supabaseClient.removeChannel(channel); };
+    return () => { supabaseAdmin.removeChannel(channel); };
   }
 }

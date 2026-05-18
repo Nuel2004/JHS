@@ -51,7 +51,7 @@ export class SupabaseProcesionRepository implements ProcesionRepository {
   }
 
   suscribirRealtime(onCambio: (estado: ProcesionEstado) => void): () => void {
-    const channel = supabaseClient
+    const channel = supabaseAdmin
       .channel('procesion-gps')
       .on(
         'postgres_changes',
@@ -60,6 +60,6 @@ export class SupabaseProcesionRepository implements ProcesionRepository {
       )
       .subscribe();
 
-    return () => { supabaseClient.removeChannel(channel); };
+    return () => { supabaseAdmin.removeChannel(channel); };
   }
 }
