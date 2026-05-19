@@ -26,7 +26,7 @@ function NoticiaCard({ noticia }: { noticia: Noticia }) {
           <img
             src={noticia.imagen_url}
             alt={noticia.titulo}
-            className="w-full h-48 object-cover mb-5 grayscale-[20%]"
+            className="w-full h-auto mb-5 grayscale-[20%]"
           />
         )
       )}

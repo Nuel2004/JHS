@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { productoRepository } from '@/database/repositories';
 import type { Producto, ProductoCreate, CategoriaProducto } from '@/interfaces/Producto';
@@ -6,7 +6,7 @@ import { SectionLabel } from '@/components/landing/Helpers';
 import { toast } from 'react-hot-toast';
 import {
   Loader2, Package, Edit2, Trash2, Plus, X, Check,
-  ChevronRight, AlertTriangle,
+  ChevronRight, AlertTriangle, Upload, ImageIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -49,11 +49,24 @@ function ProductoModal({
 }) {
   const [form, setForm] = useState(inicial);
   const [guardando, setGuardando] = useState(false);
+  const [subiendo, setSubiendo] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const set = (k: keyof ProductoCreate, v: any) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSubiendo(true);
+    const { url, error } = await productoRepository.subirImagen(file);
+    setSubiendo(false);
+    if (error) { toast.error(error); return; }
+    set('imagen_url', url ?? null);
+    toast.success('Imagen subida');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.nombre.trim()) { toast.error('El nombre es obligatorio'); return; }
     if (form.precio < 0)     { toast.error('El precio no puede ser negativo'); return; }
@@ -145,16 +158,56 @@ function ProductoModal({
             </select>
           </div>
 
+          {/* Imagen */}
           <div>
             <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
-              URL imagen
+              Imagen
             </label>
             <input
-              value={form.imagen_url ?? ''}
-              onChange={(e) => set('imagen_url', e.target.value || null)}
-              className="w-full border border-secondary/20 px-3 py-2 font-body text-sm focus:outline-none focus:border-secondary"
-              placeholder="https://..."
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFile}
             />
+            <div className="flex gap-2 items-start">
+              {/* Preview */}
+              {form.imagen_url ? (
+                <div className="relative shrink-0 w-16 h-16 border border-secondary/20 overflow-hidden bg-muted/20">
+                  <img src={form.imagen_url} alt="" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => set('imagen_url', null)}
+                    className="absolute top-0.5 right-0.5 bg-white/80 rounded-full p-0.5 text-primary/50 hover:text-red-500 transition-colors"
+                  >
+                    <X size={10} />
+                  </button>
+                </div>
+              ) : (
+                <div className="shrink-0 w-16 h-16 border border-dashed border-secondary/25 flex items-center justify-center bg-muted/10">
+                  <ImageIcon size={20} className="text-primary/20" />
+                </div>
+              )}
+              <div className="flex-1 space-y-1.5">
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={subiendo}
+                  className="flex items-center gap-1.5 px-3 py-2 border border-secondary/20 font-body text-[10px] tracking-widest uppercase text-primary/50 hover:border-secondary hover:text-secondary transition-colors disabled:opacity-50 w-full justify-center"
+                >
+                  {subiendo
+                    ? <><Loader2 size={10} className="animate-spin" /> Subiendo…</>
+                    : <><Upload size={10} /> Subir desde ordenador</>
+                  }
+                </button>
+                <input
+                  value={form.imagen_url ?? ''}
+                  onChange={(e) => set('imagen_url', e.target.value || null)}
+                  className="w-full border border-secondary/15 px-2 py-1.5 font-body text-[11px] text-primary/50 focus:outline-none focus:border-secondary placeholder:text-primary/25"
+                  placeholder="o pega una URL…"
+                />
+              </div>
+            </div>
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -178,7 +231,7 @@ function ProductoModal({
             </button>
             <button
               type="submit"
-              disabled={guardando}
+              disabled={guardando || subiendo}
               className="flex-1 bg-secondary text-white py-2 font-body text-xs tracking-widest uppercase hover:bg-secondary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {guardando ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}

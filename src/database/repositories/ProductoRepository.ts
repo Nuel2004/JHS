@@ -34,4 +34,7 @@ export interface ProductoRepository {
 
   /** Actualiza stock de un producto — solo admin */
   actualizarStock(productoId: number, stock: number): Promise<{ error?: string }>;
+
+  /** Sube una imagen al bucket de productos y devuelve la URL pública */
+  subirImagen(file: File): Promise<{ url?: string; error?: string }>;
 }

@@ -1,4 +1,4 @@
-import { supabaseClient } from './Client';
+import { supabaseClient, supabaseAdmin } from './Client';
 import type { ProductoRepository } from '../repositories/ProductoRepository';
 import type { Producto, Pedido, ProductoCreate } from '../../interfaces/Producto';
 
@@ -90,5 +90,21 @@ export class SupabaseProductoRepository implements ProductoRepository {
   async actualizarStock(productoId: number, stock: number): Promise<{ error?: string }> {
     const { error } = await supabaseClient.from('productos').update({ stock }).eq('id', productoId);
     return { error: error?.message };
+  }
+
+  async subirImagen(file: File): Promise<{ url?: string; error?: string }> {
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const path = `${Date.now()}.${ext}`;
+    const { error } = await supabaseAdmin.storage
+      .from('productos')
+      .upload(path, file, { upsert: false });
+    if (error) {
+      if (error.message.toLowerCase().includes('bucket')) {
+        return { error: 'Bucket no encontrado. Ve a Supabase → Storage → New bucket → nombre: "productos", público: activado.' };
+      }
+      return { error: error.message };
+    }
+    const { data } = supabaseAdmin.storage.from('productos').getPublicUrl(path);
+    return { url: data.publicUrl };
   }
 }
