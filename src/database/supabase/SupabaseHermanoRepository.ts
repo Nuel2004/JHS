@@ -1,4 +1,4 @@
-import { supabaseClient } from './Client';
+import { supabaseClient, supabaseAdmin } from './Client';
 import type { HermanoRepository, RegistroDatos, EditarHermanoDatos } from '../repositories/HermanoRepository';
 import type { Hermano, SessionHermano } from '../../interfaces/Hermano';
 
@@ -88,7 +88,7 @@ export class SupabaseHermanoRepository implements HermanoRepository {
 
   async obtenerTodos(): Promise<{ data?: Hermano[]; error?: string }> {
     try {
-      const { data, error } = await supabaseClient.from('hermanos').select('*').order('apellidos', { ascending: true });
+      const { data, error } = await supabaseAdmin.from('hermanos').select('*').order('apellidos', { ascending: true });
       if (error) throw error;
       return { data };
     } catch (error: any) {
@@ -97,27 +97,27 @@ export class SupabaseHermanoRepository implements HermanoRepository {
   }
 
   async actualizarPreferencia(hermanoId: number, preferencia: string): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('hermanos').update({ preferencia_paso: preferencia }).eq('id', hermanoId);
+    const { error } = await supabaseAdmin.from('hermanos').update({ preferencia_paso: preferencia }).eq('id', hermanoId);
     return { error: error?.message };
   }
 
   async marcarPagoPresencial(hermanoId: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('hermanos').update({ pago_presencial: true, estado: 'activo', es_cofrade: true }).eq('id', hermanoId);
+    const { error } = await supabaseAdmin.from('hermanos').update({ pago_presencial: true, estado: 'activo', es_cofrade: true }).eq('id', hermanoId);
     return { error: error?.message };
   }
 
   async activarCofrade(hermanoId: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('hermanos').update({ estado: 'activo', es_cofrade: true }).eq('id', hermanoId);
+    const { error } = await supabaseAdmin.from('hermanos').update({ estado: 'activo', es_cofrade: true }).eq('id', hermanoId);
     return { error: error?.message };
   }
 
   async editarHermano(hermanoId: number, datos: EditarHermanoDatos): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('hermanos').update(datos).eq('id', hermanoId);
+    const { error } = await supabaseAdmin.from('hermanos').update(datos).eq('id', hermanoId);
     return { error: error?.message };
   }
 
   async darDeBaja(hermanoId: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient
+    const { error } = await supabaseAdmin
       .from('hermanos')
       .update({ estado: 'baja', es_cofrade: false })
       .eq('id', hermanoId);
@@ -125,7 +125,7 @@ export class SupabaseHermanoRepository implements HermanoRepository {
   }
 
   async cambiarRol(hermanoId: number, rol: import('../../interfaces/Hermano').RolUsuario): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('hermanos').update({ rol }).eq('id', hermanoId);
+    const { error } = await supabaseAdmin.from('hermanos').update({ rol }).eq('id', hermanoId);
     return { error: error?.message };
   }
 

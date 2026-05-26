@@ -15,6 +15,9 @@ import LandingPage from './pages/LandingPage';
 import NoticiasPage from './pages/public/NoticiasPage';
 import ContactoPage from './pages/public/ContactoPage';
 import RedesSocialesPage from './pages/public/RedesSocialesPage';
+import AvisoLegalPage from './pages/public/AvisoLegalPage';
+import PrivacidadPage from './pages/public/PrivacidadPage';
+import CookiesPage from './pages/public/CookiesPage';
 
 // Auth
 import LoginPage from './pages/auth/LoginPage';
@@ -53,6 +56,9 @@ const router = createBrowserRouter([
           { path: '/noticias', element: <NoticiasPage /> },
           { path: '/contacto', element: <ContactoPage /> },
           { path: '/redes-sociales', element: <RedesSocialesPage /> },
+          { path: '/aviso-legal', element: <AvisoLegalPage /> },
+          { path: '/privacidad', element: <PrivacidadPage /> },
+          { path: '/cookies', element: <CookiesPage /> },
         ],
       },
 

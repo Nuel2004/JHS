@@ -90,10 +90,9 @@ export default function TiendaPage() {
         return;
       }
       throw new Error('No se recibió URL de pago');
-    } catch {
-      toast.success('Pedidos registrados. Podrás pagarlos desde "Mis pedidos".');
-      vaciarCarrito();
-      setDrawerOpen(false);
+    } catch (err: any) {
+      const msg = err?.message ?? String(err);
+      toast.error(`Error al iniciar el pago: ${msg}`);
     }
     setLoadingCheckout(false);
   };

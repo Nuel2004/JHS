@@ -1,3 +1,7 @@
+import { Link } from 'react-router-dom';
+
+const linkClass = "font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline";
+
 export function Footer() {
     return (
         <footer className="bg-background border-t border-secondary/15 px-6 md:px-12 py-10 flex flex-col md:flex-row justify-between items-center gap-6 flex-wrap">
@@ -8,36 +12,13 @@ export function Footer() {
                 </p>
             </div>
             <div className="flex gap-8 flex-wrap justify-center">
-                <a
-                    href="#"
-                    className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
-                >
-                    Historia
-                </a>
-                <a
-                    href="/noticias"
-                    className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
-                >
-                    Noticias
-                </a>
-                <a
-                    href="/#tienda"
-                    className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
-                >
-                    Tienda
-                </a>
-                <a
-                    href="/contacto"
-                    className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
-                >
-                    Contacto
-                </a>
-                <a
-                    href="#"
-                    className="font-serif text-[10px] tracking-[0.15em] uppercase text-primary/60 hover:text-secondary transition-colors no-underline"
-                >
-                    Privacidad
-                </a>
+                <a href="/#historia" className={linkClass}>Historia</a>
+                <Link to="/noticias" className={linkClass}>Noticias</Link>
+                <a href="/#tienda" className={linkClass}>Tienda</a>
+                <Link to="/contacto" className={linkClass}>Contacto</Link>
+                <Link to="/privacidad" className={linkClass}>Privacidad</Link>
+                <Link to="/cookies" className={linkClass}>Cookies</Link>
+                <Link to="/aviso-legal" className={linkClass}>Aviso legal</Link>
             </div>
             <p className="font-body text-[0.8rem] text-primary/40">
                 © 2026 Jesús Salvador de los Hombres · Montijo

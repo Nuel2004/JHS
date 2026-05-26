@@ -1,4 +1,4 @@
-import Stripe from 'npm:stripe@14';
+import Stripe from 'npm:stripe@17';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
       line_items,
       success_url,
       cancel_url,
-      payment_method_types: ['card'],
+      automatic_payment_methods: { enabled: true },
       locale: 'es',
       metadata,
     });

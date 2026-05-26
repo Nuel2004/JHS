@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diagrama ER — Cofradía JHS</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #F5F2E9;
+      color: #1B3022;
+      min-height: 100vh;
+      padding: 40px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header .label {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #B8860B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    header .label::before,
+    header .label::after {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 1px;
+      background: #B8860B;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: normal;
+      color: #1B3022;
+      margin-bottom: 6px;
+    }
+
+    header p {
+      font-size: 13px;
+      color: #1B3022;
+      opacity: 0.5;
+    }
+
+    .diagram-wrapper {
+      background: #ffffff;
+      border: 1px solid rgba(184, 134, 11, 0.25);
+      border-radius: 4px;
+      padding: 32px;
+      max-width: 1400px;
+      margin: 0 auto;
+      overflow-x: auto;
+      box-shadow: 0 2px 16px rgba(27, 48, 34, 0.06);
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+
+    .legend {
+      max-width: 1400px;
+      margin: 32px auto 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .legend-item {
+      background: white;
+      border: 1px solid rgba(184, 134, 11, 0.2);
+      border-radius: 4px;
+      padding: 12px 16px;
+    }
+
+    .legend-item h3 {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #B8860B;
+      margin-bottom: 6px;
+      font-weight: normal;
+    }
+
+    .legend-item p {
+      font-size: 12px;
+      color: #1B3022;
+      opacity: 0.6;
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 11px;
+      color: #1B3022;
+      opacity: 0.35;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="label">Base de datos</div>
+    <h1>Diagrama Entidad–Relación</h1>
+    <p>Cofradía Jesús Salvador de los Hombres · Montijo, Badajoz</p>
+  </header>
+
+  <div class="diagram-wrapper">
+    <div class="mermaid">
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#1B3022",
+    "primaryTextColor": "#F5F2E9",
+    "primaryBorderColor": "#B8860B",
+    "lineColor": "#B8860B",
+    "secondaryColor": "#F5F2E9",
+    "tertiaryColor": "#E2E0D7",
+    "background": "#ffffff",
+    "fontSize": "13px"
+  }
+}}%%
+erDiagram
+    hermanos {
+        int id PK
+        string auth_id "FK → auth.users (Supabase)"
+        string nombre
+        string apellidos
+        string genero "Mujer | Hombre | Otro"
+        string email
+        string telefono
+        string direccion
+        string fecha_nacimiento
+        boolean bautizado
+        string foto_bautismo_url
+        boolean es_cofrade
+        string estado "pendiente_pago | activo | baja"
+        string rol "hermano | admin | superadmin"
+        string preferencia_paso
+        boolean pago_presencial
+        string fecha_alta
+        string stripe_customer_id
+        string notas_admin
+    }
+
+    noticias {
+        int id PK
+        string titulo
+        string cuerpo
+        string imagen_url
+        int autor_id FK
+        string fecha_publicacion
+        boolean publicada
+        boolean destacada
+    }
+
+    productos {
+        int id PK
+        string nombre
+        string descripcion
+        float precio
+        int stock
+        string categoria "Palma | Traje | Merchandising"
+        string imagen_url
+        boolean activo
+    }
+
+    pedidos {
+        int id PK
+        int hermano_id FK
+        int producto_id FK
+        int cantidad
+        float total
+        string estado "pendiente | pagado | entregado"
+        string pago_id "Stripe payment_intent"
+        string fecha
+    }
+
+    pasos_gps {
+        int id PK
+        string nombre
+        string color "Hex color"
+        boolean activa
+        float latitud_actual
+        float longitud_actual
+        string ultima_actualizacion
+        int admin_id FK
+    }
+
+    procesion_estado {
+        int id PK
+        boolean activa
+        float latitud_actual
+        float longitud_actual
+        string ultima_actualizacion
+        int admin_id FK
+        int anno
+    }
+
+    recorrido_puntos {
+        int id PK
+        string nombre
+        string descripcion
+        float latitud
+        float longitud
+        int orden
+        string tipo "inicio | parada | paso_obligado | fin"
+        boolean activo
+    }
+
+    hermanos ||--o{ noticias         : "autor_id"
+    hermanos ||--o{ pedidos          : "hermano_id"
+    productos ||--o{ pedidos         : "producto_id"
+    hermanos ||--o{ pasos_gps        : "admin_id"
+    hermanos ||--o| procesion_estado : "admin_id"
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <h3>hermanos</h3>
+      <p>Usuarios del sistema. Gestiona autenticación, roles, estado de cofrade y datos personales.</p>
+    </div>
+    <div class="legend-item">
+      <h3>noticias</h3>
+      <p>Publicaciones de la cofradía. Un hermano (admin) actúa como autor.</p>
+    </div>
+    <div class="legend-item">
+      <h3>productos</h3>
+      <p>Catálogo de la tienda (palmas, trajes, merchandising) con stock e imagen.</p>
+    </div>
+    <div class="legend-item">
+      <h3>pedidos</h3>
+      <p>Relación N:M entre hermanos y productos. Incluye estado de pago y referencia Stripe.</p>
+    </div>
+    <div class="legend-item">
+      <h3>pasos_gps</h3>
+      <p>Los tres pasos de la procesión con su posición GPS en tiempo real (Supabase Realtime).</p>
+    </div>
+    <div class="legend-item">
+      <h3>procesion_estado</h3>
+      <p>Fila única (id=1) con el estado global de la procesión y la posición de la cruz guía.</p>
+    </div>
+    <div class="legend-item">
+      <h3>recorrido_puntos</h3>
+      <p>Puntos del recorrido procesional ordenados. Tabla independiente, sin FK directa.</p>
+    </div>
+  </div>
+
+  <footer>
+    Generado · mayo 2026 · Stack: PostgreSQL (Supabase) + React 19 + TypeScript
+  </footer>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      er: {
+        diagramPadding: 30,
+        layoutDirection: 'TB',
+        minEntityWidth: 100,
+        minEntityHeight: 75,
+        entityPadding: 15,
+        useMaxWidth: true,
+      }
+    });
+  </script>
+
+</body>
+</html>
