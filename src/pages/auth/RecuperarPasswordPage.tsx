@@ -72,6 +72,7 @@ export default function RecuperarPasswordPage() {
                   type="email"
                   required
                   autoComplete="email"
+                  disabled={loading}
                   className="bg-background border-secondary/30 rounded-none focus-visible:ring-secondary/50"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
