@@ -187,7 +187,10 @@ src/
 │   ├── public/                # Accesibles sin login
 │   │   ├── NoticiasPage.tsx
 │   │   ├── ContactoPage.tsx
-│   │   └── RedesSocialesPage.tsx
+│   │   ├── RedesSocialesPage.tsx
+│   │   ├── PrivacidadPage.tsx
+│   │   ├── CookiesPage.tsx
+│   │   └── AvisoLegalPage.tsx
 │   ├── auth/
 │   │   ├── LoginPage.tsx
 │   │   ├── RegisterPage.tsx
@@ -217,7 +220,7 @@ src/
 │   └── ui/                    # Componentes shadcn (Button, Card, Badge...)
 │
 └── lib/
-    └── utils.ts               # cn(), formatEur() y helpers
+    └── utils.ts               # cn(), formatEur(), traducirError() y helpers
 ```
 
 ---
@@ -230,7 +233,7 @@ src/
 | **Hermano** | Registrado, cuota pendiente | Dashboard, pago de cuota, explorar tienda |
 | **Cofrade activo** | Cuota pagada (`es_cofrade = true`) | Todo lo anterior + tienda completa + puesto en procesión |
 | **Admin** | Rol `admin` | Panel completo de gestión (hermanos, noticias, GPS, tienda, cuentas) |
-| **Superadmin** | Rol `superadmin` | Todo lo del admin + CRUD completo de hermanos y gestión de roles |
+| **Superadmin** | Rol `superadmin` | Todo lo del admin + CRUD completo de hermanos, gestión de roles y verificación de bautismos |
 
 ### Estados de un hermano
 
@@ -250,7 +253,7 @@ La base de datos usa **PostgreSQL** a través de Supabase con **Row Level Securi
 
 | Tabla | Descripción |
 |-------|-------------|
-| `hermanos` | Usuarios: datos personales, estado, rol, stripe_customer_id |
+| `hermanos` | Usuarios: datos personales, estado, rol, stripe_customer_id, foto_bautismo_url |
 | `noticias` | Artículos con título, cuerpo, imagen/PDF, publicada, destacada |
 | `productos` | Catálogo: nombre, precio, stock, categoría (Palma/Traje/Productos oficiales) |
 | `pedidos` | Órdenes: hermano_id, producto_id, cantidad, total, estado, stripe payment_id |
