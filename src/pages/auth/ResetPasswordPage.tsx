@@ -33,7 +33,7 @@ export default function ResetPasswordPage() {
         toast.error('El enlace ha caducado o no es válido.');
         navigate('/recuperar-password');
       }
-    }, 5000);
+    }, 10000);
 
     return () => {
       subscription.unsubscribe();

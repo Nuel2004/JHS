@@ -8,6 +8,7 @@ import { SectionLabel } from '@/components/landing/Helpers';
 import { supabaseClient, supabaseAdmin } from '@/database/supabase/Client';
 import { toast } from 'react-hot-toast';
 import { Loader2, Package, ShoppingCart } from 'lucide-react';
+import { formatEur } from '@/lib/utils';
 import CartDrawer from '@/components/tienda/CartDrawer';
 
 function localImage(p: Producto): string | null {
@@ -186,7 +187,7 @@ export default function TiendaPage() {
 
                     <div className="mt-auto">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="font-display text-2xl text-secondary">{p.precio.toFixed(2)}€</p>
+                        <p className="font-display text-2xl text-secondary">{formatEur(p.precio)}€</p>
                         {p.stock > 0 && p.stock < 10 && (
                           <p className="font-body text-[9px] text-amber-600">
                             Últimas {p.stock} ud.

@@ -36,6 +36,6 @@ export function CofradeRoute() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isCofrade = useAuthStore((s) => s.isCofrade);
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!isCofrade) return <Navigate to="/pago-cuota" replace />;
+  if (!isCofrade) return <Navigate to="/dashboard" replace />;
   return <Outlet />;
 }

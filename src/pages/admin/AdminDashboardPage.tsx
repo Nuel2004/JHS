@@ -4,7 +4,7 @@ import { supabaseClient } from '@/database/supabase/Client';
 import { SectionLabel } from '@/components/landing/Helpers';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Users, CheckCircle2, Clock, Euro, MapPin, Loader2, X, ZoomIn, FileText } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatEur } from '@/lib/utils';
 
 interface StatsAdmin {
   total_hermanos: number;
@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
             <StatCard icon={Users} label="Total hermanos" value={stats?.total_hermanos ?? 0} />
             <StatCard icon={CheckCircle2} label="Activos" value={stats?.activos ?? 0} sub="Cofrades al día" />
             <StatCard icon={Clock} label="Pendientes de pago" value={stats?.pendientes_pago ?? 0} sub="Sin activar" />
-            <StatCard icon={Euro} label="Recaudado total" value={`${(stats?.recaudado_total ?? 0).toFixed(2)} €`} sub="Cuotas completadas" />
+            <StatCard icon={Euro} label="Recaudado total" value={`${formatEur(stats?.recaudado_total ?? 0)} €`} sub="Cuotas completadas" />
             <StatCard
               icon={MapPin}
               label="GPS Procesión"

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { SessionHermano, Hermano } from '../interfaces/Hermano';
+import { useCarritoStore } from './carritoStore';
 
 const AUTH_KEY = 'jhs-auth-v1';
 export const REMEMBER_KEY = 'jhs-remember-me';
@@ -62,6 +63,7 @@ export const useAuthStore = create<AuthState>()(
         localStorage.removeItem(REMEMBER_KEY);
         localStorage.removeItem(AUTH_KEY);
         sessionStorage.removeItem(AUTH_KEY);
+        useCarritoStore.getState().vaciarCarrito();
         set({
           sessionHermano: null,
           isAuthenticated: false,

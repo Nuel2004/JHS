@@ -21,6 +21,14 @@ function PasoCard({ paso, hermanoId }: PasoCardProps) {
   const watchId = useRef<number | null>(null);
   const [gpsActivo, setGpsActivo] = useState(false);
 
+  useEffect(() => {
+    return () => {
+      if (watchId.current !== null) {
+        navigator.geolocation.clearWatch(watchId.current);
+      }
+    };
+  }, []);
+
   const activar = async () => {
     setEnviando(true);
     const { error } = await pasoRepository.activar(paso.id, hermanoId);

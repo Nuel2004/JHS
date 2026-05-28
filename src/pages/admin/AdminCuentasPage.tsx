@@ -10,7 +10,7 @@ import {
   Loader2, Search, Trash2, Plus, TrendingDown, TrendingUp, Wallet,
   BookOpen, Clock, CalendarDays, BarChart2,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatEur } from '@/lib/utils';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
@@ -315,7 +315,7 @@ function IngresostiendaTab({ pedidos }: { pedidos: any[] }) {
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                      <p className="font-display text-base text-secondary">+{Number(ped.total).toFixed(2)} €</p>
+                      <p className="font-display text-base text-secondary">+{formatEur(Number(ped.total))} €</p>
                       <span className={cn('inline-block px-2 py-0.5 border text-[9px] tracking-widest uppercase font-body', badge)}>
                         {ped.estado}
                       </span>
@@ -336,7 +336,7 @@ function IngresostiendaTab({ pedidos }: { pedidos: any[] }) {
                     {new Date(ped.fecha).toLocaleDateString('es-ES')}
                   </p>
                   <p className="col-span-2 font-display text-base text-secondary">
-                    +{Number(ped.total).toFixed(2)} €
+                    +{formatEur(Number(ped.total))} €
                   </p>
                   <div className="col-span-1">
                     <span className={cn('inline-block px-2 py-0.5 border text-[9px] tracking-widest uppercase font-body', badge)}>
@@ -354,7 +354,7 @@ function IngresostiendaTab({ pedidos }: { pedidos: any[] }) {
             <p className="col-span-9 font-body text-[9px] tracking-widest uppercase text-primary/40">
               Total mostrado
             </p>
-            <p className="col-span-3 font-display text-lg text-secondary">+{totalFiltrados.toFixed(2)} €</p>
+            <p className="col-span-3 font-display text-lg text-secondary">+{formatEur(totalFiltrados)} €</p>
           </div>
         )}
       </div>
@@ -504,7 +504,7 @@ function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
                 {new Date(g.fecha + 'T00:00:00').toLocaleDateString('es-ES')}
               </p>
               <p className="col-span-3 font-display text-base text-red-500">
-                -{g.importe.toFixed(2)} €
+                -{formatEur(g.importe)} €
               </p>
               <div className="col-span-1 flex justify-end">
                 <button
@@ -542,7 +542,7 @@ function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
                     {new Date(p.fecha).toLocaleDateString('es-ES')}
                   </p>
                   <p className="col-span-3 font-display text-base text-red-500">
-                    -{Number(p.total).toFixed(2)} €
+                    -{formatEur(Number(p.total))} €
                   </p>
                   <div className="col-span-1" />
                 </div>
@@ -573,7 +573,7 @@ function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
                     {new Date(p.fecha).toLocaleDateString('es-ES')}
                   </p>
                   <p className="col-span-3 font-display text-base text-red-500">
-                    -{(Number(p.total) * COSTE_TIENDA).toFixed(2)} €
+                    -{formatEur(Number(p.total) * COSTE_TIENDA)} €
                   </p>
                   <div className="col-span-1" />
                 </div>
@@ -583,7 +583,7 @@ function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
 
           <div className="grid grid-cols-12 gap-3 px-4 py-3 bg-muted/30">
             <p className="col-span-8 font-body text-[9px] tracking-widest uppercase text-primary/40">Total gastos</p>
-            <p className="col-span-4 font-display text-lg text-red-500">-{totalCombinado.toFixed(2)} €</p>
+            <p className="col-span-4 font-display text-lg text-red-500">-{formatEur(totalCombinado)} €</p>
           </div>
         </div>
       )}
@@ -764,7 +764,7 @@ function BalanceTab({
   const filasConSaldo = useMemo(() => {
     let saldo = 0;
     return filas.map((f) => {
-      saldo += f.ingreso - f.gasto;
+      saldo = Math.round((saldo + f.ingreso - f.gasto) * 100) / 100;
       return { ...f, saldo };
     });
   }, [filas]);
@@ -792,16 +792,16 @@ function BalanceTab({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         <div className="border border-secondary/15 p-4">
           <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-2">Total ingresos</p>
-          <p className="font-display text-2xl text-secondary">+{totalIngresos.toFixed(2)} €</p>
+          <p className="font-display text-2xl text-secondary">+{formatEur(totalIngresos)} €</p>
         </div>
         <div className="border border-red-200/40 bg-red-50/20 p-4">
           <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-2">Total gastos</p>
-          <p className="font-display text-2xl text-red-500">-{totalGastos.toFixed(2)} €</p>
+          <p className="font-display text-2xl text-red-500">-{formatEur(totalGastos)} €</p>
         </div>
         <div className={cn('border p-4', saldoFinal >= 0 ? 'border-secondary/40 bg-secondary/5' : 'border-red-300/40 bg-red-50/40')}>
           <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-2">Saldo final</p>
           <p className={cn('font-display text-2xl', saldoFinal >= 0 ? 'text-secondary' : 'text-red-500')}>
-            {saldoFinal >= 0 ? '+' : ''}{saldoFinal.toFixed(2)} €
+            {saldoFinal >= 0 ? '+' : ''}{formatEur(saldoFinal)} €
           </p>
         </div>
       </div>
@@ -973,7 +973,7 @@ function BalanceTab({
                   'hidden lg:block col-span-1 font-display text-sm',
                   fila.ingreso > 0 ? 'text-secondary' : 'text-primary/20'
                 )}>
-                  {fila.ingreso > 0 ? `+${fila.ingreso.toFixed(2)}` : '—'}
+                  {fila.ingreso > 0 ? `+${formatEur(fila.ingreso)}` : '—'}
                 </p>
 
                 {/* Gasto — desktop */}
@@ -981,7 +981,7 @@ function BalanceTab({
                   'hidden lg:block col-span-1 font-display text-sm',
                   fila.gasto > 0 ? 'text-red-500' : 'text-primary/20'
                 )}>
-                  {fila.gasto > 0 ? `-${fila.gasto.toFixed(2)}` : '—'}
+                  {fila.gasto > 0 ? `-${formatEur(fila.gasto)}` : '—'}
                 </p>
 
                 {/* Saldo — desktop */}
@@ -989,7 +989,7 @@ function BalanceTab({
                   'hidden lg:block col-span-1 font-display text-sm font-medium',
                   fila.saldo >= 0 ? 'text-secondary' : 'text-red-500'
                 )}>
-                  {fila.saldo >= 0 ? '+' : ''}{fila.saldo.toFixed(2)}
+                  {fila.saldo >= 0 ? '+' : ''}{formatEur(fila.saldo)}
                 </p>
 
                 {/* Delete / source label */}
@@ -997,16 +997,16 @@ function BalanceTab({
                   {/* Mobile: amounts + saldo */}
                   <div className="flex gap-3 lg:hidden">
                     {fila.ingreso > 0 && (
-                      <span className="font-display text-sm text-secondary">+{fila.ingreso.toFixed(2)} €</span>
+                      <span className="font-display text-sm text-secondary">+{formatEur(fila.ingreso)} €</span>
                     )}
                     {fila.gasto > 0 && (
-                      <span className="font-display text-sm text-red-500">-{fila.gasto.toFixed(2)} €</span>
+                      <span className="font-display text-sm text-red-500">-{formatEur(fila.gasto)} €</span>
                     )}
                     <span className={cn(
                       'font-display text-sm',
                       fila.saldo >= 0 ? 'text-secondary' : 'text-red-500'
                     )}>
-                      = {fila.saldo >= 0 ? '+' : ''}{fila.saldo.toFixed(2)} €
+                      = {fila.saldo >= 0 ? '+' : ''}{formatEur(fila.saldo)} €
                     </span>
                   </div>
 
@@ -1038,16 +1038,16 @@ function BalanceTab({
               {filasConSaldo.length} movimiento{filasConSaldo.length !== 1 ? 's' : ''}
             </p>
             <p className="hidden lg:block col-span-1 font-display text-sm text-secondary">
-              +{totalIngresos.toFixed(2)}
+              +{formatEur(totalIngresos)}
             </p>
             <p className="hidden lg:block col-span-1 font-display text-sm text-red-500">
-              -{totalGastos.toFixed(2)}
+              -{formatEur(totalGastos)}
             </p>
             <p className={cn(
               'col-span-4 lg:col-span-1 font-display text-sm text-right lg:text-left',
               saldoFinal >= 0 ? 'text-secondary' : 'text-red-500'
             )}>
-              {saldoFinal >= 0 ? '+' : ''}{saldoFinal.toFixed(2)} €
+              {saldoFinal >= 0 ? '+' : ''}{formatEur(saldoFinal)} €
             </p>
           </div>
         </div>
@@ -1205,12 +1205,12 @@ function EstadisticasTab({
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <SummaryCard icon={CheckCircle2} label="Tasa de cobro" value={`${tasaCobro} %`}
           sub={`${activos} de ${hermanos.length} hermanos al día`} highlight={tasaCobro >= 80} />
-        <SummaryCard icon={Clock} label="Cuota pendiente" value={`${cuotaNoRecaudada.toFixed(2)} €`}
+        <SummaryCard icon={Clock} label="Cuota pendiente" value={`${formatEur(cuotaNoRecaudada)} €`}
           sub={`${pendientes} pendiente${pendientes !== 1 ? 's' : ''} × ${CUOTA_ANUAL} €`} danger={cuotaNoRecaudada > 0} />
-        <SummaryCard icon={ShoppingBag} label="Pedidos sin cobrar" value={`${pedidosPendientesTotal.toFixed(2)} €`}
+        <SummaryCard icon={ShoppingBag} label="Pedidos sin cobrar" value={`${formatEur(pedidosPendientesTotal)} €`}
           sub={`${pedidosPendientesCount} pedido${pedidosPendientesCount !== 1 ? 's' : ''} pendiente${pedidosPendientesCount !== 1 ? 's' : ''}`} danger={pedidosPendientesCount > 0} />
         <SummaryCard icon={Euro} label="Ticket medio tienda"
-          value={ticketMedio > 0 ? `${ticketMedio.toFixed(2)} €` : '—'} sub="Por pedido cobrado" />
+          value={ticketMedio > 0 ? `${formatEur(ticketMedio)} €` : '—'} sub="Por pedido cobrado" />
         <SummaryCard icon={CalendarDays} label="Antigüedad media" value={`${antiguedadMedia} años`}
           sub={`Entre ${activosConFecha.length} hermanos activos`} />
         <SummaryCard icon={CalendarDays} label="Veteranos 10+ años" value={String(veteranos10)}
@@ -1230,7 +1230,7 @@ function EstadisticasTab({
                 <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#6b7280' }} />
                 <YAxis tick={{ fontSize: 10, fill: '#6b7280' }} width={45} />
                 <Tooltip
-                  formatter={(v) => [`${Number(v).toFixed(2)} €`]}
+                  formatter={(v) => [`${formatEur(Number(v))} €`]}
                   contentStyle={{ fontSize: 11, border: '1px solid #d1d5db', borderRadius: 0 }}
                 />
                 <Bar dataKey="valor" radius={0} maxBarSize={48}>
@@ -1371,26 +1371,26 @@ export default function AdminCuentasPage() {
             <SummaryCard
               icon={Users}
               label="Cuotas hermanos"
-              value={`${recaudadoCuotas.toFixed(2)} €`}
+              value={`${formatEur(recaudadoCuotas)} €`}
               sub={`${activos} activos × ${CUOTA_ANUAL} €`}
             />
             <SummaryCard
               icon={ShoppingBag}
               label="Ingresos tienda"
-              value={`${recaudadoTienda.toFixed(2)} €`}
+              value={`${formatEur(recaudadoTienda)} €`}
               sub={`${pedidos.filter((p) => p.estado === 'pagado' || p.estado === 'entregado').length} pedidos cobrados`}
             />
             <SummaryCard
               icon={TrendingUp}
               label="Total ingresos"
-              value={`${totalIngresos.toFixed(2)} €`}
+              value={`${formatEur(totalIngresos)} €`}
               sub="Cuotas + tienda"
               highlight
             />
             <SummaryCard
               icon={TrendingDown}
               label="Gastos"
-              value={`${totalGastosConPalmas.toFixed(2)} €`}
+              value={`${formatEur(totalGastosConPalmas)} €`}
               sub={`Manuales + coste ${pedidosVendidos.length} producto${pedidosVendidos.length !== 1 ? 's' : ''}`}
               danger={totalGastosConPalmas > 0}
             />
@@ -1403,10 +1403,10 @@ export default function AdminCuentasPage() {
             <div>
               <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-1">Balance neto</p>
               <p className={cn('font-display text-4xl', balance >= 0 ? 'text-secondary' : 'text-red-500')}>
-                {balance >= 0 ? '+' : ''}{balance.toFixed(2)} €
+                {balance >= 0 ? '+' : ''}{formatEur(balance)} €
               </p>
               <p className="font-body text-[10px] text-primary/35 mt-1">
-                {balance >= 0 ? 'Superávit' : 'Déficit'} · {totalIngresos.toFixed(2)} € ingresos − {totalGastosConPalmas.toFixed(2)} € gastos
+                {balance >= 0 ? 'Superávit' : 'Déficit'} · {formatEur(totalIngresos)} € ingresos − {formatEur(totalGastosConPalmas)} € gastos
               </p>
             </div>
             <Wallet size={32} className={balance >= 0 ? 'text-secondary/30' : 'text-red-300'} />

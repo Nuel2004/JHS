@@ -8,7 +8,7 @@ import {
   Loader2, Package, Edit2, Trash2, Plus, X, Check,
   ChevronRight, AlertTriangle, Upload, ImageIcon,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatEur } from '@/lib/utils';
 
 type Tab = 'productos' | 'pedidos';
 type EstadoPedido = 'pendiente' | 'pagado' | 'entregado';
@@ -394,7 +394,7 @@ export default function AdminTiendaPage() {
         </div>
         <div className="border border-secondary/40 bg-secondary/5 p-4 col-span-2 md:col-span-1">
           <p className="font-body text-[9px] tracking-widest uppercase text-primary/40 mb-2">Recaudado</p>
-          <p className="font-display text-3xl text-secondary">{totalRecaudado.toFixed(2)}€</p>
+          <p className="font-display text-3xl text-secondary">{formatEur(totalRecaudado)}€</p>
           <p className="font-body text-[9px] text-primary/30 mt-0.5">pedidos pagados/entregados</p>
         </div>
       </div>
@@ -451,7 +451,7 @@ export default function AdminTiendaPage() {
                 <div className="flex-1 min-w-0">
                   <p className="font-serif text-sm text-primary">{p.nombre}</p>
                   <p className="font-body text-[10px] text-primary/35">
-                    {p.categoria ?? '—'} · {p.precio.toFixed(2)}€
+                    {p.categoria ?? '—'} · {formatEur(p.precio)}€
                     {p.descripcion && ` · ${p.descripcion}`}
                   </p>
                 </div>
@@ -508,7 +508,7 @@ export default function AdminTiendaPage() {
                     {ped.hermanos?.apellidos}, {ped.hermanos?.nombre}
                   </p>
                   <p className="font-body text-[10px] text-primary/35">
-                    {ped.productos?.nombre} · {ped.cantidad} ud. · {Number(ped.total).toFixed(2)}€ ·{' '}
+                    {ped.productos?.nombre} · {ped.cantidad} ud. · {formatEur(Number(ped.total))}€ ·{' '}
                     {new Date(ped.fecha).toLocaleDateString('es-ES')}
                   </p>
                 </div>

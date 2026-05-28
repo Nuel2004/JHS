@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { X, ShoppingCart, Trash2, Loader2 } from 'lucide-react';
 import { useCarritoStore } from '@/stores/carritoStore';
-import { cn } from '@/lib/utils';
+import { cn, formatEur } from '@/lib/utils';
 
 interface CartDrawerProps {
   open: boolean;
@@ -78,7 +78,7 @@ export default function CartDrawer({ open, onClose, onCheckout, loadingCheckout 
                 <div className="flex-1 min-w-0">
                   <p className="font-serif text-xs text-primary leading-snug truncate">{item.producto.nombre}</p>
                   <p className="font-body text-[10px] text-primary/45 mt-0.5">
-                    {item.producto.precio.toFixed(2)} € / ud.
+                    {formatEur(item.producto.precio)} € / ud.
                   </p>
                 </div>
 
@@ -106,7 +106,7 @@ export default function CartDrawer({ open, onClose, onCheckout, loadingCheckout 
                 </div>
 
                 <p className="font-display text-sm text-secondary shrink-0 w-16 text-right">
-                  {(item.producto.precio * item.cantidad).toFixed(2)}€
+                  {formatEur(item.producto.precio * item.cantidad)}€
                 </p>
 
                 <button
@@ -126,7 +126,7 @@ export default function CartDrawer({ open, onClose, onCheckout, loadingCheckout 
         <div className="px-5 py-4 border-t border-secondary/10 space-y-3">
           <div className="flex items-center justify-between">
             <p className="font-serif text-xs text-primary/50">Total</p>
-            <p className="font-display text-xl text-secondary">{total.toFixed(2)}€</p>
+            <p className="font-display text-xl text-secondary">{formatEur(total)}€</p>
           </div>
 
           <button

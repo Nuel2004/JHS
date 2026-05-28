@@ -5,6 +5,7 @@ import { SectionLabel } from "./Helpers";
 import { productoRepository } from '@/database/repositories';
 import type { Producto } from '@/interfaces/Producto';
 import { Package, Loader2 } from 'lucide-react';
+import { formatEur } from '@/lib/utils';
 
 function localImage(p: Producto): string | null {
     const n = p.nombre.toLowerCase();
@@ -71,7 +72,7 @@ export function TiendaSection() {
                                     )}
                                 </CardContent>
                                 <CardFooter className="px-5 pb-5 pt-0 flex items-center justify-between">
-                                    <span className="font-display text-xl text-secondary">{p.precio.toFixed(2)}€</span>
+                                    <span className="font-display text-xl text-secondary">{formatEur(p.precio)}€</span>
                                     <Link
                                         to="/mi/tienda"
                                         className="font-serif text-[9px] tracking-[0.15em] uppercase px-3 py-1.5 border border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground transition-colors"

@@ -6,7 +6,7 @@ import { SectionLabel, GoldenDivider } from '@/components/landing/Helpers';
 import { supabaseClient } from '@/database/supabase/Client';
 import { toast } from 'react-hot-toast';
 import { Loader2, Package } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatEur } from '@/lib/utils';
 import type { Pedido } from '@/interfaces/Producto';
 
 type PedidoConProducto = Pedido & {
@@ -185,7 +185,7 @@ export default function PedidosPage() {
                     </div>
 
                     <p className="font-body text-[9px] text-primary/28 mb-3">
-                      {fecha} · {ped.cantidad} ud. · {Number(ped.total).toFixed(2)} €
+                      {fecha} · {ped.cantidad} ud. · {formatEur(Number(ped.total))} €
                     </p>
 
                     {isPendiente && (
