@@ -42,7 +42,7 @@ export default function ResetPasswordPage() {
     setLoading(true);
     const { error } = await hermanoRepository.actualizarPassword(form.password);
     if (error) {
-      toast.error(error);
+      toast.error(error ?? 'Error al actualizar la contraseña.');
       setLoading(false);
       return;
     }
