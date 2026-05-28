@@ -17,7 +17,7 @@ export default function RecuperarPasswordPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await hermanoRepository.recuperarPassword(email);
+    const { error } = await hermanoRepository.recuperarPassword(email.trim());
     setLoading(false);
     if (error) {
       toast.error('No se pudo enviar el correo. Inténtalo de nuevo.');
