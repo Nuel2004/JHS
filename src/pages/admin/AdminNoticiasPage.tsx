@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'react-hot-toast';
 import { Plus, Pencil, Trash2, EyeOff, Star, Loader2, Paperclip, X, FileText } from 'lucide-react';
+import { supabaseAdmin } from '@/database/supabase/Client';
 
 const VACIA: NoticiaCreate = { titulo: '', cuerpo: '', imagen_url: '', destacada: false, publicada: true };
 
@@ -59,6 +60,17 @@ export default function AdminNoticiasPage() {
         return;
       }
       imagenUrl = url;
+    } else if (imagenUrl && imagenUrl.startsWith('http') && !imagenUrl.includes('supabase.co')) {
+      // URL externa: re-subir a Supabase Storage para que sea persistente
+      const { data, error } = await supabaseAdmin.functions.invoke('upload-image-from-url', {
+        body: { url: imagenUrl, bucket: 'noticias' },
+      });
+      if (error || !data?.url) {
+        toast.error('No se pudo guardar la imagen de forma persistente. Descárgala y súbela como archivo.');
+        setGuardando(false);
+        return;
+      }
+      imagenUrl = data.url;
     }
 
     const datosFinales: NoticiaCreate = { ...form, imagen_url: imagenUrl };
