@@ -125,7 +125,7 @@ export function GpsSection() {
 
                     {/* Indicador de estado general */}
                     <div className="flex items-center gap-2 mb-8">
-                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${algunActivo ? "bg-secondary animate-pulse" : "bg-primary-foreground/25"}`} />
+                        <div className={`size-2 rounded-full flex-shrink-0 ${algunActivo ? "bg-secondary animate-pulse" : "bg-primary-foreground/25"}`} />
                         <span className="font-serif text-[10px] tracking-[0.2em] uppercase text-primary-foreground/50">
                             {algunActivo ? "Procesión en marcha" : "Procesión no iniciada"}
                         </span>
@@ -134,12 +134,12 @@ export function GpsSection() {
                     {/* Leyenda del recorrido */}
                     <div className="space-y-2.5 mb-6">
                         {[
-                            { color: "#b45309", label: "Salida — San Gregorio Ostiense" },
+                            { color: "#b45309", label: "Salida: San Gregorio Ostiense" },
                             { color: "#c8a951", label: "Paradas del recorrido" },
-                            { color: "#1e1b4b", label: "Llegada — San Pedro Apóstol" },
+                            { color: "#1e1b4b", label: "Llegada: San Pedro Apóstol" },
                         ].map(({ color, label }) => (
                             <div key={label} className="flex items-center gap-2.5">
-                                <div style={{ background: color }} className="w-2.5 h-2.5 rounded-full flex-shrink-0" />
+                                <div style={{ background: color }} className="size-2.5 rounded-full flex-shrink-0" />
                                 <span className="font-body text-xs text-primary-foreground/50">{label}</span>
                             </div>
                         ))}
@@ -152,15 +152,15 @@ export function GpsSection() {
                                 <div key={paso.id} className="flex items-center gap-2.5">
                                     <div
                                         style={{ background: paso.color }}
-                                        className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${paso.activa ? "animate-pulse" : "opacity-30"}`}
+                                        className={`size-2.5 rounded-full flex-shrink-0 ${paso.activa ? "animate-pulse" : "opacity-30"}`}
                                     />
                                     <span className="font-body text-xs">
                                         <span className={paso.activa ? "text-primary-foreground/80" : "text-primary-foreground/30"}>
                                             {paso.nombre}
                                         </span>
                                         {paso.activa
-                                            ? <span className="text-primary-foreground/50"> — en marcha</span>
-                                            : <span className="text-primary-foreground/25"> — sin señal</span>
+                                            ? <span className="text-primary-foreground/50"> (en marcha)</span>
+                                            : <span className="text-primary-foreground/25"> (sin señal)</span>
                                         }
                                     </span>
                                 </div>
@@ -189,8 +189,8 @@ export function GpsSection() {
                         />
 
                         {/* Marcadores de paradas */}
-                        {RECORRIDO.map((punto, i) => (
-                            <Marker key={i} position={[punto.lat, punto.lng]} icon={ICON_MAP[punto.tipo]}>
+                        {RECORRIDO.map((punto) => (
+                            <Marker key={punto.nombre} position={[punto.lat, punto.lng]} icon={ICON_MAP[punto.tipo]}>
                                 <Popup>
                                     <span style={{ fontWeight: 600, fontSize: 13 }}>{punto.nombre}</span>
                                 </Popup>
@@ -207,7 +207,7 @@ export function GpsSection() {
                                 <Popup>
                                     <span style={{ fontWeight: 600, fontSize: 13 }}>{paso.nombre}</span>
                                     <br />
-                                    <span style={{ fontSize: 11, color: "#666" }}>Posición en tiempo real</span>
+                                    <span style={{ fontSize: 12, color: "#666" }}>Posición en tiempo real</span>
                                 </Popup>
                             </Marker>
                         ))}

@@ -114,6 +114,7 @@ export function Navbar() {
                 </Button>
               </NavLink>
               <button
+                type="button"
                 onClick={handleLogout}
                 className="font-body text-[10px] tracking-widest uppercase text-primary/30 hover:text-secondary transition-colors flex items-center gap-1.5 px-2 py-1"
               >
@@ -143,7 +144,8 @@ export function Navbar() {
 
         {/* Hamburguesa — móvil */}
         <button
-          className="md:hidden w-9 h-9 flex items-center justify-center text-primary hover:text-secondary transition-colors"
+          type="button"
+          className="md:hidden size-9 flex items-center justify-center text-primary hover:text-secondary transition-colors"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Menú"
         >
@@ -171,7 +173,7 @@ export function Navbar() {
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="md:hidden overflow-hidden border-t border-secondary/10 bg-background"
           >
-            <div className="px-5 py-5 space-y-1">
+            <div className="p-5 space-y-1">
               {PUBLIC_LINKS.map((l, i) => (
                 <motion.a
                   key={l.label}
@@ -243,6 +245,7 @@ export function Navbar() {
                       <ChevronRight size={11} className="text-primary/20" />
                     </Link>
                     <button
+                      type="button"
                       onClick={handleLogout}
                       className="w-full text-left flex items-center gap-2 py-2 font-body text-[11px] tracking-widest uppercase text-primary/30 hover:text-secondary transition-colors"
                     >

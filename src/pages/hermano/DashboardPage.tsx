@@ -112,7 +112,7 @@ export default function DashboardPage() {
           const bloqueado = cofrade && !isCofrade;
           const cardContent = (
             <div className="border border-secondary/15 p-5 h-full flex items-center gap-4 group-hover:border-secondary/40 group-hover:bg-secondary/4 transition-all">
-              <div className="w-10 h-10 shrink-0 flex items-center justify-center border border-secondary/25 text-secondary group-hover:bg-secondary/8 transition-colors">
+              <div className="size-10 shrink-0 flex items-center justify-center border border-secondary/25 text-secondary group-hover:bg-secondary/8 transition-colors">
                 <Icon size={16} />
               </div>
               <div className="flex-1 min-w-0">

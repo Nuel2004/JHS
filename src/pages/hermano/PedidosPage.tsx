@@ -60,7 +60,7 @@ export default function PedidosPage() {
     setMostrarBanner(true);
     setSearchParams({});
     fetchPedidos();
-  }, [searchParams, fetchPedidos]);
+  }, [searchParams, fetchPedidos, vaciarCarrito, setSearchParams]);
 
   if (!sessionHermano) return null;
 
@@ -74,6 +74,7 @@ export default function PedidosPage() {
           pedido_id: pedido.id,
           nombre: pedido.productos?.nombre ?? 'Pedido',
           total: pedido.total,
+          origin: window.location.origin,
         },
       });
       if (error) throw error;
@@ -83,8 +84,8 @@ export default function PedidosPage() {
         return;
       }
       throw new Error('No URL');
-    } catch {
-      toast.error('No se pudo iniciar el pago. Inténtalo de nuevo.');
+    } catch (err: any) {
+      toast.error(`Error al iniciar el pago: ${err?.message ?? String(err)}`);
     } finally {
       setLoadingPago(null);
     }

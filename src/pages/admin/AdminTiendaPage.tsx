@@ -83,7 +83,7 @@ function ProductoModal({
           <h2 className="font-display text-lg text-primary">
             {inicial.id ? 'Editar producto' : 'Nuevo producto'}
           </h2>
-          <button onClick={onCerrar} className="text-primary/30 hover:text-primary transition-colors">
+          <button type="button" onClick={onCerrar} className="text-primary/30 hover:text-primary transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -91,10 +91,11 @@ function ProductoModal({
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+            <label htmlFor="prod-nombre" className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
               Nombre *
             </label>
             <input
+              id="prod-nombre"
               value={form.nombre}
               onChange={(e) => set('nombre', e.target.value)}
               className="w-full border border-secondary/20 px-3 py-2 font-body text-sm focus:outline-none focus:border-secondary"
@@ -103,10 +104,11 @@ function ProductoModal({
           </div>
 
           <div>
-            <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+            <label htmlFor="prod-descripcion" className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
               Descripción
             </label>
             <input
+              id="prod-descripcion"
               value={form.descripcion ?? ''}
               onChange={(e) => set('descripcion', e.target.value || null)}
               className="w-full border border-secondary/20 px-3 py-2 font-body text-sm focus:outline-none focus:border-secondary"
@@ -116,10 +118,11 @@ function ProductoModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+              <label htmlFor="prod-precio" className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
                 Precio (€) *
               </label>
               <input
+                id="prod-precio"
                 type="number"
                 min={0}
                 step={0.01}
@@ -129,10 +132,11 @@ function ProductoModal({
               />
             </div>
             <div>
-              <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+              <label htmlFor="prod-stock" className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
                 Stock
               </label>
               <input
+                id="prod-stock"
                 type="number"
                 min={0}
                 value={form.stock}
@@ -143,15 +147,16 @@ function ProductoModal({
           </div>
 
           <div>
-            <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+            <label htmlFor="prod-categoria" className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
               Categoría
             </label>
             <select
+              id="prod-categoria"
               value={form.categoria ?? ''}
               onChange={(e) => set('categoria', e.target.value || null)}
               className="w-full border border-secondary/20 px-3 py-2 font-body text-sm focus:outline-none focus:border-secondary bg-white"
             >
-              <option value="">— Sin categoría —</option>
+              <option value="">Sin categoría</option>
               {CATEGORIAS.map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
@@ -160,20 +165,21 @@ function ProductoModal({
 
           {/* Imagen */}
           <div>
-            <label className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
+            <label htmlFor="prod-imagen-url" className="block font-body text-[10px] tracking-widest uppercase text-primary/40 mb-1">
               Imagen
             </label>
             <input
               ref={fileRef}
               type="file"
               accept="image/*"
+              aria-label="Subir imagen del producto"
               className="hidden"
               onChange={handleFile}
             />
             <div className="flex gap-2 items-start">
               {/* Preview */}
               {form.imagen_url ? (
-                <div className="relative shrink-0 w-16 h-16 border border-secondary/20 overflow-hidden bg-muted/20">
+                <div className="relative shrink-0 size-16 border border-secondary/20 overflow-hidden bg-muted/20">
                   <img src={form.imagen_url} alt="" className="w-full h-full object-cover" />
                   <button
                     type="button"
@@ -184,7 +190,7 @@ function ProductoModal({
                   </button>
                 </div>
               ) : (
-                <div className="shrink-0 w-16 h-16 border border-dashed border-secondary/25 flex items-center justify-center bg-muted/10">
+                <div className="shrink-0 size-16 border border-dashed border-secondary/25 flex items-center justify-center bg-muted/10">
                   <ImageIcon size={20} className="text-primary/20" />
                 </div>
               )}
@@ -201,6 +207,7 @@ function ProductoModal({
                   }
                 </button>
                 <input
+                  id="prod-imagen-url"
                   value={form.imagen_url ?? ''}
                   onChange={(e) => set('imagen_url', e.target.value || null)}
                   className="w-full border border-secondary/15 px-2 py-1.5 font-body text-[11px] text-primary/50 focus:outline-none focus:border-secondary placeholder:text-primary/25"
@@ -263,12 +270,14 @@ function ConfirmDialog({
         </div>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={onCancelar}
             className="flex-1 border border-secondary/20 py-2 font-body text-xs tracking-widest uppercase text-primary/50 hover:bg-muted/30 transition-colors"
           >
             Cancelar
           </button>
           <button
+            type="button"
             onClick={onConfirmar}
             className="flex-1 bg-red-500 text-white py-2 font-body text-xs tracking-widest uppercase hover:bg-red-600 transition-colors"
           >
@@ -395,6 +404,7 @@ export default function AdminTiendaPage() {
         <div className="flex flex-1">
           {(['productos', 'pedidos'] as Tab[]).map((t) => (
             <button
+              type="button"
               key={t}
               onClick={() => setTab(t)}
               className={cn(
@@ -411,6 +421,7 @@ export default function AdminTiendaPage() {
 
         {tab === 'productos' && isSuperAdmin && (
           <button
+            type="button"
             onClick={() => setModalProducto(PRODUCTO_VACIO)}
             className="flex items-center gap-1.5 px-3 py-1.5 border border-secondary text-secondary hover:bg-secondary hover:text-white transition-colors font-body text-[10px] tracking-widest uppercase mb-px"
           >
@@ -461,6 +472,7 @@ export default function AdminTiendaPage() {
 
                 {/* Acciones */}
                 <button
+                  type="button"
                   onClick={() => setModalProducto({ ...p })}
                   className="p-1 text-primary/25 hover:text-secondary transition-colors"
                   title="Editar"
@@ -468,6 +480,7 @@ export default function AdminTiendaPage() {
                   <Edit2 size={12} />
                 </button>
                 <button
+                  type="button"
                   onClick={() => setConfirmEliminar({ tipo: 'producto', id: p.id })}
                   className="p-1 text-primary/25 hover:text-red-500 transition-colors"
                   title="Eliminar"
@@ -502,6 +515,7 @@ export default function AdminTiendaPage() {
 
                 {/* Badge estado con botón para avanzar */}
                 <button
+                  type="button"
                   onClick={() => handleAvanzarEstado(ped.id, ped.estado)}
                   disabled={cambiandoEstado === ped.id}
                   title="Avanzar estado"
@@ -519,6 +533,7 @@ export default function AdminTiendaPage() {
 
                 {/* Eliminar pedido */}
                 <button
+                  type="button"
                   onClick={() => setConfirmEliminar({ tipo: 'pedido', id: ped.id })}
                   className="p-1 text-primary/25 hover:text-red-500 transition-colors"
                   title="Eliminar pedido"

@@ -44,6 +44,11 @@ export default function AdminDashboardPage() {
   const [loading, setLoading]                     = useState(true);
   const [fotosPendientes, setFotosPendientes]     = useState<HermanoBautismo[]>([]);
   const [fotoAmpliada, setFotoAmpliada]           = useState<HermanoBautismo | null>(null);
+  const [fechaHoy, setFechaHoy]                   = useState('');
+
+  useEffect(() => {
+    setFechaHoy(new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
+  }, []);
 
   useEffect(() => {
     Promise.all([
@@ -66,8 +71,8 @@ export default function AdminDashboardPage() {
       <div className="mb-6 md:mb-8">
         <SectionLabel>Panel de Control</SectionLabel>
         <h1 className="font-display text-4xl text-primary mt-1">Dashboard</h1>
-        <p className="font-body text-sm text-primary/50 mt-1">
-          {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+        <p className="font-body text-sm text-primary/50 mt-1" suppressHydrationWarning>
+          {fechaHoy}
         </p>
       </div>
 
@@ -112,9 +117,10 @@ export default function AdminDashboardPage() {
                 {fotosPendientes.map((h) => {
                   const esPDF = h.foto_bautismo_url.toLowerCase().endsWith('.pdf');
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={h.id}
-                      className="border border-secondary/15 overflow-hidden group cursor-pointer"
+                      className="border border-secondary/15 overflow-hidden group cursor-pointer text-left w-full"
                       onClick={() => setFotoAmpliada(h)}
                     >
                       {/* Miniatura */}
@@ -149,7 +155,7 @@ export default function AdminDashboardPage() {
                           {h.estado === 'activo' ? 'Activo' : h.estado === 'pendiente_pago' ? 'Pendiente' : 'Baja'}
                         </span>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -178,8 +184,12 @@ export default function AdminDashboardPage() {
           {/* Lightbox foto bautismo */}
           {fotoAmpliada && (
             <div
+              role="button"
+              tabIndex={0}
+              aria-label="Cerrar lightbox"
               className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
               onClick={() => setFotoAmpliada(null)}
+              onKeyDown={(e) => e.key === 'Escape' && setFotoAmpliada(null)}
             >
               <div
                 className="relative max-w-2xl w-full bg-white"
@@ -206,6 +216,7 @@ export default function AdminDashboardPage() {
                       Abrir original
                     </a>
                     <button
+                      type="button"
                       onClick={() => setFotoAmpliada(null)}
                       className="text-primary/30 hover:text-primary transition-colors"
                     >
@@ -218,7 +229,7 @@ export default function AdminDashboardPage() {
                 {fotoAmpliada.foto_bautismo_url.toLowerCase().endsWith('.pdf') ? (
                   <div className="flex flex-col items-center gap-3 py-12 text-primary/30">
                     <FileText size={40} />
-                    <p className="font-body text-sm">Archivo PDF — usa "Abrir original" para verlo</p>
+                    <p className="font-body text-sm">Archivo PDF, usa "Abrir original" para verlo</p>
                   </div>
                 ) : (
                   <img

@@ -37,8 +37,8 @@ export default function AvisoLegalPage() {
         <section>
           <h2 className="font-display text-lg text-primary mb-3">3. Propiedad intelectual e industrial</h2>
           <p>
-            Todos los contenidos del Sitio —incluyendo textos, imágenes, diseños, logotipos y
-            software— son propiedad de la Cofradía o de sus colaboradores, y están protegidos por
+            Todos los contenidos del Sitio (incluyendo textos, imágenes, diseños, logotipos y
+            software) son propiedad de la Cofradía o de sus colaboradores, y están protegidos por
             la legislación española e internacional sobre propiedad intelectual e industrial.
           </p>
           <p className="mt-2">

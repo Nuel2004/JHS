@@ -1,5 +1,5 @@
 // src/pages/admin/AdminGPSPage.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { pasoRepository } from '@/database/repositories';
 import { useProcesionStore } from '@/stores/procesionStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -18,7 +18,7 @@ interface PasoCardProps {
 function PasoCard({ paso, hermanoId }: PasoCardProps) {
   const { updatePaso } = useProcesionStore();
   const [enviando, setEnviando] = useState(false);
-  const [watchId, setWatchId] = useState<number | null>(null);
+  const watchId = useRef<number | null>(null);
   const [gpsActivo, setGpsActivo] = useState(false);
 
   const activar = async () => {
@@ -34,9 +34,9 @@ function PasoCard({ paso, hermanoId }: PasoCardProps) {
 
   const desactivar = async () => {
     setEnviando(true);
-    if (watchId !== null) {
-      navigator.geolocation.clearWatch(watchId);
-      setWatchId(null);
+    if (watchId.current !== null) {
+      navigator.geolocation.clearWatch(watchId.current);
+      watchId.current = null;
       setGpsActivo(false);
     }
     const { error } = await pasoRepository.desactivar(paso.id);
@@ -59,13 +59,13 @@ function PasoCard({ paso, hermanoId }: PasoCardProps) {
       (err) => toast.error(`Error GPS: ${err.message}`),
       { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
     );
-    setWatchId(id);
+    watchId.current = id;
     setGpsActivo(true);
     toast.success('GPS activado — enviando posición');
   };
 
   const detenerGPS = () => {
-    if (watchId !== null) { navigator.geolocation.clearWatch(watchId); setWatchId(null); }
+    if (watchId.current !== null) { navigator.geolocation.clearWatch(watchId.current); watchId.current = null; }
     setGpsActivo(false);
     toast('GPS detenido');
   };
@@ -100,7 +100,7 @@ function PasoCard({ paso, hermanoId }: PasoCardProps) {
           <Button
             onClick={activar}
             disabled={enviando || paso.activa}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none font-serif text-[10px] tracking-widest uppercase px-4 py-4 gap-2"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none font-serif text-[10px] tracking-widest uppercase p-4 gap-2"
           >
             {enviando && <Loader2 size={12} className="animate-spin" />}
             Activar
@@ -109,7 +109,7 @@ function PasoCard({ paso, hermanoId }: PasoCardProps) {
             onClick={desactivar}
             disabled={enviando || !paso.activa}
             variant="outline"
-            className="border-red-400/40 text-red-500 hover:bg-red-50 rounded-none font-serif text-[10px] tracking-widest uppercase px-4 py-4 gap-2"
+            className="border-red-400/40 text-red-500 hover:bg-red-50 rounded-none font-serif text-[10px] tracking-widest uppercase p-4 gap-2"
           >
             <Square size={12} /> Finalizar
           </Button>
@@ -122,7 +122,7 @@ function PasoCard({ paso, hermanoId }: PasoCardProps) {
               <Button
                 onClick={iniciarGPS}
                 disabled={gpsActivo}
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-none font-serif text-[10px] tracking-widest uppercase px-4 py-4 gap-2"
+                className="bg-secondary text-secondary-foreground hover:bg-secondary/90 rounded-none font-serif text-[10px] tracking-widest uppercase p-4 gap-2"
               >
                 <Navigation size={12} />
                 {gpsActivo ? 'Enviando…' : 'Activar GPS'}
@@ -131,7 +131,7 @@ function PasoCard({ paso, hermanoId }: PasoCardProps) {
                 <Button
                   onClick={detenerGPS}
                   variant="outline"
-                  className="border-secondary/30 rounded-none font-serif text-[10px] tracking-widest uppercase px-4 py-4"
+                  className="border-secondary/30 rounded-none font-serif text-[10px] tracking-widest uppercase p-4"
                 >
                   Detener GPS
                 </Button>
@@ -139,7 +139,7 @@ function PasoCard({ paso, hermanoId }: PasoCardProps) {
             </div>
             {gpsActivo && (
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                <div className="size-2 rounded-full bg-secondary animate-pulse" />
                 <p className="font-body text-[11px] text-secondary">Transmitiendo en tiempo real</p>
               </div>
             )}
@@ -164,7 +164,7 @@ export default function AdminGPSPage() {
     });
     const unsub = pasoRepository.suscribirRealtime(updatePaso);
     return unsub;
-  }, []);
+  }, [setPasos, updatePaso]);
 
   return (
     <div className="p-8 max-w-2xl">

@@ -46,6 +46,7 @@ function SelectorPuesto({ hermanoId, actual, onCambiado }: SelectorPuestoProps) 
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={() => setAbierto(!abierto)}
         disabled={guardando}
         className="flex items-center gap-1.5 px-2.5 py-1 border border-secondary/20 text-[9px] tracking-widest uppercase font-body text-primary/50 hover:border-secondary/50 hover:text-secondary transition-colors disabled:opacity-40"
@@ -59,10 +60,17 @@ function SelectorPuesto({ hermanoId, actual, onCambiado }: SelectorPuestoProps) 
       {abierto && (
         <>
           {/* Overlay para cerrar */}
-          <div className="fixed inset-0 z-10" onClick={() => setAbierto(false)} />
+          <button
+            type="button"
+            aria-label="Cerrar menú"
+            tabIndex={-1}
+            className="fixed inset-0 z-10 border-none p-0"
+            onClick={() => setAbierto(false)}
+          />
           <div className="absolute right-0 top-full mt-1 z-20 bg-background border border-secondary/20 shadow-lg min-w-[160px] py-1">
             {PUESTOS.map((p) => (
               <button
+                type="button"
                 key={p.id}
                 onClick={() => cambiar(p.id)}
                 className={cn(
@@ -196,7 +204,7 @@ export default function AdminProcesionPage() {
                 {/* Lista de hermanos */}
                 <div className="flex-1 divide-y divide-secondary/8">
                   {p.hermanos.length === 0 ? (
-                    <p className="px-4 py-4 font-body text-[11px] text-primary/25 italic">
+                    <p className="p-4 font-body text-[11px] text-primary/25 italic">
                       Ningún cofrade asignado
                     </p>
                   ) : (

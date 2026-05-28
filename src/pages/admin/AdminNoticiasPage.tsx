@@ -128,6 +128,7 @@ export default function AdminNoticiasPage() {
           <div className="space-y-1.5">
             <Label className="text-[10px] uppercase tracking-widest text-primary/50">Cuerpo</Label>
             <textarea rows={6}
+              aria-label="Cuerpo de la noticia"
               className="w-full px-3 py-2 text-sm font-body bg-background border border-secondary/30 text-primary focus:outline-none focus:ring-1 focus:ring-secondary/40 resize-none"
               value={form.cuerpo} onChange={(e) => setForm({ ...form, cuerpo: e.target.value })} />
           </div>
@@ -193,6 +194,7 @@ export default function AdminNoticiasPage() {
               ref={fileInputRef}
               type="file"
               accept="image/*,.pdf"
+              aria-label="Subir imagen o PDF de la noticia"
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0] ?? null;
@@ -208,6 +210,7 @@ export default function AdminNoticiasPage() {
                   o pega una URL
                 </p>
                 <Input
+                  aria-label="URL de imagen o PDF de la noticia"
                   className="rounded-none border-secondary/20 bg-background text-xs"
                   placeholder="https://..."
                   value={form.imagen_url ?? ''}
@@ -270,11 +273,11 @@ export default function AdminNoticiasPage() {
                 </p>
               </div>
               <div className="flex gap-2 shrink-0">
-                <button onClick={() => iniciarEdicion(n)}
+                <button type="button" onClick={() => iniciarEdicion(n)}
                   className="p-1.5 border border-secondary/20 text-primary/50 hover:text-secondary hover:border-secondary/40 transition-colors">
                   <Pencil size={12} />
                 </button>
-                <button onClick={() => eliminar(n.id)}
+                <button type="button" onClick={() => eliminar(n.id)}
                   className="p-1.5 border border-red-200 text-red-400 hover:bg-red-50 transition-colors">
                   <Trash2 size={12} />
                 </button>

@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const { type, hermano_id } = body;
-    const origin = req.headers.get('origin') ?? 'http://localhost:5173';
+    const origin = body.origin ?? req.headers.get('origin') ?? 'http://localhost:5173';
 
     let line_items: Stripe.Checkout.SessionCreateParams.LineItem[];
     let success_url: string;

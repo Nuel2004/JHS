@@ -92,11 +92,12 @@ export default function RegisterPage() {
                                 { val: true,  titulo: "Hermano Cofrade",  desc: "Participa en la procesión y paga cuota." },
                                 { val: false, titulo: "Usuario Tienda",   desc: "Solo para compras y donaciones." },
                             ].map(({ val, titulo, desc }) => (
-                                <div
+                                <button
                                     key={titulo}
+                                    type="button"
                                     onClick={() => setQuiereSerHermano(val)}
                                     className={cn(
-                                        "p-4 border cursor-pointer transition-all select-none",
+                                        "p-4 border cursor-pointer transition-all select-none text-left w-full",
                                         quiereSerHermano === val
                                             ? "border-secondary bg-secondary/5"
                                             : "border-secondary/20 hover:border-secondary/40"
@@ -104,7 +105,7 @@ export default function RegisterPage() {
                                 >
                                     <p className="font-serif text-primary text-sm">{titulo}</p>
                                     <p className="text-[10px] text-primary/60 mt-0.5">{desc}</p>
-                                </div>
+                                </button>
                             ))}
                         </div>
 
@@ -157,18 +158,19 @@ export default function RegisterPage() {
                             <Label className="text-[10px] uppercase tracking-widest text-primary/70">¿Estás bautizado? *</Label>
                             <div className="grid grid-cols-2 gap-3">
                                 {([true, false] as const).map((val) => (
-                                    <div
+                                    <button
                                         key={String(val)}
+                                        type="button"
                                         onClick={() => handleBautizadoChange(val)}
                                         className={cn(
-                                            "p-3 border cursor-pointer transition-all select-none text-center",
+                                            "p-3 border cursor-pointer transition-all select-none text-center w-full",
                                             bautizado === val
                                                 ? "border-secondary bg-secondary/5"
                                                 : "border-secondary/20 hover:border-secondary/40"
                                         )}
                                     >
                                         <p className="font-serif text-primary text-sm">{val ? "Sí" : "No"}</p>
-                                    </div>
+                                    </button>
                                 ))}
                             </div>
 
@@ -187,6 +189,7 @@ export default function RegisterPage() {
                                         type="file"
                                         accept="image/*,.pdf"
                                         className="hidden"
+                                        aria-label="Subir fotografía o escaneo de fe de bautismo"
                                         onChange={(e) => setFotoBautismo(e.target.files?.[0] ?? null)}
                                     />
 

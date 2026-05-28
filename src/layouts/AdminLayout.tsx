@@ -78,6 +78,7 @@ function SidebarContent({ onNavClick, onLogout, nombre, apellidos, isSuperAdmin 
           Ver web
         </Link>
         <button
+          type="button"
           onClick={onLogout}
           className="mt-2 flex items-center gap-2 text-[10px] tracking-widest uppercase
                      text-primary-foreground/40 hover:text-secondary transition-colors"
@@ -127,6 +128,7 @@ export default function AdminLayout() {
           </div>
         </div>
         <button
+          type="button"
           onClick={() => setDrawerOpen(true)}
           className="text-primary-foreground/70 hover:text-secondary transition-colors p-1"
           aria-label="Abrir menú"
@@ -155,6 +157,7 @@ export default function AdminLayout() {
               className="md:hidden fixed top-0 left-0 bottom-0 z-[60] w-48 sm:w-56 bg-primary text-primary-foreground flex flex-col"
             >
               <button
+                type="button"
                 onClick={() => setDrawerOpen(false)}
                 className="absolute top-3 right-3 text-primary-foreground/50 hover:text-secondary transition-colors p-1"
                 aria-label="Cerrar menú"

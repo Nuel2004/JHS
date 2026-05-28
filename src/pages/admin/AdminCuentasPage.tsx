@@ -116,6 +116,7 @@ function SummaryCard({ icon: Icon, label, value, sub, highlight = false, danger 
 function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
         'px-5 py-2.5 font-body text-[10px] tracking-widest uppercase transition-colors border-b-2',
@@ -153,6 +154,7 @@ function CuentasHermanosTab({ hermanos }: { hermanos: Hermano[] }) {
         <div className="flex gap-1 flex-wrap">
           {(['todos', 'activo', 'pendiente_pago', 'baja'] as const).map((e) => (
             <button
+              type="button"
               key={e}
               onClick={() => setEstadoFiltro(e)}
               className={cn(
@@ -201,7 +203,7 @@ function CuentasHermanosTab({ hermanos }: { hermanos: Hermano[] }) {
                     </span>
                     {pagado
                       ? <span className="font-body text-xs text-secondary font-medium">{CUOTA_ANUAL} €</span>
-                      : <span className="font-body text-xs text-primary/30">—</span>
+                      : <span className="font-body text-xs text-primary/30">-</span>
                     }
                   </div>
                 </div>
@@ -226,11 +228,11 @@ function CuentasHermanosTab({ hermanos }: { hermanos: Hermano[] }) {
                 <div className="col-span-1">
                   {pagado
                     ? <span className="font-body text-xs text-secondary font-medium">{CUOTA_ANUAL} €</span>
-                    : <span className="font-body text-xs text-primary/30">—</span>
+                    : <span className="font-body text-xs text-primary/30">-</span>
                   }
                 </div>
                 <p className="col-span-2 font-body text-[10px] text-primary/40">
-                  {h.fecha_alta ? new Date(h.fecha_alta).toLocaleDateString('es-ES') : '—'}
+                  {h.fecha_alta ? new Date(h.fecha_alta).toLocaleDateString('es-ES') : '-'}
                 </p>
               </div>
             </div>
@@ -264,6 +266,7 @@ function IngresostiendaTab({ pedidos }: { pedidos: any[] }) {
       <div className="flex gap-1 mb-5 flex-wrap">
         {(['todos', 'pagado', 'entregado', 'pendiente'] as const).map((e) => (
           <button
+            type="button"
             key={e}
             onClick={() => setFiltroEstado(e)}
             className={cn(
@@ -364,7 +367,7 @@ function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
   const [gastos, setGastos] = useState<GastoTienda[]>([]);
   const [concepto, setConcepto] = useState('');
   const [importe, setImporte] = useState('');
-  const [fecha, setFecha] = useState(new Date().toISOString().slice(0, 10));
+  const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10));
   const [categoria, setCategoria] = useState<CategoriaGasto>('Material');
   const [enviando, setEnviando] = useState(false);
 
@@ -445,6 +448,7 @@ function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
           <div className="flex gap-1 flex-wrap">
             {(['Material', 'Mantenimiento', 'Personal', 'Otros'] as CategoriaGasto[]).map((cat) => (
               <button
+                type="button"
                 key={cat}
                 onClick={() => setCategoria(cat)}
                 className={cn(
@@ -483,6 +487,7 @@ function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
               { label: 'Importe',   span: 'col-span-3' },
               { label: '',          span: 'col-span-1' },
             ].map(({ label, span }, i) => (
+              // index key acceptable: static list
               <p key={i} className={cn('font-body text-[9px] tracking-widest uppercase text-primary/40', span)}>
                 {label}
               </p>
@@ -505,6 +510,7 @@ function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
               </p>
               <div className="col-span-1 flex justify-end">
                 <button
+                  type="button"
                   onClick={() => eliminarGasto(g.id)}
                   className="p-1.5 text-primary/20 hover:text-red-500 transition-colors"
                   title="Eliminar gasto"
@@ -519,14 +525,14 @@ function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
             <>
               <div className="px-4 py-2 bg-amber-50/60">
                 <p className="font-body text-[9px] tracking-widest uppercase text-amber-700/60">
-                  Palmas — coste completo · automático ({palmasPedidos.length})
+                  Palmas: coste completo · automático ({palmasPedidos.length})
                 </p>
               </div>
               {palmasPedidos.map((p: any) => (
                 <div key={`palma-${p.id}`} className="grid grid-cols-12 gap-3 px-4 py-3 items-center bg-amber-50/30 hover:bg-amber-50/50 transition-colors">
                   <div className="col-span-8 md:col-span-4">
                     <p className="font-serif text-sm text-primary">
-                      {p.productos?.nombre ?? 'Palma'} × {p.cantidad} — {p.hermanos?.apellidos}, {p.hermanos?.nombre}
+                      {p.productos?.nombre ?? 'Palma'} × {p.cantidad} · {p.hermanos?.apellidos}, {p.hermanos?.nombre}
                     </p>
                   </div>
                   <div className="hidden md:block col-span-2">
@@ -550,14 +556,14 @@ function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
             <>
               <div className="px-4 py-2 bg-blue-50/60">
                 <p className="font-body text-[9px] tracking-widest uppercase text-blue-700/60">
-                  Coste otros productos — automático ({otrosPedidos.length}) · margen {Math.round(MARGEN_TIENDA * 100)}%
+                  Coste otros productos, automático ({otrosPedidos.length}) · margen {Math.round(MARGEN_TIENDA * 100)}%
                 </p>
               </div>
               {otrosPedidos.map((p: any) => (
                 <div key={`coste-${p.id}`} className="grid grid-cols-12 gap-3 px-4 py-3 items-center bg-blue-50/20 hover:bg-blue-50/40 transition-colors">
                   <div className="col-span-8 md:col-span-4">
                     <p className="font-serif text-sm text-primary">
-                      {p.productos?.nombre ?? 'Producto'} × {p.cantidad} — {p.hermanos?.apellidos}, {p.hermanos?.nombre}
+                      {p.productos?.nombre ?? 'Producto'} × {p.cantidad} · {p.hermanos?.apellidos}, {p.hermanos?.nombre}
                     </p>
                   </div>
                   <div className="hidden md:block col-span-2">
@@ -601,7 +607,7 @@ function BalanceTab({
   const [concepto, setConcepto]   = useState('');
   const [persona, setPersona]     = useState('');
   const [importe, setImporte]     = useState('');
-  const [fecha, setFecha]         = useState(new Date().toISOString().slice(0, 10));
+  const [fecha, setFecha]         = useState(() => new Date().toISOString().slice(0, 10));
   const [categoria, setCategoria] = useState<CategoriaMovimiento>('Donativo Particular');
 
   useEffect(() => {
@@ -809,6 +815,7 @@ function BalanceTab({
         <div className="flex gap-1 mb-4">
           {(['ingreso', 'gasto'] as const).map((t) => (
             <button
+              type="button"
               key={t}
               onClick={() => {
                 setTipo(t);
@@ -863,6 +870,7 @@ function BalanceTab({
           <div className="flex gap-1 flex-wrap">
             {categoriasActuales.map((cat) => (
               <button
+                type="button"
                 key={cat}
                 onClick={() => setCategoria(cat as CategoriaMovimiento)}
                 className={cn(
@@ -912,6 +920,7 @@ function BalanceTab({
               { label: 'Saldo',     span: 'col-span-1' },
               { label: '',          span: 'col-span-1' },
             ].map(({ label, span }, i) => (
+              // index key acceptable: static list
               <p key={i} className={cn('font-body text-[9px] tracking-widest uppercase text-primary/40', span)}>
                 {label}
               </p>
@@ -1004,6 +1013,7 @@ function BalanceTab({
 
                   {fila.deletable ? (
                     <button
+                      type="button"
                       onClick={() => fila.movimientoId && eliminar(fila.movimientoId)}
                       className="p-1.5 text-primary/20 hover:text-red-500 transition-colors"
                       title="Eliminar"
@@ -1226,6 +1236,7 @@ function EstadisticasTab({
                 />
                 <Bar dataKey="valor" radius={0} maxBarSize={48}>
                   {barData.map((entry, i) => (
+                    // index key acceptable: static list
                     <Cell key={i} fill={entry.tipo === 'ingreso' ? '#4a7c59' : '#dc2626'} />
                   ))}
                 </Bar>
@@ -1234,10 +1245,10 @@ function EstadisticasTab({
           </div>
           <div className="flex gap-4 mt-2 justify-center">
             <span className="flex items-center gap-1.5 font-body text-[9px] text-primary/50">
-              <span className="w-2.5 h-2.5 bg-[#4a7c59] inline-block" /> Ingreso
+              <span className="size-2.5 bg-[#4a7c59] inline-block" /> Ingreso
             </span>
             <span className="flex items-center gap-1.5 font-body text-[9px] text-primary/50">
-              <span className="w-2.5 h-2.5 bg-[#dc2626] inline-block" /> Gasto
+              <span className="size-2.5 bg-[#dc2626] inline-block" /> Gasto
             </span>
           </div>
         </div>
@@ -1261,6 +1272,7 @@ function EstadisticasTab({
                     labelLine={false}
                   >
                     {pieHermanos.map((_, i) => (
+                      // index key acceptable: static list
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
@@ -1271,7 +1283,7 @@ function EstadisticasTab({
                   <Legend
                     iconType="square"
                     iconSize={9}
-                    formatter={(v) => <span style={{ fontSize: 10, color: '#6b7280' }}>{v}</span>}
+                    formatter={(v) => <span style={{ fontSize: 12, color: '#6b7280' }}>{v}</span>}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -1345,7 +1357,7 @@ export default function AdminCuentasPage() {
         <SectionLabel>Administración</SectionLabel>
         <h1 className="font-display text-3xl md:text-4xl text-primary mt-1">Cuentas</h1>
         <p className="font-body text-sm text-primary/50 mt-1">
-          Gestión financiera de la cofradía — cuotas, tienda y gastos
+          Gestión financiera de la cofradía: cuotas, tienda y gastos
         </p>
       </div>
 

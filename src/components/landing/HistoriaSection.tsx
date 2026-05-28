@@ -61,7 +61,7 @@ export function HistoriaSection() {
                   <span className="font-display text-secondary text-lg leading-none">{hito.year}</span>
                   {/* Nodo en la línea */}
                   <div className="md:hidden h-px w-8 bg-secondary/30" />
-                  <div className="hidden md:block w-2 h-2 rounded-full border border-secondary bg-background mt-1 translate-x-[calc(100%+1.5rem+1px)]" />
+                  <div className="hidden md:block size-2 rounded-full border border-secondary bg-background mt-1 translate-x-[calc(100%+1.5rem+1px)]" />
                 </div>
 
                 {/* Contenido */}

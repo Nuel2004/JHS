@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -14,14 +15,14 @@ export function News() {
                 <h2 className="font-display text-4xl text-primary uppercase tracking-tighter">
                     Últimas Noticias
                 </h2>
-                <a href="#" className="text-secondary/80 text-xs uppercase tracking-widest hover:text-secondary transition-colors">
+                <Link to="/noticias" className="text-secondary/80 text-xs uppercase tracking-widest hover:text-secondary transition-colors">
                     Ver todas
-                </a>
+                </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {NOTICIAS.map((n, i) => (
-                    <Card key={i} className="bg-muted/50 border-secondary/10 hover:border-secondary/40 transition-all rounded-none group cursor-pointer shadow-none">
+                {NOTICIAS.map((n) => (
+                    <Card key={n.title} className="bg-muted/50 border-secondary/10 hover:border-secondary/40 transition-all rounded-none group cursor-pointer shadow-none">
                         <CardHeader>
                             <Badge variant="outline" className="w-fit border-secondary/30 text-secondary text-[10px] uppercase rounded-none">
                                 {n.tag}

@@ -94,7 +94,12 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
   return (
     <div className="fixed inset-0 z-40 flex">
       {/* Overlay */}
-      <div className="flex-1 bg-black/30" onClick={onClose} />
+      <button
+        type="button"
+        aria-label="Cerrar panel de edición"
+        className="flex-1 bg-black/30 border-none p-0"
+        onClick={onClose}
+      />
 
       {/* Panel */}
       <aside className="w-full max-w-md bg-background border-l border-secondary/20 flex flex-col overflow-hidden">
@@ -104,7 +109,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
             <p className="font-body text-[9px] tracking-widest uppercase text-primary/40">Editar hermano</p>
             <p className="font-serif text-primary">{hermano.apellidos}, {hermano.nombre}</p>
           </div>
-          <button onClick={onClose} className="p-1.5 text-primary/30 hover:text-primary transition-colors">
+          <button type="button" onClick={onClose} className="p-1.5 text-primary/30 hover:text-primary transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -219,6 +224,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
             <Label className="text-[9px] uppercase tracking-widest text-primary/50">Notas admin</Label>
             <textarea
               rows={4}
+              aria-label="Notas de administrador (observaciones internas no visibles para el hermano)"
               className="w-full px-3 py-2 text-sm font-body bg-background border border-secondary/30 text-primary focus:outline-none focus:ring-1 focus:ring-secondary/40 resize-none rounded-none"
               placeholder="Observaciones internas (no visibles para el hermano)…"
               value={form.notas_admin ?? ''}
@@ -254,6 +260,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
                 </span>
                 {hermano.rol === 'admin' ? (
                   <button
+                    type="button"
                     onClick={() => cambiarRol('hermano')}
                     disabled={cambiandoRol}
                     className="flex items-center gap-1.5 px-3 py-1.5 border border-red-200 text-red-400 hover:bg-red-50 text-[10px] tracking-widest uppercase font-body transition-colors disabled:opacity-40"
@@ -263,6 +270,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
                   </button>
                 ) : (
                   <button
+                    type="button"
                     onClick={() => cambiarRol('admin')}
                     disabled={cambiandoRol}
                     className="flex items-center gap-1.5 px-3 py-1.5 border border-secondary/30 text-secondary hover:bg-secondary/10 text-[10px] tracking-widest uppercase font-body transition-colors disabled:opacity-40"
@@ -291,6 +299,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
             confirmandoBaja ? (
               <div className="flex gap-2">
                 <button
+                  type="button"
                   onClick={darDeBaja}
                   disabled={guardando}
                   className="px-3 py-2 text-[10px] tracking-widest uppercase font-body border border-red-400 text-red-500 hover:bg-red-50 transition-colors"
@@ -298,6 +307,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
                   Confirmar baja
                 </button>
                 <button
+                  type="button"
                   onClick={() => setConfirmandoBaja(false)}
                   className="px-3 py-2 text-[10px] tracking-widest uppercase font-body border border-secondary/20 text-primary/40 hover:text-primary/70 transition-colors"
                 >
@@ -306,6 +316,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
               </div>
             ) : (
               <button
+                type="button"
                 onClick={() => setConfirmandoBaja(true)}
                 className="p-2 border border-red-200 text-red-400 hover:bg-red-50 transition-colors"
                 title="Dar de baja"
@@ -417,12 +428,12 @@ export default function AdminHermanosPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     {h.estado !== 'activo' && (
                       <>
-                        <button onClick={() => activar(h)} disabled={accionando === h.id}
+                        <button type="button" onClick={() => activar(h)} disabled={accionando === h.id}
                           className="px-3 py-1.5 border border-secondary/30 text-secondary text-[10px] tracking-widest uppercase font-body hover:bg-secondary/10 transition-colors disabled:opacity-40 flex items-center gap-1.5">
                           {accionando === h.id ? <Loader2 size={11} className="animate-spin" /> : <UserCheck size={11} />}
                           Activar
                         </button>
-                        <button onClick={() => marcarPresencial(h)} disabled={accionando === h.id}
+                        <button type="button" onClick={() => marcarPresencial(h)} disabled={accionando === h.id}
                           className="px-3 py-1.5 border border-secondary/30 text-secondary text-[10px] tracking-widest uppercase font-body hover:bg-secondary/10 transition-colors disabled:opacity-40 flex items-center gap-1.5">
                           <Home size={11} /> Presencial
                         </button>
@@ -431,7 +442,7 @@ export default function AdminHermanosPage() {
                     {h.estado === 'activo' && (
                       <CheckCircle2 size={14} className="text-secondary" />
                     )}
-                    <button onClick={() => setEditando(h)}
+                    <button type="button" onClick={() => setEditando(h)}
                       className="ml-auto px-3 py-1.5 border border-secondary/20 text-primary/40 text-[10px] tracking-widest uppercase font-body hover:text-secondary hover:border-secondary/40 transition-colors flex items-center gap-1.5">
                       <Pencil size={11} /> Editar
                     </button>
@@ -495,12 +506,12 @@ export default function AdminHermanosPage() {
                 <div className="col-span-2 flex gap-1.5 items-center">
                   {h.estado !== 'activo' && (
                     <>
-                      <button onClick={() => activar(h)} disabled={accionando === h.id}
+                      <button type="button" onClick={() => activar(h)} disabled={accionando === h.id}
                         title="Activar como cofrade"
                         className="p-1.5 border border-secondary/30 text-secondary hover:bg-secondary/10 transition-colors disabled:opacity-40">
                         {accionando === h.id ? <Loader2 size={12} className="animate-spin" /> : <UserCheck size={12} />}
                       </button>
-                      <button onClick={() => marcarPresencial(h)} disabled={accionando === h.id}
+                      <button type="button" onClick={() => marcarPresencial(h)} disabled={accionando === h.id}
                         title="Registrar pago presencial"
                         className="p-1.5 border border-secondary/30 text-secondary hover:bg-secondary/10 transition-colors disabled:opacity-40">
                         <Home size={12} />
@@ -512,6 +523,7 @@ export default function AdminHermanosPage() {
                   )}
                   {/* Editar */}
                   <button
+                    type="button"
                     onClick={() => setEditando(h)}
                     title="Editar hermano"
                     className="p-1.5 border border-secondary/20 text-primary/40 hover:text-secondary hover:border-secondary/40 transition-colors ml-auto"

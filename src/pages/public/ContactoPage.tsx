@@ -53,6 +53,7 @@ export default function ContactoPage() {
               <Label className="text-[10px] uppercase tracking-widest text-primary/60">Mensaje</Label>
               <textarea
                 rows={4}
+                aria-label="Mensaje de contacto"
                 className="w-full px-3 py-2 text-sm font-body bg-background border border-secondary/30
                            text-primary placeholder:text-primary/30 focus:outline-none focus:ring-1 focus:ring-secondary/40 resize-none"
                 value={form.mensaje}
@@ -82,7 +83,7 @@ export default function ContactoPage() {
             { icon: Phone, label: 'Teléfono', value: '+34 600 000 000' },
           ].map(({ icon: Icon, label, value }) => (
             <div key={label} className="flex gap-4">
-              <div className="w-8 h-8 border border-secondary/30 flex items-center justify-center text-secondary shrink-0 mt-0.5">
+              <div className="size-8 border border-secondary/30 flex items-center justify-center text-secondary shrink-0 mt-0.5">
                 <Icon size={14} />
               </div>
               <div>

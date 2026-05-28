@@ -47,7 +47,7 @@ export default function RedesSocialesPage() {
         {/* ── Facebook ─────────────────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <IconFacebook className="w-4 h-4 text-secondary" />
+            <IconFacebook className="size-4 text-secondary" />
             <p className="font-body text-[10px] tracking-widest uppercase text-primary/40">Facebook</p>
           </div>
 
@@ -81,13 +81,13 @@ export default function RedesSocialesPage() {
         {/* ── Instagram ────────────────────────────────────────────────── */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-            <IconInstagram className="w-4 h-4 text-secondary" />
+            <IconInstagram className="size-4 text-secondary" />
             <p className="font-body text-[10px] tracking-widest uppercase text-primary/40">Instagram</p>
           </div>
 
           <div className="border border-secondary/15 flex flex-col items-center justify-center text-center gap-6 py-16 px-8 bg-gradient-to-br from-secondary/3 to-transparent">
-            <div className="w-16 h-16 rounded-full border-2 border-secondary/30 flex items-center justify-center">
-              <IconInstagram className="w-7 h-7 text-secondary/50" />
+            <div className="size-16 rounded-full border-2 border-secondary/30 flex items-center justify-center">
+              <IconInstagram className="size-7 text-secondary/50" />
             </div>
             <div>
               <p className="font-display text-2xl text-primary">@cofradiajhs</p>

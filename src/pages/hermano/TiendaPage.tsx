@@ -41,37 +41,31 @@ export default function TiendaPage() {
       setLoadingCheckout(false);
       return;
     }
-    const pedidosCreados: Array<{
-      pedido_id: number;
-      nombre: string;
-      precio: number;
-      cantidad: number;
-    }> = [];
+    const resultados = await Promise.all(
+      items.map((item) =>
+        productoRepository.crearPedido(hermanoId, item.producto.id, item.cantidad)
+      )
+    );
 
-    for (const item of items) {
-      const { data, error } = await productoRepository.crearPedido(
-        hermanoId,
-        item.producto.id,
-        item.cantidad,
-      );
-      if (error || !data) {
-        if (pedidosCreados.length > 0) {
-          await supabaseClient
-            .from('pedidos')
-            .delete()
-            .in('id', pedidosCreados.map((p) => p.pedido_id));
-        }
-        toast.error('Error al registrar el pedido. Inténtalo de nuevo.');
-        setLoadingCheckout(false);
-        return;
+    const failedIndex = resultados.findIndex(({ error }) => error);
+    if (failedIndex !== -1) {
+      const successIds = resultados
+        .slice(0, failedIndex)
+        .map((r) => r.data!.id);
+      if (successIds.length > 0) {
+        await supabaseClient.from('pedidos').delete().in('id', successIds);
       }
-      pedidosCreados.push({
-        pedido_id: data.id,
-        nombre: item.producto.nombre,
-        precio: item.producto.precio,
-        cantidad: item.cantidad,
-      });
+      toast.error('Error al registrar el pedido. Inténtalo de nuevo.');
+      setLoadingCheckout(false);
+      return;
     }
+
+    const pedidosCreados = resultados.map((r, i) => ({
+      pedido_id: r.data!.id,
+      nombre: items[i].producto.nombre,
+      precio: items[i].producto.precio,
+      cantidad: items[i].cantidad,
+    }));
 
     try {
       const { data: stripeData, error: stripeError } = await supabaseClient.functions.invoke(
@@ -81,6 +75,7 @@ export default function TiendaPage() {
             type: 'carrito',
             hermano_id: hermanoId,
             items: pedidosCreados,
+            origin: window.location.origin,
           },
         },
       );
@@ -134,7 +129,7 @@ export default function TiendaPage() {
         >
           <ShoppingCart size={16} className="text-secondary" />
           {totalUnidades > 0 && (
-            <span className="w-5 h-5 flex items-center justify-center bg-secondary text-secondary-foreground text-[10px] font-body rounded-full">
+            <span className="size-5 flex items-center justify-center bg-secondary text-secondary-foreground text-[10px] font-body rounded-full">
               {totalUnidades}
             </span>
           )}
@@ -192,7 +187,7 @@ export default function TiendaPage() {
                             type="button"
                             aria-label={`Reducir cantidad de ${p.nombre}`}
                             onClick={() => actualizarCantidad(p.id, enCarrito - 1)}
-                            className="w-7 h-7 flex items-center justify-center border border-secondary/30 text-primary/60 hover:border-secondary text-sm"
+                            className="size-7 flex items-center justify-center border border-secondary/30 text-primary/60 hover:border-secondary text-sm"
                           >
                             −
                           </button>
@@ -203,7 +198,7 @@ export default function TiendaPage() {
                             type="button"
                             aria-label={`Aumentar cantidad de ${p.nombre}`}
                             onClick={() => actualizarCantidad(p.id, Math.min(enCarrito + 1, p.stock))}
-                            className="w-7 h-7 flex items-center justify-center border border-secondary/30 text-primary/60 hover:border-secondary text-sm"
+                            className="size-7 flex items-center justify-center border border-secondary/30 text-primary/60 hover:border-secondary text-sm"
                           >
                             +
                           </button>

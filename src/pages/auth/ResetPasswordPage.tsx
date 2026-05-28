@@ -19,21 +19,26 @@ export default function ResetPasswordPage() {
   const [form, setForm] = useState({ password: '', confirm: '' });
 
   useEffect(() => {
-    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'PASSWORD_RECOVERY') {
-          setSessionReady(true);
-        } else if (event === 'INITIAL_SESSION') {
-          if (session) {
-            navigate('/dashboard');
-          } else {
-            toast.error('El enlace ha caducado o no es válido.');
-            navigate('/recuperar-password');
-          }
-        }
+    let recovered = false;
+
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        recovered = true;
+        setSessionReady(true);
       }
-    );
-    return () => subscription.unsubscribe();
+    });
+
+    const timeout = setTimeout(() => {
+      if (!recovered) {
+        toast.error('El enlace ha caducado o no es válido.');
+        navigate('/recuperar-password');
+      }
+    }, 5000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

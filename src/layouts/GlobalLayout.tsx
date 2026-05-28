@@ -11,17 +11,18 @@ export default function GlobalLayout() {
 
   useEffect(() => {
     const onScroll = () => setShowTop(window.scrollY > 400);
-    window.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   useEffect(() => {
-    const isAdminRoute = location.pathname.startsWith('/admin');
     document.documentElement.classList.toggle(
       'reading-mode',
       isReadingMode && !isAdminRoute
     );
-  }, [isReadingMode, location.pathname]);
+  }, [isReadingMode, isAdminRoute]);
 
   useEffect(() => {
     return () => {
@@ -40,7 +41,7 @@ export default function GlobalLayout() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-6 right-6 z-50 w-10 h-10 flex items-center justify-center
+            className="fixed bottom-6 right-6 z-50 size-10 flex items-center justify-center
                        bg-primary text-primary-foreground border border-secondary/30
                        hover:bg-secondary hover:text-secondary-foreground transition-colors shadow-lg"
             aria-label="Volver arriba"

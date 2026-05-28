@@ -29,9 +29,12 @@ export default function CartDrawer({ open, onClose, onCheckout, loadingCheckout 
   return (
     <>
       {/* Overlay */}
-      <div
+      <button
+        type="button"
+        aria-label="Cerrar carrito"
+        tabIndex={-1}
         className={cn(
-          'fixed inset-0 bg-black/40 z-40 transition-opacity duration-300',
+          'fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 border-none p-0 cursor-default',
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
         )}
         onClick={onClose}
@@ -85,7 +88,7 @@ export default function CartDrawer({ open, onClose, onCheckout, loadingCheckout 
                     type="button"
                     onClick={() => actualizarCantidad(item.producto.id, item.cantidad - 1)}
                     aria-label={`Reducir cantidad de ${item.producto.nombre}`}
-                    className="w-5 h-5 flex items-center justify-center border border-secondary/20 text-primary/50 hover:border-secondary/50 text-xs"
+                    className="size-5 flex items-center justify-center border border-secondary/20 text-primary/50 hover:border-secondary/50 text-xs"
                   >
                     −
                   </button>
@@ -96,7 +99,7 @@ export default function CartDrawer({ open, onClose, onCheckout, loadingCheckout 
                     type="button"
                     onClick={() => actualizarCantidad(item.producto.id, Math.min(item.cantidad + 1, item.producto.stock))}
                     aria-label={`Aumentar cantidad de ${item.producto.nombre}`}
-                    className="w-5 h-5 flex items-center justify-center border border-secondary/20 text-primary/50 hover:border-secondary/50 text-xs"
+                    className="size-5 flex items-center justify-center border border-secondary/20 text-primary/50 hover:border-secondary/50 text-xs"
                   >
                     +
                   </button>

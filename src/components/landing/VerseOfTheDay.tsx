@@ -171,9 +171,9 @@ export function VerseOfTheDay() {
             <Card className="max-w-3xl w-full bg-muted/30 border-secondary/20 shadow-none rounded-none text-center p-8 md:p-12">
                 <CardContent className="p-0 flex flex-col items-center">
                     <span className="font-serif text-[10px] tracking-[0.2em] uppercase text-secondary mb-6 flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-secondary/50"></span>
+                        <span className="size-2 rounded-full bg-secondary/50"></span>
                         Palabra del Día
-                        <span className="w-2 h-2 rounded-full bg-secondary/50"></span>
+                        <span className="size-2 rounded-full bg-secondary/50"></span>
                     </span>
 
                     <p className="font-body text-xl md:text-2xl italic text-primary/90 leading-[1.8] mb-6">

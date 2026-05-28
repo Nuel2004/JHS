@@ -17,12 +17,12 @@ export default function CuotasPage() {
     setLoadingStripe(true);
     try {
       const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', {
-        body: { type: 'cuota', hermano_id: hermano.id },
+        body: { type: 'cuota', hermano_id: hermano.id, origin: window.location.origin },
       });
       if (error) throw error;
       if (data?.url) window.location.href = data.url;
-    } catch {
-      toast.error('No se pudo iniciar el pago. Inténtalo de nuevo.');
+    } catch (err: any) {
+      toast.error(`Error al iniciar el pago: ${err?.message ?? String(err)}`);
     } finally {
       setLoadingStripe(false);
     }
@@ -47,7 +47,7 @@ export default function CuotasPage() {
           }
           <div>
             <p className="font-serif text-sm text-primary font-medium">
-              {activo ? `Cuota ${anioActual} — Pagada` : `Cuota ${anioActual} — Pendiente`}
+              {activo ? `Cuota ${anioActual}: Pagada` : `Cuota ${anioActual}: Pendiente`}
             </p>
             <p className="font-body text-xs text-primary/50 mt-0.5">
               {activo
@@ -64,6 +64,7 @@ export default function CuotasPage() {
           <p className="font-serif text-[10px] tracking-widest uppercase text-primary/40">Cómo pagar</p>
 
           <button
+            type="button"
             onClick={handlePagarStripe}
             disabled={loadingStripe}
             className="w-full text-left px-5 py-4 border border-secondary/20 hover:border-secondary/50
@@ -79,7 +80,7 @@ export default function CuotasPage() {
             </div>
           </button>
 
-          <button className="w-full text-left px-5 py-4 border border-secondary/20 hover:border-secondary/50
+          <button type="button" className="w-full text-left px-5 py-4 border border-secondary/20 hover:border-secondary/50
                              hover:bg-secondary/5 transition-all flex items-center gap-4">
             <Home size={18} className="text-secondary shrink-0" />
             <div>
@@ -94,10 +95,10 @@ export default function CuotasPage() {
       <div className="mt-10 pt-6 border-t border-secondary/10">
         <p className="font-serif text-[10px] tracking-widest uppercase text-primary/30 mb-3">Información</p>
         <ul className="font-body text-xs text-primary/55 space-y-2 list-none p-0">
-          <li>— La cuota anual es de 10 € por hermano</li>
-          <li>— El pago activa tu cuenta como Hermano Cofrade</li>
-          <li>— Puedes elegir tu puesto en la procesión una vez activado</li>
-          <li>— Para dudas: <a href="mailto:hermandad@jhsmontijo.es" className="text-secondary">hermandad@jhsmontijo.es</a></li>
+          <li>La cuota anual es de 10 € por hermano.</li>
+          <li>El pago activa tu cuenta como Hermano Cofrade.</li>
+          <li>Puedes elegir tu puesto en la procesión una vez activado.</li>
+          <li>Para dudas: <a href="mailto:hermandad@jhsmontijo.es" className="text-secondary">hermandad@jhsmontijo.es</a></li>
         </ul>
       </div>
     </div>

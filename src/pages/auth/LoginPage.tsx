@@ -87,7 +87,7 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-3.5 h-3.5 accent-secondary cursor-pointer"
+                  className="size-3.5 accent-secondary cursor-pointer"
                 />
                 <span className="font-body text-[10px] uppercase tracking-widest text-primary/60">
                   Recordar sesión
