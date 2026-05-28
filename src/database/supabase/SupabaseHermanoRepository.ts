@@ -6,9 +6,10 @@ export class SupabaseHermanoRepository implements HermanoRepository {
 
   async registrar(datos: RegistroDatos): Promise<{ success: boolean; error?: string }> {
     try {
-      const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: datos.email,
         password: datos.password,
+        email_confirm: true,
       });
 
       if (authError) throw authError;
@@ -19,17 +20,17 @@ export class SupabaseHermanoRepository implements HermanoRepository {
       if (datos.bautizado && datos.foto_bautismo) {
         const ext = datos.foto_bautismo.name.split('.').pop() ?? 'jpg';
         const path = `${authData.user.id}/bautismo.${ext}`;
-        const { error: uploadError } = await supabaseClient.storage
+        const { error: uploadError } = await supabaseAdmin.storage
           .from('bautismos')
           .upload(path, datos.foto_bautismo, { upsert: true });
         if (uploadError) throw uploadError;
-        const { data: urlData } = supabaseClient.storage
+        const { data: urlData } = supabaseAdmin.storage
           .from('bautismos')
           .getPublicUrl(path);
         foto_bautismo_url = urlData.publicUrl;
       }
 
-      const { error: dbError } = await supabaseClient
+      const { error: dbError } = await supabaseAdmin
         .from('hermanos')
         .insert([{
           auth_id: authData.user.id,
