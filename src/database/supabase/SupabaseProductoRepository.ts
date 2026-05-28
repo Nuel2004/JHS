@@ -1,4 +1,5 @@
 import { supabaseClient, supabaseAdmin } from './Client';
+import { traducirError } from '@/lib/utils';
 import type { ProductoRepository } from '../repositories/ProductoRepository';
 import type { Producto, Pedido, ProductoCreate } from '../../interfaces/Producto';
 
@@ -11,7 +12,7 @@ export class SupabaseProductoRepository implements ProductoRepository {
       if (error) throw error;
       return { data };
     } catch (error: any) {
-      return { error: error.message };
+      return { error: traducirError(error.message) };
     }
   }
 
@@ -22,7 +23,7 @@ export class SupabaseProductoRepository implements ProductoRepository {
       if (error) throw error;
       return { data };
     } catch (error: any) {
-      return { error: error.message };
+      return { error: traducirError(error.message) };
     }
   }
 
@@ -42,7 +43,7 @@ export class SupabaseProductoRepository implements ProductoRepository {
       if (error) throw error;
       return { data };
     } catch (error: any) {
-      return { error: error.message };
+      return { error: traducirError(error.message) };
     }
   }
 
@@ -53,7 +54,7 @@ export class SupabaseProductoRepository implements ProductoRepository {
       if (error) throw error;
       return { data };
     } catch (error: any) {
-      return { error: error.message };
+      return { error: traducirError(error.message) };
     }
   }
 
@@ -63,33 +64,33 @@ export class SupabaseProductoRepository implements ProductoRepository {
       if (error) throw error;
       return { data };
     } catch (error: any) {
-      return { error: error.message };
+      return { error: traducirError(error.message) };
     }
   }
 
   async actualizarProducto(id: number, datos: Partial<ProductoCreate>): Promise<{ error?: string }> {
     const { error } = await supabaseClient.from('productos').update(datos).eq('id', id);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   async eliminarProducto(id: number): Promise<{ error?: string }> {
     const { error } = await supabaseClient.from('productos').delete().eq('id', id);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   async actualizarEstadoPedido(pedidoId: number, estado: 'pendiente' | 'pagado' | 'entregado'): Promise<{ error?: string }> {
     const { error } = await supabaseClient.from('pedidos').update({ estado }).eq('id', pedidoId);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   async eliminarPedido(pedidoId: number): Promise<{ error?: string }> {
     const { error } = await supabaseClient.from('pedidos').delete().eq('id', pedidoId);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   async actualizarStock(productoId: number, stock: number): Promise<{ error?: string }> {
     const { error } = await supabaseClient.from('productos').update({ stock }).eq('id', productoId);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   async subirImagen(file: File): Promise<{ url?: string; error?: string }> {
@@ -102,7 +103,7 @@ export class SupabaseProductoRepository implements ProductoRepository {
       if (error.message.toLowerCase().includes('bucket')) {
         return { error: 'Bucket no encontrado. Ve a Supabase → Storage → New bucket → nombre: "productos", público: activado.' };
       }
-      return { error: error.message };
+      return { error: traducirError(error.message) };
     }
     const { data } = supabaseAdmin.storage.from('productos').getPublicUrl(path);
     return { url: data.publicUrl };

@@ -1,5 +1,6 @@
 // src/database/supabase/SupabasePasoRepository.ts
 import { supabaseClient, supabaseAdmin } from './Client';
+import { traducirError } from '@/lib/utils';
 import type { PasoRepository } from '../repositories/PasoRepository';
 import type { Paso } from '../../interfaces/Paso';
 
@@ -12,7 +13,7 @@ export class SupabasePasoRepository implements PasoRepository {
       if (error) throw error;
       return { data };
     } catch (error: any) {
-      return { error: error.message };
+      return { error: traducirError(error.message) };
     }
   }
 
@@ -21,7 +22,7 @@ export class SupabasePasoRepository implements PasoRepository {
       .from('pasos_gps')
       .update({ activa: true, admin_id: adminId, ultima_actualizacion: new Date().toISOString() })
       .eq('id', id);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   async desactivar(id: number): Promise<{ error?: string }> {
@@ -29,7 +30,7 @@ export class SupabasePasoRepository implements PasoRepository {
       .from('pasos_gps')
       .update({ activa: false, latitud_actual: null, longitud_actual: null })
       .eq('id', id);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   async actualizarGPS(id: number, lat: number, lng: number): Promise<{ error?: string }> {
@@ -41,7 +42,7 @@ export class SupabasePasoRepository implements PasoRepository {
         ultima_actualizacion: new Date().toISOString(),
       })
       .eq('id', id);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   suscribirRealtime(onCambio: (paso: Paso) => void): () => void {

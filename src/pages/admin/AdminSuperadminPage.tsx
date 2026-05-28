@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { hermanoRepository } from '@/database/repositories';
 import type { Hermano, EstadoHermano, Genero, RolUsuario } from '@/interfaces/Hermano';
 import type { EditarHermanoDatos, CrearPorAdminDatos } from '@/database/repositories/HermanoRepository';
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'react-hot-toast';
 import {
   Search, Plus, X, Save, Loader2, Trash2, ShieldAlert, ShieldCheck, Shield, UserX,
+  Paperclip, ZoomIn, FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -50,13 +51,21 @@ function EditPanel({ hermano, onClose, onSaved, onDeleted }: EditPanelProps) {
   const [cambiandoRol, setCambiandoRol]       = useState(false);
   const [confirmandoElim, setConfirmandoElim] = useState(false);
   const [eliminando, setEliminando]           = useState(false);
+  const [fotoFile, setFotoFile]               = useState<File | null>(null);
+  const fotoInputRef                          = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof EditarHermanoDatos>(key: K, val: EditarHermanoDatos[K]) =>
     setForm((p) => ({ ...p, [key]: val }));
 
   const guardar = async () => {
     setGuardando(true);
-    const datos: EditarHermanoDatos = { ...form, notas_admin: form.notas_admin?.trim() || null };
+    let fotoUrl = hermano.foto_bautismo_url;
+    if (fotoFile && hermano.auth_id) {
+      const { url, error: uploadError } = await hermanoRepository.subirFotoBautismo(hermano.auth_id, fotoFile);
+      if (uploadError) { toast.error(uploadError); setGuardando(false); return; }
+      fotoUrl = url ?? null;
+    }
+    const datos: EditarHermanoDatos = { ...form, foto_bautismo_url: fotoUrl, notas_admin: form.notas_admin?.trim() || null };
     const { error } = await hermanoRepository.editarHermano(hermano.id, datos);
     if (error) { toast.error(error); } else {
       toast.success('Hermano actualizado');
@@ -208,6 +217,48 @@ function EditPanel({ hermano, onClose, onSaved, onDeleted }: EditPanelProps) {
               placeholder="Observaciones internas…"
               value={form.notas_admin ?? ''} onChange={(e) => set('notas_admin', e.target.value)} />
           </div>
+
+          {/* Fe de bautismo */}
+          {form.bautizado && (
+            <div className="border border-secondary/10 p-3 space-y-2">
+              <p className="font-body text-[9px] tracking-widest uppercase text-primary/30">Fe de bautismo</p>
+              <input
+                ref={fotoInputRef}
+                type="file"
+                accept="image/*,.pdf"
+                className="hidden"
+                aria-label="Subir fotografía o escaneo de fe de bautismo"
+                onChange={(e) => setFotoFile(e.target.files?.[0] ?? null)}
+              />
+              {fotoFile ? (
+                <div className="flex items-center gap-2">
+                  <Paperclip size={11} className="text-secondary shrink-0" />
+                  <span className="font-body text-[10px] text-primary/60 truncate flex-1">{fotoFile.name}</span>
+                  <button type="button" onClick={() => { setFotoFile(null); if (fotoInputRef.current) fotoInputRef.current.value = ''; }}
+                    className="text-primary/30 hover:text-red-500 transition-colors">
+                    <X size={11} />
+                  </button>
+                </div>
+              ) : hermano.foto_bautismo_url ? (
+                <div className="flex items-center justify-between gap-2">
+                  <a href={hermano.foto_bautismo_url} target="_blank" rel="noopener noreferrer"
+                    className="font-body text-[10px] text-secondary hover:underline truncate">
+                    Ver foto actual
+                  </a>
+                  <button type="button" onClick={() => fotoInputRef.current?.click()}
+                    className="font-body text-[9px] tracking-widest uppercase text-primary/40 hover:text-secondary border border-secondary/20 px-2 py-1 transition-colors shrink-0">
+                    Reemplazar
+                  </button>
+                </div>
+              ) : (
+                <button type="button" onClick={() => fotoInputRef.current?.click()}
+                  className="flex items-center gap-2 border border-dashed border-secondary/30 px-3 py-2 font-body text-[10px] tracking-widest uppercase text-primary/40 hover:text-secondary hover:border-secondary/40 transition-colors w-full">
+                  <Paperclip size={11} />
+                  Sin foto — subir documento
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Solo lectura */}
           <div className="border border-secondary/10 p-3 space-y-1.5">
@@ -427,6 +478,7 @@ export default function AdminSuperadminPage() {
   const [loading, setLoading]       = useState(true);
   const [editando, setEditando]     = useState<Hermano | null>(null);
   const [creando, setCreando]       = useState(false);
+  const [fotoAmpliada, setFotoAmpliada] = useState<Hermano | null>(null);
 
   const cargar = () => {
     setLoading(true);
@@ -576,6 +628,100 @@ export default function AdminSuperadminPage() {
             )}
           </div>
         </>
+      )}
+
+      {/* Verificación de bautismos */}
+      {!loading && (() => {
+        const bautismosConFoto = hermanos.filter((h) => h.bautizado && h.foto_bautismo_url);
+        return (
+          <div className="mt-8 pt-6 border-t border-secondary/10">
+            <div className="flex items-baseline gap-3 mb-4">
+              <p className="font-serif text-[10px] tracking-widest uppercase text-primary/35">
+                Verificación de bautismo
+              </p>
+              {bautismosConFoto.length > 0 && (
+                <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 font-body text-[9px] tracking-widest uppercase">
+                  {bautismosConFoto.length} documento{bautismosConFoto.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            {bautismosConFoto.length === 0 ? (
+              <p className="font-body text-sm text-primary/35 italic">
+                No hay documentación de bautismo registrada.
+              </p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {bautismosConFoto.map((h) => {
+                  const esPDF = h.foto_bautismo_url!.toLowerCase().endsWith('.pdf');
+                  const est = ESTADO_CONFIG[h.estado];
+                  return (
+                    <button type="button" key={h.id}
+                      className="border border-secondary/15 overflow-hidden group cursor-pointer text-left w-full"
+                      onClick={() => setFotoAmpliada(h)}>
+                      <div className="relative aspect-[4/3] bg-muted/30 flex items-center justify-center overflow-hidden">
+                        {esPDF ? (
+                          <div className="flex flex-col items-center gap-1 text-primary/30">
+                            <FileText size={28} />
+                            <span className="font-body text-[9px] uppercase tracking-widest">PDF</span>
+                          </div>
+                        ) : (
+                          <img src={h.foto_bautismo_url!} alt={`Fe de bautismo de ${h.nombre}`}
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                        )}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                          <ZoomIn size={18} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                      <div className="px-2.5 py-2">
+                        <p className="font-serif text-xs text-primary truncate">{h.apellidos}, {h.nombre}</p>
+                        <span className={cn('font-body text-[9px] tracking-widest uppercase', est.color.split(' ')[0])}>
+                          {est.label}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* Lightbox foto bautismo */}
+      {fotoAmpliada && (
+        <div role="button" tabIndex={0} aria-label="Cerrar lightbox"
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setFotoAmpliada(null)}
+          onKeyDown={(e) => e.key === 'Escape' && setFotoAmpliada(null)}>
+          <div className="relative max-w-2xl w-full bg-white" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-secondary/10">
+              <div>
+                <p className="font-serif text-sm text-primary">{fotoAmpliada.apellidos}, {fotoAmpliada.nombre}</p>
+                <p className="font-body text-[10px] text-primary/40 uppercase tracking-widest">Fe de bautismo</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <a href={fotoAmpliada.foto_bautismo_url!} target="_blank" rel="noopener noreferrer"
+                  className="font-body text-[9px] tracking-widest uppercase text-secondary border border-secondary/30 px-2 py-1 hover:bg-secondary/5 transition-colors"
+                  onClick={(e) => e.stopPropagation()}>
+                  Abrir original
+                </a>
+                <button type="button" onClick={() => setFotoAmpliada(null)}
+                  className="text-primary/30 hover:text-primary transition-colors">
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+            {fotoAmpliada.foto_bautismo_url!.toLowerCase().endsWith('.pdf') ? (
+              <div className="flex flex-col items-center gap-3 py-12 text-primary/30">
+                <FileText size={40} />
+                <p className="font-body text-sm">Archivo PDF, usa "Abrir original" para verlo</p>
+              </div>
+            ) : (
+              <img src={fotoAmpliada.foto_bautismo_url!} alt={`Fe de bautismo de ${fotoAmpliada.nombre}`}
+                className="w-full max-h-[70vh] object-contain" />
+            )}
+          </div>
+        </div>
       )}
 
       {editando && (

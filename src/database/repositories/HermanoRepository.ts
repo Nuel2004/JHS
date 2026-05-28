@@ -40,6 +40,7 @@ export interface EditarHermanoDatos {
   bautizado?: boolean;
   estado?: import('../../interfaces/Hermano').EstadoHermano;
   notas_admin?: string | null;
+  foto_bautismo_url?: string | null;
 }
 
 export interface HermanoRepository {
@@ -81,6 +82,9 @@ export interface HermanoRepository {
 
   /** Elimina un hermano de la BD y de auth — solo superadmin */
   eliminar(hermanoId: number, authId: string | null): Promise<{ error?: string }>;
+
+  /** Sube o reemplaza la foto de bautismo desde el panel admin */
+  subirFotoBautismo(authId: string, file: File): Promise<{ url?: string; error?: string }>;
 
   /** Envía email de recuperación de contraseña */
   recuperarPassword(email: string): Promise<{ error?: string }>;

@@ -1,4 +1,5 @@
 import { supabaseClient, supabaseAdmin } from './Client';
+import { traducirError } from '@/lib/utils';
 import type { ProcesionRepository } from '../repositories/ProcesionRepository';
 import type { ProcesionEstado, RecorridoPunto } from '../../interfaces/Procesion';
 
@@ -11,7 +12,7 @@ export class SupabaseProcesionRepository implements ProcesionRepository {
       if (error) throw error;
       return { data };
     } catch (error: any) {
-      return { error: error.message };
+      return { error: traducirError(error.message) };
     }
   }
 
@@ -22,7 +23,7 @@ export class SupabaseProcesionRepository implements ProcesionRepository {
       if (error) throw error;
       return { data };
     } catch (error: any) {
-      return { error: error.message };
+      return { error: traducirError(error.message) };
     }
   }
 
@@ -31,7 +32,7 @@ export class SupabaseProcesionRepository implements ProcesionRepository {
       .from('procesion_estado')
       .update({ activa: true, admin_id: adminId, ultima_actualizacion: new Date().toISOString() })
       .eq('id', 1);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   async desactivar(): Promise<{ error?: string }> {
@@ -39,7 +40,7 @@ export class SupabaseProcesionRepository implements ProcesionRepository {
       .from('procesion_estado')
       .update({ activa: false, latitud_actual: null, longitud_actual: null })
       .eq('id', 1);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   async actualizarGPS(lat: number, lng: number): Promise<{ error?: string }> {
@@ -47,7 +48,7 @@ export class SupabaseProcesionRepository implements ProcesionRepository {
       .from('procesion_estado')
       .update({ latitud_actual: lat, longitud_actual: lng, ultima_actualizacion: new Date().toISOString() })
       .eq('id', 1);
-    return { error: error?.message };
+    return { error: traducirError(error?.message) };
   }
 
   suscribirRealtime(onCambio: (estado: ProcesionEstado) => void): () => void {

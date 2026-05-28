@@ -7,14 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SectionLabel, GoldenDivider } from "@/components/landing/Helpers";
+import { SectionLabel } from "@/components/landing/Helpers";
 import { cn } from "@/lib/utils";
 import { Loader2, Paperclip, X } from "lucide-react";
 
 export default function RegisterPage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [quiereSerHermano, setQuiereSerHermano] = useState(true);
 
     const [bautizado, setBautizado] = useState<boolean | null>(null);
     const [fotoBautismo, setFotoBautismo] = useState<File | null>(null);
@@ -45,6 +44,20 @@ export default function RegisterPage() {
         if (!formData.genero) { toast.error("Selecciona un género"); return; }
         if (bautizado === null) { toast.error("Indica si estás bautizado"); return; }
         if (bautizado && !fotoBautismo) { toast.error("Adjunta una fotografía de tu fe de bautismo"); return; }
+
+        const camposTexto = [
+            [formData.nombre.trim(), 'El nombre es obligatorio'],
+            [formData.apellidos.trim(), 'Los apellidos son obligatorios'],
+            [formData.email.trim(), 'El email es obligatorio'],
+            [formData.telefono.trim(), 'El teléfono es obligatorio'],
+            [formData.direccion.trim(), 'La dirección es obligatoria'],
+            [formData.fecha_nacimiento.trim(), 'La fecha de nacimiento es obligatoria'],
+            [formData.password, 'La contraseña es obligatoria'],
+        ] as const;
+        for (const [valor, mensaje] of camposTexto) {
+            if (!valor) { toast.error(mensaje); return; }
+        }
+
         setLoading(true);
 
         const resultado = await hermanoRepository.registrar({
@@ -52,7 +65,7 @@ export default function RegisterPage() {
             genero: formData.genero as "Mujer" | "Hombre" | "Otro",
             bautizado,
             foto_bautismo: fotoBautismo,
-            quiere_ser_hermano: quiereSerHermano,
+            quiere_ser_hermano: true,
         });
 
         if (resultado.success) {
@@ -86,31 +99,6 @@ export default function RegisterPage() {
                 <CardContent className="pt-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
 
-                        {/* Tipo de usuario */}
-                        <div className="grid grid-cols-2 gap-4">
-                            {[
-                                { val: true,  titulo: "Hermano Cofrade",  desc: "Participa en la procesión y paga cuota." },
-                                { val: false, titulo: "Usuario Tienda",   desc: "Solo para compras y donaciones." },
-                            ].map(({ val, titulo, desc }) => (
-                                <button
-                                    key={titulo}
-                                    type="button"
-                                    onClick={() => setQuiereSerHermano(val)}
-                                    className={cn(
-                                        "p-4 border cursor-pointer transition-all select-none text-left w-full",
-                                        quiereSerHermano === val
-                                            ? "border-secondary bg-secondary/5"
-                                            : "border-secondary/20 hover:border-secondary/40"
-                                    )}
-                                >
-                                    <p className="font-serif text-primary text-sm">{titulo}</p>
-                                    <p className="text-[10px] text-primary/60 mt-0.5">{desc}</p>
-                                </button>
-                            ))}
-                        </div>
-
-                        <GoldenDivider className="opacity-50" />
-
                         {/* Datos personales */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
@@ -124,7 +112,7 @@ export default function RegisterPage() {
                             <div className="space-y-2">
                                 <Label className="text-[10px] uppercase tracking-widest text-primary/70">Género *</Label>
                                 <Select onValueChange={v => setFormData(prev => ({ ...prev, genero: v as any }))}>
-                                    <SelectTrigger className="bg-background border-secondary/30 rounded-none">
+                                    <SelectTrigger className="w-full bg-background border-secondary/30 rounded-none h-10">
                                         <SelectValue placeholder="Seleccionar..." />
                                     </SelectTrigger>
                                     <SelectContent>
