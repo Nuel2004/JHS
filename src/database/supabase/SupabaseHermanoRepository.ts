@@ -135,4 +135,9 @@ export class SupabaseHermanoRepository implements HermanoRepository {
     });
     return { error: error?.message };
   }
+
+  async actualizarPassword(password: string): Promise<{ error?: string }> {
+    const { error } = await supabaseClient.auth.updateUser({ password });
+    return { error: error?.message };
+  }
 }

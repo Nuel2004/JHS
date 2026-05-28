@@ -64,4 +64,7 @@ export interface HermanoRepository {
 
   /** Envía email de recuperación de contraseña */
   recuperarPassword(email: string): Promise<{ error?: string }>;
+
+  /** Actualiza la contraseña del usuario con sesión de recuperación activa */
+  actualizarPassword(password: string): Promise<{ error?: string }>;
 }
