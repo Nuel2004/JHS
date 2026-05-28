@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useCarritoStore } from '@/stores/carritoStore';
 import type { Producto } from '@/interfaces/Producto';
 import { SectionLabel } from '@/components/landing/Helpers';
-import { supabaseClient } from '@/database/supabase/Client';
+import { supabaseClient, supabaseAdmin } from '@/database/supabase/Client';
 import { toast } from 'react-hot-toast';
 import { Loader2, Package, ShoppingCart } from 'lucide-react';
 import CartDrawer from '@/components/tienda/CartDrawer';
@@ -64,7 +64,7 @@ export default function TiendaPage() {
         .slice(0, failedIndex)
         .map((r) => r.data!.id);
       if (successIds.length > 0) {
-        await supabaseClient.from('pedidos').delete().in('id', successIds);
+        await supabaseAdmin.from('pedidos').delete().in('id', successIds);
       }
       toast.error('Error al registrar el pedido. Inténtalo de nuevo.');
       setLoadingCheckout(false);

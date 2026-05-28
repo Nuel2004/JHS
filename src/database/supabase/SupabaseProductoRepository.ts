@@ -34,7 +34,7 @@ export class SupabaseProductoRepository implements ProductoRepository {
 
       const total = (producto?.precio ?? 0) * cantidad;
 
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabaseAdmin
         .from('pedidos')
         .insert([{ hermano_id: hermanoId, producto_id: productoId, cantidad, total }])
         .select().single();
