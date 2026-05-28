@@ -61,10 +61,11 @@ export class SupabaseHermanoRepository implements HermanoRepository {
       if (authError) throw authError;
       if (!authData.user) throw new Error('Usuario no encontrado.');
 
-      const { data: hermano, error: hermanoError } = await supabaseClient
-        .from('hermanos').select('*').eq('auth_id', authData.user.id).single();
+      const { data: hermano, error: hermanoError } = await supabaseAdmin
+        .from('hermanos').select('*').eq('auth_id', authData.user.id).maybeSingle();
 
       if (hermanoError) { await supabaseClient.auth.signOut(); throw hermanoError; }
+      if (!hermano) { await supabaseClient.auth.signOut(); throw new Error('Registro incompleto. Contacta con el administrador para activar tu cuenta.'); }
 
       return { data: { user: { id: authData.user.id, email: authData.user.email! }, hermano } };
     } catch (error: any) {
