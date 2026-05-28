@@ -22,6 +22,8 @@ import CookiesPage from './pages/public/CookiesPage';
 // Auth
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import RecuperarPasswordPage from './pages/auth/RecuperarPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 
 // Hermano (área privada)
 import DashboardPage from './pages/hermano/DashboardPage';
@@ -59,6 +61,7 @@ const router = createBrowserRouter([
           { path: '/aviso-legal', element: <AvisoLegalPage /> },
           { path: '/privacidad', element: <PrivacidadPage /> },
           { path: '/cookies', element: <CookiesPage /> },
+          { path: '/reset-password', element: <ResetPasswordPage /> },
         ],
       },
 
@@ -71,6 +74,7 @@ const router = createBrowserRouter([
             children: [
               { path: '/login', element: <LoginPage /> },
               { path: '/registro', element: <RegisterPage /> },
+              { path: '/recuperar-password', element: <RecuperarPasswordPage /> },
             ],
           },
         ],
