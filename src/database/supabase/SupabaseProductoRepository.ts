@@ -60,7 +60,7 @@ export class SupabaseProductoRepository implements ProductoRepository {
 
   async crearProducto(datos: ProductoCreate): Promise<{ data?: Producto; error?: string }> {
     try {
-      const { data, error } = await supabaseClient.from('productos').insert([datos]).select().single();
+      const { data, error } = await supabaseAdmin.from('productos').insert([datos]).select().single();
       if (error) throw error;
       return { data };
     } catch (error: any) {
@@ -69,27 +69,27 @@ export class SupabaseProductoRepository implements ProductoRepository {
   }
 
   async actualizarProducto(id: number, datos: Partial<ProductoCreate>): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('productos').update(datos).eq('id', id);
+    const { error } = await supabaseAdmin.from('productos').update(datos).eq('id', id);
     return { error: traducirError(error?.message) };
   }
 
   async eliminarProducto(id: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('productos').delete().eq('id', id);
+    const { error } = await supabaseAdmin.from('productos').delete().eq('id', id);
     return { error: traducirError(error?.message) };
   }
 
   async actualizarEstadoPedido(pedidoId: number, estado: 'pendiente' | 'pagado' | 'entregado'): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('pedidos').update({ estado }).eq('id', pedidoId);
+    const { error } = await supabaseAdmin.from('pedidos').update({ estado }).eq('id', pedidoId);
     return { error: traducirError(error?.message) };
   }
 
   async eliminarPedido(pedidoId: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('pedidos').delete().eq('id', pedidoId);
+    const { error } = await supabaseAdmin.from('pedidos').delete().eq('id', pedidoId);
     return { error: traducirError(error?.message) };
   }
 
   async actualizarStock(productoId: number, stock: number): Promise<{ error?: string }> {
-    const { error } = await supabaseClient.from('productos').update({ stock }).eq('id', productoId);
+    const { error } = await supabaseAdmin.from('productos').update({ stock }).eq('id', productoId);
     return { error: traducirError(error?.message) };
   }
 

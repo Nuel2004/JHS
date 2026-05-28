@@ -346,5 +346,5 @@ npm run build
 
 ## Licencia
 
-Proyecto privado — Cofradía "Jesús Salvador de los Hombres", Montijo, Badajoz.  
+Proyecto privado — Cofradía "Jesús Salvador de los Hombres", Montijo. 
 Todos los derechos reservados.
