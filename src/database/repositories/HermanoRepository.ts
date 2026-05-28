@@ -1,6 +1,20 @@
-import type { Hermano, SessionHermano, Genero } from '../../interfaces/Hermano';
+import type { Hermano, SessionHermano, Genero, RolUsuario, EstadoHermano } from '../../interfaces/Hermano';
 
 export type { Genero };
+
+export interface CrearPorAdminDatos {
+  email: string;
+  password: string;
+  nombre: string;
+  apellidos: string;
+  genero: Genero;
+  direccion: string;
+  fecha_nacimiento: string;
+  telefono: string;
+  rol: RolUsuario;
+  estado: EstadoHermano;
+  bautizado: boolean;
+}
 
 export interface RegistroDatos {
   email: string;
@@ -61,6 +75,12 @@ export interface HermanoRepository {
 
   /** Cambia el rol de un hermano — solo superadmin */
   cambiarRol(hermanoId: number, rol: import('../../interfaces/Hermano').RolUsuario): Promise<{ error?: string }>;
+
+  /** Crea un hermano manualmente desde el panel superadmin (sin email) */
+  crearPorAdmin(datos: CrearPorAdminDatos): Promise<{ error?: string }>;
+
+  /** Elimina un hermano de la BD y de auth — solo superadmin */
+  eliminar(hermanoId: number, authId: string | null): Promise<{ error?: string }>;
 
   /** Envía email de recuperación de contraseña */
   recuperarPassword(email: string): Promise<{ error?: string }>;

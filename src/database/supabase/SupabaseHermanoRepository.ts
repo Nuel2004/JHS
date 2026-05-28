@@ -1,5 +1,5 @@
 import { supabaseClient, supabaseAdmin } from './Client';
-import type { HermanoRepository, RegistroDatos, EditarHermanoDatos } from '../repositories/HermanoRepository';
+import type { HermanoRepository, RegistroDatos, EditarHermanoDatos, CrearPorAdminDatos } from '../repositories/HermanoRepository';
 import type { Hermano, SessionHermano } from '../../interfaces/Hermano';
 
 export class SupabaseHermanoRepository implements HermanoRepository {
@@ -129,6 +129,56 @@ export class SupabaseHermanoRepository implements HermanoRepository {
   async cambiarRol(hermanoId: number, rol: import('../../interfaces/Hermano').RolUsuario): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('hermanos').update({ rol }).eq('id', hermanoId);
     return { error: error?.message };
+  }
+
+  async crearPorAdmin(datos: CrearPorAdminDatos): Promise<{ error?: string }> {
+    try {
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: datos.email,
+        password: datos.password,
+        email_confirm: true,
+      });
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('No se pudo crear el usuario de autenticación.');
+
+      const { error: dbError } = await supabaseAdmin.from('hermanos').insert([{
+        auth_id: authData.user.id,
+        email: datos.email,
+        nombre: datos.nombre,
+        apellidos: datos.apellidos,
+        genero: datos.genero,
+        direccion: datos.direccion,
+        fecha_nacimiento: datos.fecha_nacimiento,
+        telefono: datos.telefono,
+        rol: datos.rol,
+        estado: datos.estado,
+        es_cofrade: datos.estado === 'activo',
+        bautizado: datos.bautizado,
+        foto_bautismo_url: null,
+      }]);
+
+      if (dbError) {
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+        throw dbError;
+      }
+      return {};
+    } catch (error: any) {
+      return { error: error.message };
+    }
+  }
+
+  async eliminar(hermanoId: number, authId: string | null): Promise<{ error?: string }> {
+    try {
+      const { error: dbError } = await supabaseAdmin.from('hermanos').delete().eq('id', hermanoId);
+      if (dbError) throw dbError;
+      if (authId) {
+        const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(authId);
+        if (authError) throw authError;
+      }
+      return {};
+    } catch (error: any) {
+      return { error: error.message };
+    }
   }
 
   async recuperarPassword(email: string): Promise<{ error?: string }> {

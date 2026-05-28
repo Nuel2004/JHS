@@ -6,18 +6,19 @@ import { hermanoRepository } from '../database/repositories';
 import { toast } from 'react-hot-toast';
 import {
   LayoutDashboard, Users, Newspaper, MapPin, ShoppingBag,
-  LogOut, ChevronRight, Landmark, ListOrdered, Menu, X, Home,
+  LogOut, ChevronRight, Landmark, ListOrdered, Menu, X, Home, ShieldAlert,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { to: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/admin/hermanos', icon: Users, label: 'Hermanos' },
-  { to: '/admin/cuentas', icon: Landmark, label: 'Cuentas' },
-  { to: '/admin/procesion', icon: ListOrdered, label: 'Procesión' },
-  { to: '/admin/noticias', icon: Newspaper, label: 'Noticias' },
-  { to: '/admin/gps', icon: MapPin, label: 'GPS Procesión' },
-  { to: '/admin/tienda', icon: ShoppingBag, label: 'Tienda' },
-];
+  { to: '/admin/dashboard',   icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/admin/hermanos',    icon: Users,           label: 'Hermanos' },
+  { to: '/admin/cuentas',     icon: Landmark,        label: 'Cuentas' },
+  { to: '/admin/procesion',   icon: ListOrdered,     label: 'Procesión' },
+  { to: '/admin/noticias',    icon: Newspaper,       label: 'Noticias' },
+  { to: '/admin/gps',         icon: MapPin,          label: 'GPS Procesión' },
+  { to: '/admin/tienda',      icon: ShoppingBag,     label: 'Tienda' },
+  { to: '/admin/superadmin',  icon: ShieldAlert,     label: 'Superadmin', superadminOnly: true },
+] as const;
 
 function SidebarContent({ onNavClick, onLogout, nombre, apellidos, isSuperAdmin }: {
   onNavClick?: () => void;
@@ -45,7 +46,7 @@ function SidebarContent({ onNavClick, onLogout, nombre, apellidos, isSuperAdmin 
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
+        {NAV_ITEMS.filter((item) => !('superadminOnly' in item && item.superadminOnly) || isSuperAdmin).map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}

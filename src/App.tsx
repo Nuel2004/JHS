@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast';
 
 // Guards
-import { PublicRoute, ProtectedRoute, AdminRoute, CofradeRoute } from './router/guards';
+import { PublicRoute, ProtectedRoute, AdminRoute, CofradeRoute, SuperadminRoute } from './router/guards';
 
 // Layouts
 import GlobalLayout from './layouts/GlobalLayout';
@@ -38,6 +38,7 @@ import AdminGPSPage from './pages/admin/AdminGPSPage';
 import AdminCuentasPage from './pages/admin/AdminCuentasPage';
 import AdminProcesionPage from './pages/admin/AdminProcesionPage';
 import AdminTiendaPage from './pages/admin/AdminTiendaPage';
+import AdminSuperadminPage from './pages/admin/AdminSuperadminPage';
 
 // Hermano — tienda
 import TiendaPage from './pages/hermano/TiendaPage';
@@ -122,6 +123,18 @@ const router = createBrowserRouter([
               { path: '/admin/cuentas', element: <AdminCuentasPage /> },
               { path: '/admin/procesion', element: <AdminProcesionPage /> },
               { path: '/admin/tienda', element: <AdminTiendaPage /> },
+            ],
+          },
+          // Rutas exclusivas de superadmin
+          {
+            element: <SuperadminRoute />,
+            children: [
+              {
+                element: <AdminLayout />,
+                children: [
+                  { path: '/admin/superadmin', element: <AdminSuperadminPage /> },
+                ],
+              },
             ],
           },
         ],
