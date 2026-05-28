@@ -33,7 +33,7 @@ Plataforma digital oficial de la Cofradía **"Jesús Salvador de los Hombres"** 
 ### Para hermanos registrados
 - 👤 Dashboard personal con estado de membresía
 - 💳 Pago de cuota anual (10 €) mediante Stripe o en efectivo
-- 🛍️ Tienda online con carrito persistente (palmas, trajes, merchandising)
+- 🛍️ Tienda online con carrito persistente (palmas, trajes, productos oficiales)
 - 📦 Historial de pedidos con estado en tiempo real
 - 🕯️ Elección de puesto en procesión (solo cofrades activos)
 
@@ -145,7 +145,7 @@ src/
 ├── index.css                  # Tailwind + tema visual (colores, tipografías)
 │
 ├── router/
-│   └── guards.tsx             # PublicRoute, ProtectedRoute, AdminRoute, CofradeRoute
+│   └── guards.tsx             # PublicRoute, ProtectedRoute, AdminRoute, CofradeRoute, SuperadminRoute
 │
 ├── layouts/
 │   ├── GlobalLayout.tsx       # Raíz: scroll-to-top y modo lectura
@@ -190,7 +190,9 @@ src/
 │   │   └── RedesSocialesPage.tsx
 │   ├── auth/
 │   │   ├── LoginPage.tsx
-│   │   └── RegisterPage.tsx
+│   │   ├── RegisterPage.tsx
+│   │   ├── RecuperarPasswordPage.tsx
+│   │   └── ResetPasswordPage.tsx
 │   ├── hermano/               # Área privada del hermano
 │   │   ├── DashboardPage.tsx
 │   │   ├── CuotasPage.tsx
@@ -204,7 +206,8 @@ src/
 │       ├── AdminGPSPage.tsx
 │       ├── AdminProcesionPage.tsx
 │       ├── AdminCuentasPage.tsx
-│       └── AdminTiendaPage.tsx
+│       ├── AdminTiendaPage.tsx
+│       └── AdminSuperadminPage.tsx
 │
 ├── components/
 │   ├── layout/                # Navbar, Footer
@@ -214,7 +217,7 @@ src/
 │   └── ui/                    # Componentes shadcn (Button, Card, Badge...)
 │
 └── lib/
-    └── utils.ts               # cn() y helpers
+    └── utils.ts               # cn(), formatEur() y helpers
 ```
 
 ---
@@ -227,7 +230,7 @@ src/
 | **Hermano** | Registrado, cuota pendiente | Dashboard, pago de cuota, explorar tienda |
 | **Cofrade activo** | Cuota pagada (`es_cofrade = true`) | Todo lo anterior + tienda completa + puesto en procesión |
 | **Admin** | Rol `admin` | Panel completo de gestión (hermanos, noticias, GPS, tienda, cuentas) |
-| **Superadmin** | Rol `superadmin` | Todo lo del admin + cambio de roles de usuario |
+| **Superadmin** | Rol `superadmin` | Todo lo del admin + CRUD completo de hermanos y gestión de roles |
 
 ### Estados de un hermano
 
@@ -249,7 +252,7 @@ La base de datos usa **PostgreSQL** a través de Supabase con **Row Level Securi
 |-------|-------------|
 | `hermanos` | Usuarios: datos personales, estado, rol, stripe_customer_id |
 | `noticias` | Artículos con título, cuerpo, imagen/PDF, publicada, destacada |
-| `productos` | Catálogo: nombre, precio, stock, categoría (Palma/Traje/Merchandising) |
+| `productos` | Catálogo: nombre, precio, stock, categoría (Palma/Traje/Productos oficiales) |
 | `pedidos` | Órdenes: hermano_id, producto_id, cantidad, total, estado, stripe payment_id |
 | `procesion_estado` | Estado global de la procesión (activa/inactiva, coordenadas GPS) |
 | `pasos_gps` | Los 3 pasos procesionales con su posición GPS en tiempo real |
