@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { X, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -13,7 +13,7 @@ export function ChatbotWidget() {
       {/* Panel */}
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 24, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
@@ -46,12 +46,12 @@ export function ChatbotWidget() {
                 El asistente de la Cofradía JHS se implementará próximamente. Podrás consultarnos sobre nuestra historia, patrimonio y actividades.
               </p>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* Floating button */}
-      <motion.button
+      <m.button
         type="button"
         onClick={() => setOpen(o => !o)}
         whileHover={{ scale: 1.05 }}
@@ -67,13 +67,13 @@ export function ChatbotWidget() {
       >
         <AnimatePresence mode="wait">
           {open ? (
-            <motion.span key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+            <m.span key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
               <X size={18} />
-            </motion.span>
+            </m.span>
           ) : (
-            <motion.span key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+            <m.span key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
               <MessageCircle size={18} />
-            </motion.span>
+            </m.span>
           )}
         </AnimatePresence>
         {!open && (
@@ -81,7 +81,7 @@ export function ChatbotWidget() {
             Próximamente
           </span>
         )}
-      </motion.button>
+      </m.button>
     </>
   );
 }

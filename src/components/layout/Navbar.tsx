@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import { LogOut, User, ShieldCheck, Menu, X, ChevronRight, ShoppingBag, Package } from 'lucide-react';
 import { useState } from 'react';
 import { useReadingModeStore } from '@/stores/readingModeStore';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 
 const PUBLIC_LINKS = [
   { href: '/#historia', label: 'Historia' },
@@ -150,7 +150,7 @@ export function Navbar() {
           aria-label="Menú"
         >
           <AnimatePresence mode="wait" initial={false}>
-            <motion.span
+            <m.span
               key={menuOpen ? 'close' : 'open'}
               initial={{ rotate: -90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
@@ -158,7 +158,7 @@ export function Navbar() {
               transition={{ duration: 0.15 }}
             >
               {menuOpen ? <X size={19} /> : <Menu size={19} />}
-            </motion.span>
+            </m.span>
           </AnimatePresence>
         </button>
       </div>
@@ -166,7 +166,7 @@ export function Navbar() {
       {/* Menú móvil animado */}
       <AnimatePresence>
         {menuOpen && (
-          <motion.div
+          <m.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -175,7 +175,7 @@ export function Navbar() {
           >
             <div className="p-5 space-y-1">
               {PUBLIC_LINKS.map((l, i) => (
-                <motion.a
+                <m.a
                   key={l.label}
                   href={l.href}
                   onClick={() => setMenuOpen(false)}
@@ -186,10 +186,10 @@ export function Navbar() {
                 >
                   {l.label}
                   <ChevronRight size={11} className="text-primary/20 group-hover:text-secondary transition-colors" />
-                </motion.a>
+                </m.a>
               ))}
 
-              <motion.button
+              <m.button
                 type="button"
                 onClick={() => { toggleReadingMode(); setMenuOpen(false); }}
                 initial={{ x: -12, opacity: 0 }}
@@ -205,7 +205,7 @@ export function Navbar() {
                   ${isReadingMode ? 'bg-secondary text-secondary-foreground' : 'bg-primary/10 text-primary/40'}`}>
                   Aa
                 </span>
-              </motion.button>
+              </m.button>
 
               <div className="pt-4 space-y-2">
                 {isAuthenticated ? (
@@ -274,7 +274,7 @@ export function Navbar() {
                 )}
               </div>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </nav>

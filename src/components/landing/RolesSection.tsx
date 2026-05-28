@@ -24,7 +24,7 @@ const ROLES = [
             { label: "Historia y noticias",   active: true  },
             { label: "Mapa GPS en procesión", active: true  },
             { label: "Compra de palmas",      active: true  },
-            { label: "Materiales y merchandising",     active: true },
+            { label: "Materiales y productos oficiales", active: true },
             { label: "Donación de trajes",    active: true  },
             { label: "Gestión de cuotas",     active: false },
             { label: "Elección de puesto",    active: false },
@@ -38,7 +38,7 @@ const ROLES = [
             { label: "Todas las funciones anteriores", active: true },
             { label: "Gestión de cuotas online",       active: true },
             { label: "Elección de puesto",             active: true },
-            { label: "Materiales y merchandising",     active: true },
+            { label: "Materiales y productos oficiales", active: true },
             { label: "Acceso completo a la tienda",    active: true },
             { label: "Contacto directo costurera",     active: true },
         ],
@@ -54,7 +54,7 @@ export function RolesSection() {
                 <span className="text-secondary">para cada miembro</span>
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {ROLES.map((r) => (
                     <Card
                         key={r.name}

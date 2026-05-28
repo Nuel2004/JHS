@@ -1,4 +1,4 @@
-export type CategoriaProducto = 'Palma' | 'Traje' | 'Merchandising';
+export type CategoriaProducto = 'Palma' | 'Traje' | 'Productos oficiales';
 
 export interface Producto {
   id: number;

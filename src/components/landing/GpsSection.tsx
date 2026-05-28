@@ -106,7 +106,7 @@ export function GpsSection() {
         <section id="procesion" className="py-20 border-y border-secondary/20 bg-primary">
             <style>{`@keyframes jhs-ping{75%,100%{transform:scale(2.2);opacity:0}}`}</style>
 
-            <div className="max-w-5xl mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="max-w-5xl mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
 
                 {/* Columna izquierda: texto */}
                 <div>
@@ -170,7 +170,7 @@ export function GpsSection() {
                 </div>
 
                 {/* Columna derecha: mapa */}
-                <div className="h-[420px] rounded-lg overflow-hidden border border-secondary/30 shadow-lg">
+                <div className="h-64 sm:h-80 lg:h-[420px] rounded-lg overflow-hidden border border-secondary/30 shadow-lg">
                     <MapContainer
                         center={MAP_CENTER}
                         zoom={15}

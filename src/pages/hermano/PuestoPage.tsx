@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { SectionLabel, GoldenDivider } from '@/components/landing/Helpers';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
 // ── Definición de puestos con límite de huecos ──────────────────────────────
 const PUESTOS: Record<string, { label: string; desc: string; max: number }> = {
@@ -114,7 +114,7 @@ export default function PuestoPage() {
       <GoldenDivider className="justify-start" />
 
       {/* ── Esquema visual interactivo ───────────────────────────────────── */}
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -232,11 +232,11 @@ export default function PuestoPage() {
             )}
           </div>
         ))}
-      </motion.div>
+      </m.div>
 
       {/* ── Detalle del puesto seleccionado ─────────────────────────────── */}
       {puestoSeleccionado && (
-        <motion.div
+        <m.div
           key={seleccion}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -255,7 +255,7 @@ export default function PuestoPage() {
             )}
             <CheckCircle2 size={16} className="text-secondary mt-1 ml-auto" />
           </div>
-        </motion.div>
+        </m.div>
       )}
 
       {/* ── Lista alternativa para puestos sin icono en el esquema ───────── */}

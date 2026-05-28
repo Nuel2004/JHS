@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { GoldenDivider } from "./Helpers";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 
 const fadeUp = (delay = 0) => ({
@@ -35,49 +35,49 @@ export function Hero() {
 
       <div className="relative z-10 max-w-3xl w-full mx-auto">
         {/* Eyebrow */}
-        <motion.p
+        <m.p
           {...fadeUp(0)}
           className="font-body text-[10px] tracking-[0.5em] uppercase text-secondary mb-8 flex items-center justify-center gap-4"
         >
           <span className="inline-block h-px w-12 bg-secondary/40" />
           Fundada en 1981 · Montijo · Badajoz
           <span className="inline-block h-px w-12 bg-secondary/40" />
-        </motion.p>
+        </m.p>
 
         {/* Título principal */}
-        <motion.h1
+        <m.h1
           {...fadeUp(0.12)}
           className="font-display text-[clamp(2.6rem,8vw,5.5rem)] leading-[1.1] text-primary mb-3"
         >
           Jesús Salvador
           <br />
           <span className="text-secondary italic">de los Hombres</span>
-        </motion.h1>
+        </m.h1>
 
         {/* Subtítulo */}
-        <motion.p
+        <m.p
           {...fadeUp(0.22)}
           className="font-body text-xs md:text-sm tracking-[0.35em] uppercase text-primary/40 mb-10"
         >
           Cofradía de penitencia
-        </motion.p>
+        </m.p>
 
-        <motion.div {...fadeUp(0.3)}>
+        <m.div {...fadeUp(0.3)}>
           <GoldenDivider />
-        </motion.div>
+        </m.div>
 
         {/* Descripción */}
-        <motion.p
+        <m.p
           {...fadeUp(0.4)}
           className="font-body text-base md:text-lg leading-[1.9] text-primary/65 max-w-lg mx-auto mb-12"
         >
           Desde 1981 abrimos la Semana Santa de Montijo con la procesión de
           la Burrita. Únete, sigue el recorrido en directo y gestiona tu
           hermandad desde cualquier lugar.
-        </motion.p>
+        </m.p>
 
         {/* CTAs */}
-        <motion.div {...fadeUp(0.5)} className="flex flex-col sm:flex-row gap-3 justify-center">
+        <m.div {...fadeUp(0.5)} className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link to="/registro">
             <Button className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 rounded-none font-serif text-[11px] tracking-widest uppercase px-10 py-6 h-auto gap-2 group">
               Hacerse Hermano
@@ -92,10 +92,10 @@ export function Hero() {
               Conoce la plataforma
             </Button>
           </a>
-        </motion.div>
+        </m.div>
 
         {/* Scroll indicator */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2, duration: 0.6 }}
@@ -103,7 +103,7 @@ export function Hero() {
         >
           <div className="w-px h-10 bg-primary/40 animate-pulse" />
           <span className="font-body text-[9px] tracking-[0.3em] uppercase text-primary/50">Descubrir</span>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

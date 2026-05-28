@@ -44,11 +44,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading]                     = useState(true);
   const [fotosPendientes, setFotosPendientes]     = useState<HermanoBautismo[]>([]);
   const [fotoAmpliada, setFotoAmpliada]           = useState<HermanoBautismo | null>(null);
-  const [fechaHoy, setFechaHoy]                   = useState('');
-
-  useEffect(() => {
-    setFechaHoy(new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
-  }, []);
+  const [fechaHoy]                                = useState(() => new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
 
   useEffect(() => {
     Promise.all([
@@ -67,7 +63,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="mb-6 md:mb-8">
         <SectionLabel>Panel de Control</SectionLabel>
         <h1 className="font-display text-4xl text-primary mt-1">Dashboard</h1>

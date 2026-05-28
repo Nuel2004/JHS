@@ -25,7 +25,7 @@ const ESTADO_SIGUIENTE: Record<EstadoPedido, EstadoPedido> = {
   entregado: 'pendiente',
 };
 
-const CATEGORIAS: CategoriaProducto[] = ['Palma', 'Traje', 'Merchandising'];
+const CATEGORIAS: CategoriaProducto[] = ['Palma', 'Traje', 'Productos oficiales'];
 
 const PRODUCTO_VACIO: ProductoCreate = {
   nombre: '',

@@ -54,7 +54,7 @@ const CATEGORIAS_INGRESO = [
 
 const CATEGORIAS_GASTO_BAL = [
   'Palmas',
-  'Merchandising',
+  'Productos oficiales',
   'Fotocopias',
   'Coste Reparto',
   'Comisión Banco',
@@ -364,19 +364,17 @@ function IngresostiendaTab({ pedidos }: { pedidos: any[] }) {
 
 // ── Tab 3: Gastos de tienda ───────────────────────────────────────────────────
 function GastosTiendaTab({ pedidosVendidos }: { pedidosVendidos: any[] }) {
-  const [gastos, setGastos] = useState<GastoTienda[]>([]);
+  const [gastos, setGastos] = useState<GastoTienda[]>(() => {
+    try {
+      const stored = localStorage.getItem(GASTOS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
   const [concepto, setConcepto] = useState('');
   const [importe, setImporte] = useState('');
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10));
   const [categoria, setCategoria] = useState<CategoriaGasto>('Material');
   const [enviando, setEnviando] = useState(false);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(GASTOS_KEY);
-      if (stored) setGastos(JSON.parse(stored));
-    } catch { /* corrupted — start fresh */ }
-  }, []);
 
   const persistir = (nuevos: GastoTienda[]) => {
     setGastos(nuevos);
@@ -601,23 +599,24 @@ function BalanceTab({
   hermanos: Hermano[];
   pedidos: any[];
 }) {
-  const [movimientos, setMovimientos] = useState<MovimientoManual[]>([]);
-  const [gastosLegacy, setGastosLegacy] = useState<GastoTienda[]>([]);
+  const [movimientos, setMovimientos] = useState<MovimientoManual[]>(() => {
+    try {
+      const stored = localStorage.getItem(MOVIMIENTOS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
+  const [gastosLegacy] = useState<GastoTienda[]>(() => {
+    try {
+      const stored = localStorage.getItem(GASTOS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
   const [tipo, setTipo]           = useState<TipoMovimiento>('ingreso');
   const [concepto, setConcepto]   = useState('');
   const [persona, setPersona]     = useState('');
   const [importe, setImporte]     = useState('');
   const [fecha, setFecha]         = useState(() => new Date().toISOString().slice(0, 10));
   const [categoria, setCategoria] = useState<CategoriaMovimiento>('Donativo Particular');
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(MOVIMIENTOS_KEY);
-      if (stored) setMovimientos(JSON.parse(stored));
-      const storedGastos = localStorage.getItem(GASTOS_KEY);
-      if (storedGastos) setGastosLegacy(JSON.parse(storedGastos));
-    } catch { /* noop */ }
-  }, []);
 
   const persistir = (nuevos: MovimientoManual[]) => {
     setMovimientos(nuevos);
@@ -1301,7 +1300,16 @@ export default function AdminCuentasPage() {
   const [pedidos, setPedidos]   = useState<any[]>([]);
   const [loading, setLoading]   = useState(true);
   const [tab, setTab]           = useState<'cuotas' | 'tienda' | 'gastos' | 'balance' | 'antiguedad' | 'estadisticas'>('cuotas');
-  const [gastosTotales, setGastosTotales] = useState(0);
+  const [gastosTotales, setGastosTotales] = useState(() => {
+    try {
+      const stored = localStorage.getItem(GASTOS_KEY);
+      if (stored) {
+        const parsed: GastoTienda[] = JSON.parse(stored);
+        return parsed.reduce((acc: number, g: GastoTienda) => acc + g.importe, 0);
+      }
+    } catch { /* noop */ }
+    return 0;
+  });
 
   useEffect(() => {
     Promise.all([
@@ -1312,14 +1320,6 @@ export default function AdminCuentasPage() {
       setPedidos(peds.data ?? []);
       setLoading(false);
     });
-
-    try {
-      const stored = localStorage.getItem(GASTOS_KEY);
-      if (stored) {
-        const parsed: GastoTienda[] = JSON.parse(stored);
-        setGastosTotales(parsed.reduce((acc, g) => acc + g.importe, 0));
-      }
-    } catch { /* noop */ }
   }, []);
 
   useEffect(() => {

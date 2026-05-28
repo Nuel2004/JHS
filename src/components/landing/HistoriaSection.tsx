@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { GoldenDivider, SectionLabel } from "./Helpers";
 
 const HITOS = [
@@ -23,26 +23,26 @@ export function HistoriaSection() {
       <div className="max-w-4xl mx-auto">
 
         {/* Cabecera */}
-        <motion.div {...fadeUp(0)}>
+        <m.div {...fadeUp(0)}>
           <SectionLabel>Desde 1981</SectionLabel>
-        </motion.div>
+        </m.div>
 
-        <motion.h2 {...fadeUp(0.08)} className="font-display text-3xl md:text-4xl text-primary mb-4 leading-tight">
+        <m.h2 {...fadeUp(0.08)} className="font-display text-3xl md:text-4xl text-primary mb-4 leading-tight">
           Una historia de fe<br />
           <span className="text-secondary italic">enraizada en Montijo</span>
-        </motion.h2>
+        </m.h2>
 
-        <motion.div {...fadeUp(0.14)}>
+        <m.div {...fadeUp(0.14)}>
           <GoldenDivider className="justify-start my-5" />
-        </motion.div>
+        </m.div>
 
-        <motion.p {...fadeUp(0.2)} className="font-body text-base md:text-lg leading-[1.9] text-primary/65 max-w-2xl mb-16">
+        <m.p {...fadeUp(0.2)} className="font-body text-base md:text-lg leading-[1.9] text-primary/65 max-w-2xl mb-16">
           La Cofradía Jesús Salvador de los Hombres, conocida popularmente como{" "}
           <span className="text-secondary font-semibold">«La Burrita»</span>, nació en Montijo en{" "}
           <span className="text-primary/90">1981</span> impulsada por la devoción al Domingo de Ramos.
           Tiene su sede canónica en la Parroquia de San Pedro Apóstol y une a su comunidad
           en la procesión del Domingo de Ramos y en la vida social y caritativa de la localidad.
-        </motion.p>
+        </m.p>
 
         {/* Timeline */}
         <div className="relative">
@@ -51,7 +51,7 @@ export function HistoriaSection() {
 
           <div className="space-y-10">
             {HITOS.map((hito, i) => (
-              <motion.div
+              <m.div
                 key={hito.year}
                 {...fadeUp(0.1 + i * 0.07)}
                 className="flex flex-col md:flex-row md:items-start gap-3 md:gap-8"
@@ -68,13 +68,13 @@ export function HistoriaSection() {
                 <div className="flex-1 border border-secondary/10 hover:border-secondary/30 transition-colors duration-300 px-6 py-4">
                   <p className="font-body text-sm md:text-base leading-[1.8] text-primary/70">{hito.text}</p>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
 
         {/* Nota patrimonial */}
-        <motion.div
+        <m.div
           {...fadeUp(0.5)}
           className="mt-16 border border-secondary/20 px-8 py-6 flex flex-col md:flex-row md:items-center gap-6"
         >
@@ -87,7 +87,7 @@ export function HistoriaSection() {
               Luis Peña Maldonado. Se custodia en la Ermita de Jesús de Montijo.
             </p>
           </div>
-        </motion.div>
+        </m.div>
 
       </div>
     </section>

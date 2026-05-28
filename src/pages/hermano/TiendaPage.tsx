@@ -10,10 +10,21 @@ import { toast } from 'react-hot-toast';
 import { Loader2, Package, ShoppingCart } from 'lucide-react';
 import CartDrawer from '@/components/tienda/CartDrawer';
 
+function localImage(p: Producto): string | null {
+  const n = p.nombre.toLowerCase();
+  if (n.includes('palma'))                        return '/images/palma.png';
+  if (n.includes('estampita'))                    return '/images/estampita.png';
+  if (n.includes('medalla') || n.includes('pin')) return '/images/medalla.png';
+  if (n.includes('traje') || n.includes('tunic')) return '/images/tunica.png';
+  if (p.categoria === 'Palma')                    return '/images/palma.png';
+  if (p.categoria === 'Traje')                    return '/images/tunica.png';
+  return null;
+}
+
 export default function TiendaPage() {
   const { sessionHermano } = useAuthStore();
   const hermanoId = sessionHermano!.hermano.id;
-  const { items, agregarItem, actualizarCantidad, vaciarCarrito } = useCarritoStore();
+  const { items, agregarItem, actualizarCantidad } = useCarritoStore();
 
   const [productos, setProductos]             = useState<Producto[]>([]);
   const [loading, setLoading]                 = useState(true);
@@ -113,7 +124,7 @@ export default function TiendaPage() {
         {/* Cabecera */}
         <SectionLabel>Tienda oficial</SectionLabel>
         <h1 className="font-display text-4xl text-primary mt-1 mb-2">
-          Materiales y merchandising
+          Materiales y Productos Oficiales
         </h1>
         <p className="font-body text-sm text-primary/55 mb-8 max-w-lg">
           Adquiere los materiales de la hermandad. Los pedidos quedan registrados
@@ -125,7 +136,7 @@ export default function TiendaPage() {
           type="button"
           aria-label={`Abrir carrito${totalUnidades > 0 ? `, ${totalUnidades} unidades` : ''}`}
           onClick={() => setDrawerOpen(true)}
-          className="fixed top-20 right-6 z-30 flex items-center gap-2 px-3 py-2 bg-white border border-secondary/20 shadow-md hover:border-secondary/50 transition-colors"
+          className="fixed top-[72px] right-4 sm:right-6 z-30 flex items-center gap-2 px-3 py-2 bg-white border border-secondary/20 shadow-md hover:border-secondary/50 transition-colors"
         >
           <ShoppingCart size={16} className="text-secondary" />
           {totalUnidades > 0 && (
@@ -143,6 +154,8 @@ export default function TiendaPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
             {productos.map((p) => {
+              if (p.nombre.toLowerCase().includes('palma hermano')) return null;
+              const imgSrc = p.imagen_url ?? localImage(p);
               const enCarrito = cantidadEnCarrito(p.id);
               return (
                 <div
@@ -150,9 +163,9 @@ export default function TiendaPage() {
                   className="border border-secondary/15 flex flex-col hover:border-secondary/30 transition-colors"
                 >
                   {/* Imagen con badge de categoría superpuesto */}
-                  <div className="relative h-48 bg-primary flex items-center justify-center border-b border-secondary/10 overflow-hidden">
-                    {p.imagen_url
-                      ? <img src={p.imagen_url} alt={p.nombre} className="h-full w-full object-cover" />
+                  <div className="relative h-36 sm:h-44 md:h-48 bg-primary flex items-center justify-center border-b border-secondary/10 overflow-hidden">
+                    {imgSrc
+                      ? <img src={imgSrc} alt={p.nombre} className="h-full w-full object-cover" />
                       : <Package size={40} className="text-secondary/30" />
                     }
                     {p.categoria && (

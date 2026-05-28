@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
 import { hermanoRepository } from '../database/repositories';
 import { toast } from 'react-hot-toast';
@@ -107,6 +107,7 @@ export default function AdminLayout() {
   const apellidos = sessionHermano?.hermano.apellidos;
 
   return (
+    <LazyMotion features={domAnimation}>
     <div className="min-h-screen flex bg-background">
 
       {/* Sidebar desktop */}
@@ -141,7 +142,7 @@ export default function AdminLayout() {
       <AnimatePresence>
         {drawerOpen && (
           <>
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -149,7 +150,7 @@ export default function AdminLayout() {
               className="md:hidden fixed inset-0 z-50 bg-black/60"
               onClick={() => setDrawerOpen(false)}
             />
-            <motion.aside
+            <m.aside
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
@@ -171,7 +172,7 @@ export default function AdminLayout() {
                 apellidos={apellidos}
                 isSuperAdmin={isSuperAdmin}
               />
-            </motion.aside>
+            </m.aside>
           </>
         )}
       </AnimatePresence>
@@ -182,5 +183,6 @@ export default function AdminLayout() {
       </main>
 
     </div>
+    </LazyMotion>
   );
 }
