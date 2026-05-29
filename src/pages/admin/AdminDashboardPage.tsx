@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabaseClient } from '@/database/supabase/Client';
+import { supabaseClient, supabaseAdmin } from '@/database/supabase/Client';
+import { hermanoRepository } from '@/database/repositories';
 import { SectionLabel } from '@/components/landing/Helpers';
+import { toast } from 'react-hot-toast';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Users, CheckCircle2, Clock, Euro, MapPin, Loader2, X, ZoomIn, FileText } from 'lucide-react';
 import { cn, formatEur } from '@/lib/utils';
@@ -20,6 +22,7 @@ interface HermanoBautismo {
   apellidos: string;
   estado: string;
   foto_bautismo_url: string;
+  bautismo_verificado: boolean;
 }
 
 function StatCard({ icon: Icon, label, value, sub }: {
@@ -44,15 +47,17 @@ export default function AdminDashboardPage() {
   const [loading, setLoading]                     = useState(true);
   const [fotosPendientes, setFotosPendientes]     = useState<HermanoBautismo[]>([]);
   const [fotoAmpliada, setFotoAmpliada]           = useState<HermanoBautismo | null>(null);
+  const [verificando, setVerificando]             = useState(false);
   const [fechaHoy]                                = useState(() => new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
 
   useEffect(() => {
     Promise.all([
       supabaseClient.rpc('stats_admin'),
-      supabaseClient
+      supabaseAdmin
         .from('hermanos')
-        .select('id, nombre, apellidos, estado, foto_bautismo_url')
+        .select('id, nombre, apellidos, estado, foto_bautismo_url, bautismo_verificado')
         .eq('bautizado', true)
+        .eq('bautismo_verificado', false)
         .not('foto_bautismo_url', 'is', null)
         .order('fecha_alta', { ascending: false }),
     ]).then(([statsRes, fotosRes]) => {
@@ -219,6 +224,28 @@ export default function AdminDashboardPage() {
                       <X size={16} />
                     </button>
                   </div>
+                </div>
+
+                {/* Acción verificar */}
+                <div className="px-4 py-2.5 border-b border-secondary/10 flex justify-end">
+                  <button
+                    type="button"
+                    disabled={verificando}
+                    onClick={async () => {
+                      setVerificando(true);
+                      const { error } = await hermanoRepository.verificarBautismo(fotoAmpliada.id, true);
+                      if (error) { toast.error(error); } else {
+                        setFotosPendientes((prev) => prev.filter((x) => x.id !== fotoAmpliada.id));
+                        setFotoAmpliada(null);
+                        toast.success('Bautismo verificado');
+                      }
+                      setVerificando(false);
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 border border-secondary text-secondary font-body text-[9px] tracking-widest uppercase hover:bg-secondary/5 transition-colors disabled:opacity-40"
+                  >
+                    {verificando ? <Loader2 size={10} className="animate-spin" /> : <CheckCircle2 size={10} />}
+                    Verificar documento
+                  </button>
                 </div>
 
                 {/* Imagen o PDF */}

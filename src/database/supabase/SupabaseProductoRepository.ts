@@ -70,27 +70,27 @@ export class SupabaseProductoRepository implements ProductoRepository {
 
   async actualizarProducto(id: number, datos: Partial<ProductoCreate>): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('productos').update(datos).eq('id', id);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async eliminarProducto(id: number): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('productos').delete().eq('id', id);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async actualizarEstadoPedido(pedidoId: number, estado: 'pendiente' | 'pagado' | 'entregado'): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('pedidos').update({ estado }).eq('id', pedidoId);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async eliminarPedido(pedidoId: number): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('pedidos').delete().eq('id', pedidoId);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async actualizarStock(productoId: number, stock: number): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('productos').update({ stock }).eq('id', productoId);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async subirImagen(file: File): Promise<{ url?: string; error?: string }> {

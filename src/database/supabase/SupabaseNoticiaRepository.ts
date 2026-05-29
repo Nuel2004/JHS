@@ -46,12 +46,12 @@ export class SupabaseNoticiaRepository implements NoticiaRepository {
 
   async editar(id: number, cambios: Partial<NoticiaCreate>): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('noticias').update(cambios).eq('id', id);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async eliminar(id: number): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('noticias').delete().eq('id', id);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async obtenerTodas(): Promise<{ data?: Noticia[]; error?: string }> {

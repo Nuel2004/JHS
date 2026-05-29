@@ -86,6 +86,9 @@ export interface HermanoRepository {
   /** Sube o reemplaza la foto de bautismo desde el panel admin */
   subirFotoBautismo(authId: string, file: File): Promise<{ url?: string; error?: string }>;
 
+  /** Marca o desmarca la fe de bautismo como verificada — solo superadmin */
+  verificarBautismo(hermanoId: number, verificado: boolean): Promise<{ error?: string }>;
+
   /** Envía email de recuperación de contraseña */
   recuperarPassword(email: string): Promise<{ error?: string }>;
 

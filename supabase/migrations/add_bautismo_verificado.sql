@@ -1,0 +1,1 @@
+ALTER TABLE hermanos ADD COLUMN IF NOT EXISTS bautismo_verificado BOOLEAN DEFAULT false NOT NULL;

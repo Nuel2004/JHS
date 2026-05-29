@@ -112,7 +112,7 @@ export default function RegisterPage() {
                             <div className="space-y-2">
                                 <Label className="text-[10px] uppercase tracking-widest text-primary/70">Género *</Label>
                                 <Select onValueChange={v => setFormData(prev => ({ ...prev, genero: v as any }))}>
-                                    <SelectTrigger className="w-full bg-background border-secondary/30 rounded-none h-10">
+                                    <SelectTrigger className="w-full bg-white border-secondary/30 rounded-none h-10">
                                         <SelectValue placeholder="Seleccionar..." />
                                     </SelectTrigger>
                                     <SelectContent>

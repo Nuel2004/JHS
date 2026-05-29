@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { hermanoRepository } from '@/database/repositories';
 import type { Hermano, EstadoHermano, Genero, RolUsuario } from '@/interfaces/Hermano';
 import type { EditarHermanoDatos } from '@/database/repositories/HermanoRepository';
@@ -11,7 +11,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'react-hot-toast';
 import {
   CheckCircle2, Search, UserCheck, Home, Loader2,
-  Pencil, X, UserX, Save, ChevronRight, ShieldCheck, ShieldOff,
+  Pencil, X, UserX, Save, ChevronRight, ShieldCheck, ShieldOff, Paperclip,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +45,8 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
   const [guardando, setGuardando] = useState(false);
   const [confirmandoBaja, setConfirmandoBaja] = useState(false);
   const [cambiandoRol, setCambiandoRol] = useState(false);
+  const [fotoFile, setFotoFile]             = useState<File | null>(null);
+  const fotoInputRef                        = useRef<HTMLInputElement>(null);
 
   const set = <K extends keyof EditarHermanoDatos>(key: K, value: EditarHermanoDatos[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -63,8 +65,15 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
 
   const guardar = async () => {
     setGuardando(true);
+    let fotoUrl = hermano.foto_bautismo_url;
+    if (fotoFile && hermano.auth_id) {
+      const { url, error: uploadError } = await hermanoRepository.subirFotoBautismo(hermano.auth_id, fotoFile);
+      if (uploadError) { toast.error(uploadError); setGuardando(false); return; }
+      fotoUrl = url ?? null;
+    }
     const datos: EditarHermanoDatos = {
       ...form,
+      foto_bautismo_url: fotoUrl,
       notas_admin: form.notas_admin?.trim() || null,
     };
     const { error } = await hermanoRepository.editarHermano(hermano.id, datos);
@@ -142,7 +151,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
                 value={form.genero}
                 onValueChange={(v) => set('genero', v as Genero)}
               >
-                <SelectTrigger className="rounded-none border-secondary/30 bg-background text-sm">
+                <SelectTrigger className="w-full rounded-none border-secondary/30 bg-white text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -188,7 +197,7 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
                 value={form.estado}
                 onValueChange={(v) => set('estado', v as EstadoHermano)}
               >
-                <SelectTrigger className="rounded-none border-secondary/30 bg-background text-sm">
+                <SelectTrigger className="w-full rounded-none border-secondary/30 bg-white text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -219,6 +228,48 @@ function EditPanel({ hermano, isSuperAdmin, onClose, onSaved }: EditPanelProps) 
               </div>
             </div>
           </div>
+
+          {/* Fe de bautismo */}
+          {form.bautizado && (
+            <div className="border border-secondary/10 p-3 space-y-2">
+              <p className="font-body text-[9px] tracking-widest uppercase text-primary/30">Fe de bautismo</p>
+              <input
+                ref={fotoInputRef}
+                type="file"
+                accept="image/*,.pdf"
+                className="hidden"
+                aria-label="Subir fotografía o escaneo de fe de bautismo"
+                onChange={(e) => setFotoFile(e.target.files?.[0] ?? null)}
+              />
+              {fotoFile ? (
+                <div className="flex items-center gap-2">
+                  <Paperclip size={11} className="text-secondary shrink-0" />
+                  <span className="font-body text-[10px] text-primary/60 truncate flex-1">{fotoFile.name}</span>
+                  <button type="button" onClick={() => { setFotoFile(null); if (fotoInputRef.current) fotoInputRef.current.value = ''; }}
+                    className="text-primary/30 hover:text-red-500 transition-colors">
+                    <X size={11} />
+                  </button>
+                </div>
+              ) : hermano.foto_bautismo_url ? (
+                <div className="flex items-center justify-between gap-2">
+                  <a href={hermano.foto_bautismo_url} target="_blank" rel="noopener noreferrer"
+                    className="font-body text-[10px] text-secondary hover:underline truncate">
+                    Ver foto actual
+                  </a>
+                  <button type="button" onClick={() => fotoInputRef.current?.click()}
+                    className="font-body text-[9px] tracking-widest uppercase text-primary/40 hover:text-secondary border border-secondary/20 px-2 py-1 transition-colors shrink-0">
+                    Reemplazar
+                  </button>
+                </div>
+              ) : (
+                <button type="button" onClick={() => fotoInputRef.current?.click()}
+                  className="flex items-center gap-2 border border-dashed border-secondary/30 px-3 py-2 font-body text-[10px] tracking-widest uppercase text-primary/40 hover:text-secondary hover:border-secondary/40 transition-colors w-full">
+                  <Paperclip size={11} />
+                  Sin foto — subir documento
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="space-y-1.5">
             <Label className="text-[9px] uppercase tracking-widest text-primary/50">Notas admin</Label>

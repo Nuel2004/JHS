@@ -14,6 +14,7 @@ export interface Hermano {
   telefono: string;
   bautizado: boolean;
   foto_bautismo_url: string | null;
+  bautismo_verificado: boolean;
   es_cofrade: boolean;
   estado: EstadoHermano;
   rol: RolUsuario;

@@ -21,13 +21,39 @@ export class SupabaseHermanoRepository implements HermanoRepository {
         if (!valor) throw new Error(mensaje);
       }
 
-      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      let createResult = await supabaseAdmin.auth.admin.createUser({
         email: datos.email,
         password: datos.password,
         email_confirm: true,
       });
 
-      if (authError) throw authError;
+      // Si el email ya existe en Auth, intentar limpiar registro huérfano y reintentar
+      if (createResult.error) {
+        const m = createResult.error.message.toLowerCase();
+        if (m.includes('already') || m.includes('email already exists')) {
+          const { data: existing } = await supabaseAdmin
+            .from('hermanos').select('id').eq('email', datos.email).maybeSingle();
+          if (!existing) {
+            // Auth user huérfano: hacer sign in para obtener su ID, borrarlo y reintentar
+            const { data: signInData } = await supabaseAdmin.auth.signInWithPassword({
+              email: datos.email!,
+              password: datos.password!,
+            });
+            if (signInData?.user) {
+              await supabaseAdmin.auth.admin.deleteUser(signInData.user.id);
+              await supabaseAdmin.auth.signOut();
+              createResult = await supabaseAdmin.auth.admin.createUser({
+                email: datos.email,
+                password: datos.password,
+                email_confirm: true,
+              });
+            }
+          }
+        }
+        if (createResult.error) throw createResult.error;
+      }
+
+      const authData = createResult.data;
       if (!authData.user) throw new Error('No se pudo crear el usuario de autenticación.');
 
       // Subir foto de bautismo si se ha aportado
@@ -86,7 +112,11 @@ export class SupabaseHermanoRepository implements HermanoRepository {
         .from('hermanos').select('*').eq('auth_id', authData.user.id).maybeSingle();
 
       if (hermanoError) { await supabaseClient.auth.signOut(); throw hermanoError; }
-      if (!hermano) { await supabaseClient.auth.signOut(); throw new Error('Registro incompleto. Contacta con el administrador para activar tu cuenta.'); }
+      if (!hermano) {
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+        await supabaseClient.auth.signOut();
+        throw new Error('Tu registro anterior no se completó correctamente. Ya puedes volver a registrarte con el mismo correo.');
+      }
 
       return { data: { user: { id: authData.user.id, email: authData.user.email! }, hermano } };
     } catch (error: any) {
@@ -96,7 +126,7 @@ export class SupabaseHermanoRepository implements HermanoRepository {
 
   async logout(): Promise<{ error?: string }> {
     const { error } = await supabaseClient.auth.signOut();
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async obtenerPorAuthId(authId: string): Promise<{ data?: Hermano; error?: string }> {
@@ -121,22 +151,22 @@ export class SupabaseHermanoRepository implements HermanoRepository {
 
   async actualizarPreferencia(hermanoId: number, preferencia: string): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('hermanos').update({ preferencia_paso: preferencia }).eq('id', hermanoId);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async marcarPagoPresencial(hermanoId: number): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('hermanos').update({ pago_presencial: true, estado: 'activo', es_cofrade: true }).eq('id', hermanoId);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async activarCofrade(hermanoId: number): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('hermanos').update({ estado: 'activo', es_cofrade: true }).eq('id', hermanoId);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async editarHermano(hermanoId: number, datos: EditarHermanoDatos): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('hermanos').update(datos).eq('id', hermanoId);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async darDeBaja(hermanoId: number): Promise<{ error?: string }> {
@@ -144,12 +174,12 @@ export class SupabaseHermanoRepository implements HermanoRepository {
       .from('hermanos')
       .update({ estado: 'baja', es_cofrade: false })
       .eq('id', hermanoId);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async cambiarRol(hermanoId: number, rol: import('../../interfaces/Hermano').RolUsuario): Promise<{ error?: string }> {
     const { error } = await supabaseAdmin.from('hermanos').update({ rol }).eq('id', hermanoId);
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async crearPorAdmin(datos: CrearPorAdminDatos): Promise<{ error?: string }> {
@@ -213,15 +243,20 @@ export class SupabaseHermanoRepository implements HermanoRepository {
     return { url: data.publicUrl };
   }
 
+  async verificarBautismo(hermanoId: number, verificado: boolean): Promise<{ error?: string }> {
+    const { error } = await supabaseAdmin.from('hermanos').update({ bautismo_verificado: verificado }).eq('id', hermanoId);
+    return { error: error?.message ? traducirError(error.message) : undefined };
+  }
+
   async recuperarPassword(email: string): Promise<{ error?: string }> {
     const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 
   async actualizarPassword(password: string): Promise<{ error?: string }> {
     const { error } = await supabaseClient.auth.updateUser({ password });
-    return { error: traducirError(error?.message) };
+    return { error: error?.message ? traducirError(error.message) : undefined };
   }
 }
