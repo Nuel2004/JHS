@@ -284,8 +284,8 @@ Supabase Realtime está activo en `procesion_estado` y `pasos_gps`. Todos los vi
 
 ## Despliegue
 
-### Vercel (recomendado)
-
+### Vercel 
+Enlace de la aplicación https://jhs-woad.vercel.app/
 1. Conecta el repositorio en [vercel.com](https://vercel.com)
 2. Configura las variables de entorno en el panel de Vercel
 3. El despliegue es automático en cada push a `main`
