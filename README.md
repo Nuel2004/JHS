@@ -18,6 +18,7 @@ Plataforma digital oficial de la Cofradía **"Jesús Salvador de los Hombres"** 
 - [Roles de usuario](#roles-de-usuario)
 - [Base de datos](#base-de-datos)
 - [Despliegue](#despliegue)
+- Enlace de vercel https://jhs-woad.vercel.app/
 
 ---
 
